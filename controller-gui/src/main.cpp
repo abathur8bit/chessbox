@@ -3,69 +3,14 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
+#include "AnimSprite.h"
+
 using namespace std;
 
 const int FULL_SCREEN_MODE = SDL_WINDOW_RESIZABLE;
 //const int FULL_SCREEN_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
 const int SCREEN_WIDTH = 480;  
 const int SCREEN_HEIGHT = 800;
-#define SCALE 2
-
-class AnimSprite
-{
-public:
-    AnimSprite() {}
-    SDL_Texture* load(SDL_Renderer* renderer, string filename, int frameCount, int x, int y)
-    {
-        m_texture = IMG_LoadTexture(renderer, filename.c_str());
-        m_delay = 100;
-
-        m_currentFrame = 0;
-        m_sourceRect.x = 0;
-        m_sourceRect.y = 0;
-        SDL_QueryTexture(m_texture, NULL, NULL, &m_sourceRect.w, &m_sourceRect.h);
-        m_sourceRect.w /= frameCount;   //each frame of the animation
-        m_frameCount = frameCount;
-        m_destinationRect.x = x;
-        m_destinationRect.y = y;
-        m_destinationRect.w = m_sourceRect.w * SCALE;
-        m_destinationRect.h = m_sourceRect.h * SCALE;
-        return m_texture;
-    }
-    void draw(SDL_Renderer* renderer)
-    {
-        SDL_RenderCopyEx(renderer, m_texture, &m_sourceRect, &m_destinationRect, 0, 0, SDL_FLIP_NONE);
-    }
-    void update(int ticks)
-    {
-        m_sourceRect.x = m_sourceRect.w * int(((ticks / m_delay) % m_frameCount));
-
-    }
-    void setPos(int x, int y)
-    {
-        m_destinationRect.x = x;
-        m_destinationRect.y = y;
-    }
-    void setFrame(int frame)
-    {
-        m_currentFrame = frame;
-    }
-    void setDelay(Uint32 delayMilliSeconds)
-    {
-        m_delay = delayMilliSeconds;
-    }
-    int widthDest() { return m_destinationRect.w; }
-    int heightDest() { return m_destinationRect.h; }
-    int widthSource() { return m_sourceRect.w; }
-    int heightSource() { return m_sourceRect.h; }
-protected:
-    SDL_Texture* m_texture;
-    int m_frameCount;
-    int m_currentFrame;
-    Uint32 m_delay;
-    SDL_Rect m_sourceRect;
-    SDL_Rect m_destinationRect;
-};
 
 bool coolSpot() {
     SDL_Window* window;
@@ -102,7 +47,7 @@ bool coolSpot() {
 //        printf("Joystick already initialized");
 //    }
 //
-    window = SDL_CreateWindow("8BitCoder.com",
+    window = SDL_CreateWindow("ChessBox",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
         SCREEN_WIDTH, SCREEN_HEIGHT,
@@ -124,6 +69,7 @@ bool coolSpot() {
     int y = 0;
     for (int i = 0; i < max; i++)
     {
+//        SDL_Texture* t = cool[i].load(renderer, "coolspot_dusting.png", 10, x, y);
         SDL_Texture* t = cool[i].load(renderer, "coolspot_fingersnap.png", 10, x, y);
         if (!t) {
             printf("Couldn't initialize SDL: %s\n", SDL_GetError());
