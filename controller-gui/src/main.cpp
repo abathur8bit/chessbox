@@ -1,7 +1,6 @@
-#include <string>
 #include <stdio.h>
+
 #include <SDL.h>
-#include <SDL_image.h>
 
 #include "AnimSprite.h"
 
@@ -15,12 +14,9 @@ const int SCREEN_HEIGHT = 800;
 bool coolSpot() {
     SDL_Window* window;
     SDL_Renderer* renderer;
-    SDL_Texture* texture;
-    SDL_Event event;
     SDL_Rect r;
     SDL_Rect r2;
     SDL_Point center;
-    SDL_Joystick* joystick = nullptr;
 
     SDL_EnableScreenSaver();
 
@@ -29,24 +25,6 @@ bool coolSpot() {
         return false;
     }
 
-//    if (!SDL_WasInit(SDL_INIT_JOYSTICK))
-//    {
-//        printf("initializing joystick %08X", joystick);
-//        SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-//        int joystickCount = SDL_NumJoysticks();
-//        printf("joysticks: %d", joystickCount);
-//        joystick = SDL_JoystickOpen(0);
-//        if (joystickCount == 2)
-//        {
-//            SDL_JoystickOpen(1);
-//        }
-//        SDL_JoystickEventState(SDL_ENABLE);
-//    }
-//    else
-//    {
-//        printf("Joystick already initialized");
-//    }
-//
     window = SDL_CreateWindow("ChessBox",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
@@ -69,7 +47,6 @@ bool coolSpot() {
     int y = 0;
     for (int i = 0; i < max; i++)
     {
-//        SDL_Texture* t = cool[i].load(renderer, "coolspot_dusting.png", 10, x, y);
         SDL_Texture* t = cool[i].load(renderer, "coolspot_fingersnap.png", 10, x, y);
         if (!t) {
             printf("Couldn't initialize SDL: %s\n", SDL_GetError());
@@ -89,21 +66,21 @@ bool coolSpot() {
         SDL_Event event;
         if (SDL_PollEvent(&event))
         {
-                printf("got event type %04X\n", event.type);
-                switch (event.type)
-                {
-                case SDL_QUIT:
-                    running = false;
-                    break;
-                case SDL_WINDOWEVENT:
-                    printf("had a window event!!!\n");
-                    break;
-                case SDL_KEYDOWN:
-                    running = false;
-                    break;
-                default:
-                    break;
-                }
+            printf("got event type %04X\n", event.type);
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                running = false;
+                break;
+            case SDL_WINDOWEVENT:
+                printf("had a window event!!!\n");
+                break;
+            case SDL_KEYDOWN:
+                running = false;
+                break;
+            default:
+                break;
+            }
         }
         SDL_SetRenderDrawColor(renderer, 128, 128, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
@@ -127,14 +104,11 @@ bool coolSpot() {
     }
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
-
     SDL_Quit();
-
 }
 
 
 int main(int argc, char* argv[]) {
     coolSpot();
-
     return 0;
 }
