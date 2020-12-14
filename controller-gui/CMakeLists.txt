@@ -11,5 +11,5 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
-add_executable(controller_gui src/main.cpp src/AnimSprite.cpp)
+add_executable(controller_gui src/main.cpp src/AnimSprite.cpp src/Button.cpp src/Button.h)
 target_link_libraries(controller_gui PRIVATE SDL2main SDL2 SDL2_image)

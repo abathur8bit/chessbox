@@ -21,6 +21,7 @@ public:
     void draw(SDL_Renderer* renderer);
     void update(int ticks);
     void setPos(int x, int y);
+    SDL_Rect destRect() {return m_destinationRect;}
     void setFrame(int frame);
     void setDelay(Uint32 delayMilliSeconds);
     int widthDest() { return m_destinationRect.w; }
