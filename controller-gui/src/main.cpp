@@ -1,9 +1,11 @@
 #include <stdio.h>
-
+#include <string.h>
+#include <algorithm>
 #include <SDL.h>
 
 #include "AnimSprite.h"
 #include "Button.h"
+#include "Board.h"
 
 using namespace std;
 
@@ -15,8 +17,7 @@ const int SCREEN_HEIGHT = 800;
 
 
 
-
-void coolSpot() {
+void coolSpot(const char* assets) {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Rect r;
@@ -37,6 +38,7 @@ void coolSpot() {
             SCREEN_WIDTH, SCREEN_HEIGHT,
             FULL_SCREEN_MODE);
 
+    TTF_Init();
     r.w = 100;
     r.h = 50;
     r2.w = r.w;
@@ -50,10 +52,12 @@ void coolSpot() {
     const int max = 25;
     AnimSprite cool[max];
     int x = 0;
-    int y = 0;
+    int y = 100;
+    char filename[255];
+    snprintf(filename, sizeof(filename), "%s/coolspot_fingersnap.png", assets);
     for (int i = 0; i < max; i++)
     {
-        SDL_Texture* t = cool[i].load(renderer, "coolspot_fingersnap.png", 10, x, y);
+        SDL_Texture* t = cool[i].load(renderer, filename, 10, x, y);
         if (!t) {
             printf("Couldn't initialize SDL: %s\n", SDL_GetError());
 
@@ -65,11 +69,14 @@ void coolSpot() {
             y += cool[i].heightSource() * SCALE;
         }
     }
-    Button button("quit",10,SCREEN_HEIGHT-10-30,50,30);
+    Button button("QUIT",10,10,50,30);
     AnimSprite coolButton;
-    coolButton.load(renderer,"coolspot_fingersnap.png", 10, 100, 500);
+    snprintf(filename,sizeof(filename),"%s/button_power.png",assets);
+    coolButton.load(renderer,filename, 1, 100, 10);
     AnimButton animButton("quit",coolButton);
+    Board board(0,0,480,480);
 
+    button.setListener([](){printf("In button lambda\n");});
     bool running = true;
     while (running)
     {
@@ -83,8 +90,8 @@ void coolSpot() {
                 case SDL_MOUSEBUTTONUP:
                 case SDL_MOUSEMOTION:
                 case SDL_MOUSEWHEEL:
-                    button.mouseEvent(event);
-                    animButton.mouseEvent(event);
+                    button.mouseEvent(event,[](){printf("button was clicked\n");});
+                    animButton.mouseEvent(event,[](){printf("anim button was clicked\n");});
                     break;
             case SDL_QUIT:
                 running = false;
@@ -102,16 +109,13 @@ void coolSpot() {
         SDL_SetRenderDrawColor(renderer, 191, 37, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
+        board.draw(renderer);
         for (int i = 0; i < max; i++)
         {
             cool[i].draw(renderer);
         }
         button.draw(renderer);
-        animButton.draw(renderer);
-
-        SDL_Rect rect = { 10,10,50,50 };
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-        SDL_RenderDrawRect(renderer, &rect);
+//        animButton.draw(renderer);
 
         SDL_RenderPresent(renderer);
 
@@ -120,16 +124,32 @@ void coolSpot() {
         {
             cool[i].update(ticks);
         }
+
         button.update(ticks);
-        animButton.update(ticks);
+//        animButton.update(ticks);
+        board.update(ticks);
+
     }
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
+    TTF_Quit();
     SDL_Quit();
 }
 
 
+void foo(void(*f)()) {
+    printf("calling f\n");
+    f();
+}
 int main(int argc, char* argv[]) {
-    coolSpot();
+    char assets[255]="assets";
+    if(argc>2) {
+        strncpy_s(assets,argv[1],sizeof(assets));
+    }
+
+//    foo([](){printf("from lambda\n");});
+
+    coolSpot(assets);
+
     return 0;
 }
