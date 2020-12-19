@@ -1,11 +1,35 @@
+/* *****************************************************************************
+ * Created by Lee Patterson 12/19/2020
+ *
+ * Copyright 2019 Lee Patterson <https://github.com/abathur8bit>
+ *
+ * You may use and modify at will. Please credit me in the source.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ******************************************************************************/
+
 #include <stdio.h>
 #include <string.h>
+
 #include <algorithm>
+#include <list>
+
 #include <SDL.h>
 
-#include "AnimSprite.h"
+#include "Sprite.h"
 #include "Button.h"
 #include "Board.h"
+#include "UIGroup.h"
 
 using namespace std;
 
@@ -15,7 +39,15 @@ const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
 
 
+list<Button*> buttons;
+UIGroup buttonGroup("buttons",0,699,480,100);
 
+void processMouseEvent(SDL_Event* event) {
+    for(list<Component*>::iterator it=buttonGroup.begin(); it != buttonGroup.end(); ++it) {
+        Button* b = static_cast<Button*>(*it);
+        b->mouseEvent(event,[](Button* b){printf("button %s was clicked size=%dx%d\n",b->id(),b->rect()->w,b->rect()->h);});
+    }
+}
 
 void coolSpot(const char* assets) {
     SDL_Window* window;
@@ -50,7 +82,7 @@ void coolSpot(const char* assets) {
     SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
 
     const int max = 25;
-    AnimSprite cool[max];
+    Sprite cool[max];
     int x = 0;
     int y = 100;
     char filename[255];
@@ -69,29 +101,44 @@ void coolSpot(const char* assets) {
             y += cool[i].heightSource() * SCALE;
         }
     }
-    Button button("QUIT",10,10,50,30);
-    AnimSprite coolButton;
-    snprintf(filename,sizeof(filename),"%s/button_power.png",assets);
-    coolButton.load(renderer,filename, 1, 100, 10);
-    AnimButton animButton("quit",coolButton);
-    Board board(0,0,480,480);
+    int ww=60,hh=60,xx=0,yy=0;
+    TextButton quitButton("quit","Quit", xx, yy, ww, hh);
+    xx+=ww;
+    TextButton pingButton("ping","Ping",xx,yy,ww,hh);
+    xx+=ww;
+    AnimButton imageButton("image",renderer,"assets/button-twoplayer-whiteblack.png",1,xx,yy);
+    imageButton.setChecked(true);
+    xx+=ww;
+    snprintf(filename,sizeof(filename),"%s/coolspot_dusting.png",assets);
+    AnimButton animButton("anim",renderer,filename,10,xx,yy);
+    xx+=ww;
 
-    button.setListener([](){printf("In button lambda\n");});
+    Board board(0,0,480,480);
+    buttonGroup.add(&quitButton);
+    buttonGroup.add(&quitButton);
+    buttonGroup.add(&pingButton);
+    buttonGroup.add(&animButton);
+    buttonGroup.add(&imageButton);
+
+    buttons.push_back(&quitButton);
+    buttons.push_back(&pingButton);
+    buttons.push_back(&animButton);
+    buttons.push_back(&imageButton);
+
     bool running = true;
     while (running)
     {
         SDL_Event event;
         if (SDL_PollEvent(&event))
         {
-            printf("got event type %04X\n", event.type);
+//            printf("got event type %04X\n", event.type);
             switch (event.type)
             {
                 case SDL_MOUSEBUTTONDOWN:
                 case SDL_MOUSEBUTTONUP:
                 case SDL_MOUSEMOTION:
                 case SDL_MOUSEWHEEL:
-                    button.mouseEvent(event,[](){printf("button was clicked\n");});
-                    animButton.mouseEvent(event,[](){printf("anim button was clicked\n");});
+                    processMouseEvent(&event);
                     break;
             case SDL_QUIT:
                 running = false;
@@ -114,8 +161,10 @@ void coolSpot(const char* assets) {
         {
             cool[i].draw(renderer);
         }
-        button.draw(renderer);
-//        animButton.draw(renderer);
+        buttonGroup.draw(renderer);
+//        for(std::list<Button*>::iterator it=buttons.begin(); it != buttons.end(); ++it) {
+//            (*it)->draw(renderer);
+//        }
 
         SDL_RenderPresent(renderer);
 
@@ -124,9 +173,10 @@ void coolSpot(const char* assets) {
         {
             cool[i].update(ticks);
         }
-
-        button.update(ticks);
-//        animButton.update(ticks);
+        buttonGroup.update(ticks);
+//        for(std::list<Button*>::iterator it=buttons.begin(); it != buttons.end(); ++it) {
+//            (*it)->update(ticks);
+//        }
         board.update(ticks);
 
     }
@@ -141,13 +191,34 @@ void foo(void(*f)()) {
     printf("calling f\n");
     f();
 }
+
+class A {
+public:
+    void foo() {
+        bar();
+    }
+    virtual void bar() {
+        printf("A foobar\n");
+    }
+};
+
+class B : public A {
+public:
+    void bar() {
+        printf("B bar\n");
+    }
+};
+
 int main(int argc, char* argv[]) {
+//    B b;
+//    b.foo();
+//    return 1;
+
+
     char assets[255]="assets";
     if(argc>2) {
-        strncpy_s(assets,argv[1],sizeof(assets));
+        strncpy(assets,argv[1],sizeof(assets));
     }
-
-//    foo([](){printf("from lambda\n");});
 
     coolSpot(assets);
 

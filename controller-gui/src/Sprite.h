@@ -2,8 +2,8 @@
 // Created by patte on 12/13/2020.
 //
 
-#ifndef CONTROLLER_GUI_ANIMSPRITE_H
-#define CONTROLLER_GUI_ANIMSPRITE_H
+#ifndef CONTROLLER_GUI_SPRITE_H
+#define CONTROLLER_GUI_SPRITE_H
 
 #include <string>
 #include <SDL.h>
@@ -13,15 +13,16 @@ using namespace std;
 
 #define SCALE 1
 
-class AnimSprite
+class Sprite
 {
 public:
-    AnimSprite() {}
-    SDL_Texture* load(SDL_Renderer* renderer, string filename, int frameCount, int x, int y);
+    Sprite() {}
+    SDL_Texture * load(SDL_Renderer* renderer, const char* filename, int x, int y);
+    SDL_Texture* load(SDL_Renderer* renderer, const char* filename, int frameCount, int x, int y);
     void draw(SDL_Renderer* renderer);
     void update(int ticks);
     void setPos(int x, int y);
-    SDL_Rect destRect() {return m_destinationRect;}
+    SDL_Rect* destRect() {return &m_destinationRect;}
     void setFrame(int frame);
     void setDelay(Uint32 delayMilliSeconds);
     int widthDest() { return m_destinationRect.w; }
@@ -38,4 +39,4 @@ protected:
 };
 
 
-#endif //CONTROLLER_GUI_ANIMSPRITE_H
+#endif //CONTROLLER_GUI_SPRITE_H

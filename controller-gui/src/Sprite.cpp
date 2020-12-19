@@ -2,11 +2,14 @@
 // Created by patte on 12/13/2020.
 //
 
-#include "AnimSprite.h"
+#include "Sprite.h"
 
-SDL_Texture* AnimSprite::load(SDL_Renderer* renderer, string filename, int frameCount, int x, int y)
+SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int x, int y) {
+    return load(renderer,filename,1,x,y);
+}
+SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int frameCount, int x, int y)
 {
-    m_texture = IMG_LoadTexture(renderer, filename.c_str());
+    m_texture = IMG_LoadTexture(renderer, filename);
     m_delay = 100;
 
     m_currentFrame = 0;
@@ -21,25 +24,25 @@ SDL_Texture* AnimSprite::load(SDL_Renderer* renderer, string filename, int frame
     m_destinationRect.h = m_sourceRect.h * SCALE;
     return m_texture;
 }
-void AnimSprite::draw(SDL_Renderer* renderer)
+void Sprite::draw(SDL_Renderer* renderer)
 {
     SDL_RenderCopyEx(renderer, m_texture, &m_sourceRect, &m_destinationRect, 0, 0, SDL_FLIP_NONE);
 }
-void AnimSprite::update(int ticks)
+void Sprite::update(int ticks)
 {
     m_sourceRect.x = m_sourceRect.w * int(((ticks / m_delay) % m_frameCount));
 
 }
-void AnimSprite::setPos(int x, int y)
+void Sprite::setPos(int x, int y)
 {
     m_destinationRect.x = x;
     m_destinationRect.y = y;
 }
-void AnimSprite::setFrame(int frame)
+void Sprite::setFrame(int frame)
 {
     m_currentFrame = frame;
 }
-void AnimSprite::setDelay(Uint32 delayMilliSeconds)
+void Sprite::setDelay(Uint32 delayMilliSeconds)
 {
     m_delay = delayMilliSeconds;
 }
