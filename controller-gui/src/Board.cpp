@@ -25,7 +25,7 @@ void Board::loadPieces(SDL_Renderer* renderer,const char* setName) {
 //        for(int x=0; x<8; x++) {
         snprintf(buffer, sizeof(buffer), "assets/pieces/%s/%s.png", setName, piece[i]);
         m_pieces[i] = new Sprite();
-        m_pieces[i]->load(renderer, buffer, x, y);
+        m_pieces[i]->load(renderer, buffer, 0, 0);
         printf("loading %s x=%d y=%d\n", buffer,x,y);
         if(x+w>=480 || (i==5)) {
             x=0;
@@ -58,11 +58,55 @@ void Board::draw(SDL_Renderer *renderer) {
         white=!white;
     }
 
-    for(int i=0; i<12; i++) {
-        if(m_pieces[i]) {
-            m_pieces[i]->draw(renderer);
-        } else {
-            printf("piece at %i is null\n",i);
+    int i=0;
+    SDL_Rect dest = {0,0,60,60};
+    for(int y=0; y<8; y++) {
+        for (int x = 0; x < 8; x++) {
+            Sprite *piece = nullptr;
+            char p = m_rules.pieceAt(i++);
+            switch (p) {
+                case 'k':
+                    piece = m_pieces[0];
+                    break;
+                case 'q':
+                    piece = m_pieces[1];
+                    break;
+                case 'r':
+                    piece = m_pieces[2];
+                    break;
+                case 'b':
+                    piece = m_pieces[3];
+                    break;
+                case 'n':
+                    piece = m_pieces[4];
+                    break;
+                case 'p':
+                    piece = m_pieces[5];
+                    break;
+                case 'K':
+                    piece = m_pieces[6];
+                    break;
+                case 'Q':
+                    piece = m_pieces[7];
+                    break;
+                case 'R':
+                    piece = m_pieces[8];
+                    break;
+                case 'B':
+                    piece = m_pieces[9];
+                    break;
+                case 'N':
+                    piece = m_pieces[10];
+                    break;
+                case 'P':
+                    piece = m_pieces[11];
+                    break;
+            }
+            if(piece) {
+                dest.x=x*60;
+                dest.y=y*60;
+                piece->draw(renderer,&dest);
+            }
         }
     }
 }

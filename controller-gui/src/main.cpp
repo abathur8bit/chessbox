@@ -97,7 +97,7 @@ void coolSpot(const char* assets) {
     const int max = 25;
     Sprite cool[max];
     int x = 0;
-    int y = 200;
+    int y = 500;
     char filename[255];
     snprintf(filename, sizeof(filename), "%s/coolspot_fingersnap.png", assets);
     for (int i = 0; i < max; i++)

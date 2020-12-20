@@ -19,6 +19,7 @@ public:
     Sprite() {}
     SDL_Texture * load(SDL_Renderer* renderer, const char* filename, int x, int y);
     SDL_Texture* load(SDL_Renderer* renderer, const char* filename, int frameCount, int x, int y);
+    void draw(SDL_Renderer* renderer,SDL_Rect* dest);
     void draw(SDL_Renderer* renderer);
     void update(int ticks);
     void setPos(int x, int y);
@@ -29,6 +30,7 @@ public:
     int heightDest() { return m_destinationRect.h; }
     int widthSource() { return m_sourceRect.w; }
     int heightSource() { return m_sourceRect.h; }
+    const char* name() {return m_name.c_str();}
 protected:
     SDL_Texture* m_texture;
     int m_frameCount;
@@ -36,6 +38,7 @@ protected:
     Uint32 m_delay;
     SDL_Rect m_sourceRect;
     SDL_Rect m_destinationRect;
+    string m_name;
 };
 
 

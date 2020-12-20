@@ -9,6 +9,7 @@ SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int x, i
 }
 SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int frameCount, int x, int y)
 {
+    m_name = filename;
     m_texture = IMG_LoadTexture(renderer, filename);
     m_delay = 100;
 
@@ -23,6 +24,9 @@ SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int fram
     m_destinationRect.w = m_sourceRect.w * SCALE;
     m_destinationRect.h = m_sourceRect.h * SCALE;
     return m_texture;
+}
+void Sprite::draw(SDL_Renderer* renderer,SDL_Rect* dest) {
+    SDL_RenderCopyEx(renderer, m_texture, &m_sourceRect, dest, 0, 0, SDL_FLIP_NONE);
 }
 void Sprite::draw(SDL_Renderer* renderer)
 {
