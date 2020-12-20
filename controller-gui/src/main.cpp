@@ -30,6 +30,7 @@
 #include "Button.h"
 #include "Board.h"
 #include "UIGroup.h"
+#include "thc.h"
 
 using namespace std;
 
@@ -40,8 +41,9 @@ const int SCREEN_HEIGHT = 800;
 
 
 list<Button*> buttons;
-UIGroup buttonGroup("buttons",0,699,480,100);
+UIGroup buttonGroup("buttons",0,800-60,480,60);
 bool running=false;
+
 
 void processMouseEvent(SDL_Event* event) {
     Component* result = buttonGroup.mouseEvent(event);
@@ -95,7 +97,7 @@ void coolSpot(const char* assets) {
     const int max = 25;
     Sprite cool[max];
     int x = 0;
-    int y = 100;
+    int y = 200;
     char filename[255];
     snprintf(filename, sizeof(filename), "%s/coolspot_fingersnap.png", assets);
     for (int i = 0; i < max; i++)
@@ -125,6 +127,7 @@ void coolSpot(const char* assets) {
     xx+=ww;
 
     Board board(0,0,480,480);
+    board.loadPieces(renderer,"spatial");
     buttonGroup.add(&quitButton);
     buttonGroup.add(&quitButton);
     buttonGroup.add(&pingButton);
@@ -135,6 +138,8 @@ void coolSpot(const char* assets) {
     buttons.push_back(&pingButton);
     buttons.push_back(&animButton);
     buttons.push_back(&imageButton);
+
+
 
     running=true;
     while (running)
