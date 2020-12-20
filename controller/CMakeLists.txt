@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(chesslrcontroller)
+project(cbcontroller)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "-std=c++11")
 
+include_directories(../common)
 include_directories(/usr/local/include)
 link_directories(/usr/local/lib)
 
-add_executable(chesslrcontroller src/main/cpp/controller.cpp src/main/cpp/thc.cpp)
+add_executable(cbcontroller src/main/cpp/controller.cpp ../common/thc.cpp)
 #add_executable(jj src/main/cpp/test.cpp )
-target_link_libraries(chesslrcontroller PRIVATE ssobjects wiringPi pthread)
+target_link_libraries(cbcontroller PRIVATE ssobjects wiringPi pthread)

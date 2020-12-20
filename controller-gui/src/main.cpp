@@ -30,7 +30,7 @@
 #include "Button.h"
 #include "Board.h"
 #include "UIGroup.h"
-#include "thc.h"
+#include "../../common/thc.h"
 
 using namespace std;
 
@@ -43,6 +43,7 @@ const int SCREEN_HEIGHT = 800;
 list<Button*> buttons;
 UIGroup buttonGroup("buttons",0,800-60,480,60);
 bool running=false;
+Board board(0,0,480,480);
 
 
 void processMouseEvent(SDL_Event* event) {
@@ -52,6 +53,9 @@ void processMouseEvent(SDL_Event* event) {
         if(!strcmp(result->id(),"quit")) {
             printf("User wants to quit\n");
             running=false;
+        } else if(!strcmp(result->id(),"ping")) {
+            const char* fen = "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3";
+            board.Forsyth(fen);
         }
     }
 
@@ -126,7 +130,6 @@ void coolSpot(const char* assets) {
     AnimButton animButton("anim",renderer,filename,10,xx,yy);
     xx+=ww;
 
-    Board board(0,0,480,480);
     board.loadPieces(renderer,"spatial");
     buttonGroup.add(&quitButton);
     buttonGroup.add(&quitButton);

@@ -9,7 +9,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-#include "thc.h"
+#include "../../common/thc.h"
 
 #include "Sprite.h"
 #include "Component.h"
@@ -45,6 +45,7 @@ public:
     Board(int x,int y,int w,int h);
     virtual void draw(SDL_Renderer* renderer);
     void loadPieces(SDL_Renderer* renderer,const char* setName);
+    void Forsyth(const char* fen);
 };
 
 

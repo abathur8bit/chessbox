@@ -110,3 +110,7 @@ void Board::draw(SDL_Renderer *renderer) {
         }
     }
 }
+
+void Board::Forsyth(const char *fen) {
+    m_rules.Forsyth(fen);
+}

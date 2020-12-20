@@ -3,7 +3,7 @@ project(controller_gui)
 
 set(CMAKE_CXX_STANDARD 14)
 
-include_directories(/workspace/chessbox/controller/src/main/cpp)
+include_directories(../common)
 
 if(WIN32)
     include_directories(/workspace/sdl/SDL2/include)
@@ -13,5 +13,5 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
-add_executable(controller_gui ../controller/src/main/cpp/thc.cpp ../controller/src/main/cpp/thc.h src/main.cpp src/Sprite.cpp src/Sprite.h src/Button.cpp src/Button.h src/Board.cpp src/Board.h src/Component.cpp src/Component.h src/UIGroup.cpp src/UIGroup.h)
+add_executable(controller_gui ../common/thc.cpp ../common/thc.h src/main.cpp src/Sprite.cpp src/Sprite.h src/Button.cpp src/Button.h src/Board.cpp src/Board.h src/Component.cpp src/Component.h src/UIGroup.cpp src/UIGroup.h)
 target_link_libraries(controller_gui PRIVATE SDL2main SDL2 SDL2_image SDL2_ttf)
