@@ -38,18 +38,17 @@ void Button::setChecked(bool state) {
 
 void Button::draw(SDL_Renderer* renderer) {
     SDL_Color buttonColor = m_normalColor;
+    if(m_checked)
+        buttonColor=m_checkedColor;
     switch (m_state) {
         case BUTTON_STATE_MOUSE_DOWN:
             buttonColor=m_mouseDownColor;
             break;
-    }
-    if(m_checked)
-        buttonColor=m_checkedColor;
-    if(m_state==BUTTON_STATE_MOUSE_OVER) {
-//        SDL_SetRenderDrawColor(renderer, m_checkedColor.r, m_checkedColor.g, m_checkedColor.b, SDL_ALPHA_OPAQUE);
-        buttonColor.r+=15;
-        buttonColor.g+=15;
-        buttonColor.b+=150;
+        case BUTTON_STATE_MOUSE_OVER:
+            buttonColor.r+=15;
+            buttonColor.g+=15;
+            buttonColor.b+=150;
+            break;
     }
     SDL_SetRenderDrawColor(renderer, buttonColor.r, buttonColor.g, buttonColor.b, SDL_ALPHA_OPAQUE);
     SDL_RenderFillRect(renderer, &m_rect);
@@ -62,8 +61,6 @@ void Button::draw(SDL_Renderer* renderer) {
 }
 
 Component* Button::mouseEvent(SDL_Event* event) {
-    //bool Button::mouseEvent(SDL_Event* event,void(*f)(Button* b)) {
-    printf("button mouse event\n");
     if(event->button.x >= m_rect.x && event->button.x < m_rect.x + m_rect.w && event->button.y >= m_rect.y && event->button.y < m_rect.y + m_rect.h) {
         switch(event->type) {
             case  SDL_MOUSEMOTION:
@@ -75,7 +72,6 @@ Component* Button::mouseEvent(SDL_Event* event) {
             case SDL_MOUSEBUTTONUP:
                 m_state=BUTTON_STATE_MOUSE_OVER;
                 //f(this);
-                printf("mouse up for %s\n", id());
                 return this;
                 break;
         }

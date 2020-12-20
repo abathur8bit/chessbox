@@ -41,12 +41,20 @@ const int SCREEN_HEIGHT = 800;
 
 list<Button*> buttons;
 UIGroup buttonGroup("buttons",0,699,480,100);
+bool running=false;
 
 void processMouseEvent(SDL_Event* event) {
-    buttonGroup.mouseEvent(event);
+    Component* result = buttonGroup.mouseEvent(event);
+    if(result) {
+        printf("Event for %s\n",result->id());
+        if(!strcmp(result->id(),"quit")) {
+            printf("User wants to quit\n");
+            running=false;
+        }
+    }
 //    for(list<Component*>::iterator it=buttonGroup.begin(); it != buttonGroup.end(); ++it) {
 //        Button* b = static_cast<Button*>(*it);
-//        b->mouseEvent(event,[](Button* b){printf("button %s was clicked size=%dx%d\n",b->id(),b->rect()->w,b->rect()->h);});
+//        b->mouseEvent(event,[](Button* b){printf("button %s was clicked size=%dx%d\n",b->id(),b->rect()->w,b->rect()->h);});  //called method signature is //bool Button::mouseEvent(SDL_Event* event,void(*f)(Button* b));
 //    }
 }
 
@@ -126,7 +134,7 @@ void coolSpot(const char* assets) {
     buttons.push_back(&animButton);
     buttons.push_back(&imageButton);
 
-    bool running = true;
+    running=true;
     while (running)
     {
         SDL_Event event;
@@ -145,7 +153,7 @@ void coolSpot(const char* assets) {
                 running = false;
                 break;
             case SDL_WINDOWEVENT:
-                printf("had a window event!!!\n");
+//                printf("had a window event!!!\n");
                 break;
             case SDL_KEYDOWN:
                 running = false;
