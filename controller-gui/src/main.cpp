@@ -52,6 +52,8 @@ void processMouseEvent(SDL_Event* event) {
             running=false;
         }
     }
+
+    //was processing the components here, then using a lamba. Will see about using a lambda again later.
 //    for(list<Component*>::iterator it=buttonGroup.begin(); it != buttonGroup.end(); ++it) {
 //        Button* b = static_cast<Button*>(*it);
 //        b->mouseEvent(event,[](Button* b){printf("button %s was clicked size=%dx%d\n",b->id(),b->rect()->w,b->rect()->h);});  //called method signature is //bool Button::mouseEvent(SDL_Event* event,void(*f)(Button* b));
@@ -196,6 +198,7 @@ void coolSpot(const char* assets) {
 }
 
 
+//Just some test stuff
 void foo(void(*f)()) {
     printf("calling f\n");
     f();
@@ -265,6 +268,8 @@ int main(int argc, char* argv[]) {
     if(argc>2) {
         strncpy(assets,argv[1],sizeof(assets));
     }
+
+    [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
     coolSpot(assets);
 
