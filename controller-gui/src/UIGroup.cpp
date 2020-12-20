@@ -32,10 +32,10 @@ void UIGroup::update(long ticks) {
 }
 
 void UIGroup::draw(SDL_Renderer *renderer) {
+    SDL_Rect r;
     for(list<Component*>::iterator it=m_components.begin(); it != m_components.end(); it++) {
         //adjust the offset of the component to be relative to this group
         Component* c = *it;
-        SDL_Rect r;
         copyRect(&r,c->rect()); //save
         c->rect()->x+=m_rect.x;
         c->rect()->y+=m_rect.y;
@@ -44,10 +44,18 @@ void UIGroup::draw(SDL_Renderer *renderer) {
     }
 }
 
-bool UIGroup::mouseEvent(SDL_Event* event,void(*f)(Component* c)) {
+Component* UIGroup::mouseEvent(SDL_Event* event) {
+    SDL_Rect r;
     for(list<Component*>::iterator it=m_components.begin(); it != m_components.end(); ++it) {
-        Component* b = static_cast<Component*>(*it);
-        b->mouseEvent(event,[](Component* b){printf("button %s was clicked size=%dx%d\n",b->id(),b->rect()->w,b->rect()->h);});
+        Component* c = *it;
+        copyRect(&r,c->rect()); //save
+        c->rect()->x+=m_rect.x; //adjust offset
+        c->rect()->y+=m_rect.y;
+        Component* result = (*it)->mouseEvent(event);
+        copyRect(c->rect(),&r); //restore
+        if(result)
+            return result;
+//        (*it)->mouseEvent(event,[](Component* b){printf("component %s was clicked size=%dx%d\n",b->id(),b->rect()->w,b->rect()->h);});
     }
-    return false;
+    return nullptr;
 }

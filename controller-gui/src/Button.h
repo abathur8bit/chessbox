@@ -44,7 +44,8 @@ public:
     ~Button();
     virtual void update(long ticks){}
     virtual void draw(SDL_Renderer* renderer);
-    virtual bool mouseEvent(SDL_Event* event,void(*f)(Button* b));
+    virtual Component* mouseEvent(SDL_Event* event);
+//    virtual bool mouseEvent(SDL_Event* event,void(*f)(Button* b));
     void setChecked(bool state);
 protected:
     int m_state;

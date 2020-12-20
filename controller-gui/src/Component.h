@@ -33,7 +33,8 @@ public:
     Component(string id,int x,int y,int w,int h);
     virtual void draw(SDL_Renderer* renderer)=0;
     virtual void update(long ticks){}
-    virtual bool mouseEvent(SDL_Event* event,void(*f)(Component* b)){return false;};
+    virtual Component * mouseEvent(SDL_Event* event);
+//    virtual bool mouseEvent(SDL_Event* event,void(*f)(Component* b));
     virtual const char* id() { return m_id.c_str(); }
     virtual SDL_Rect* rect() {return &m_rect;}
     void copyRect(SDL_Rect* dest,SDL_Rect* src);

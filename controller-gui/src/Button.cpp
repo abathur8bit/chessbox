@@ -61,7 +61,9 @@ void Button::draw(SDL_Renderer* renderer) {
 //    SDL_RenderDrawRect(renderer, &center);
 }
 
-bool Button::mouseEvent(SDL_Event* event,void(*f)(Button* b)) {
+Component* Button::mouseEvent(SDL_Event* event) {
+    //bool Button::mouseEvent(SDL_Event* event,void(*f)(Button* b)) {
+    printf("button mouse event\n");
     if(event->button.x >= m_rect.x && event->button.x < m_rect.x + m_rect.w && event->button.y >= m_rect.y && event->button.y < m_rect.y + m_rect.h) {
         switch(event->type) {
             case  SDL_MOUSEMOTION:
@@ -72,14 +74,16 @@ bool Button::mouseEvent(SDL_Event* event,void(*f)(Button* b)) {
                 break;
             case SDL_MOUSEBUTTONUP:
                 m_state=BUTTON_STATE_MOUSE_OVER;
-                f(this);
+                //f(this);
+                printf("mouse up for %s\n", id());
+                return this;
                 break;
         }
     } else {
         m_state=BUTTON_STATE_NORMAL;
     }
 
-    return false;
+    return nullptr;
 }
 
 AnimButton::AnimButton(string id,SDL_Renderer* renderer,const char* filename,int frameCount,int x,int y) : Button(id,x,y,0,0),m_delay(0) {

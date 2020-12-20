@@ -43,10 +43,11 @@ list<Button*> buttons;
 UIGroup buttonGroup("buttons",0,699,480,100);
 
 void processMouseEvent(SDL_Event* event) {
-    for(list<Component*>::iterator it=buttonGroup.begin(); it != buttonGroup.end(); ++it) {
-        Button* b = static_cast<Button*>(*it);
-        b->mouseEvent(event,[](Button* b){printf("button %s was clicked size=%dx%d\n",b->id(),b->rect()->w,b->rect()->h);});
-    }
+    buttonGroup.mouseEvent(event);
+//    for(list<Component*>::iterator it=buttonGroup.begin(); it != buttonGroup.end(); ++it) {
+//        Button* b = static_cast<Button*>(*it);
+//        b->mouseEvent(event,[](Button* b){printf("button %s was clicked size=%dx%d\n",b->id(),b->rect()->w,b->rect()->h);});
+//    }
 }
 
 void coolSpot(const char* assets) {
@@ -64,7 +65,7 @@ void coolSpot(const char* assets) {
     }
 
     window = SDL_CreateWindow(
-            "ChessBox",
+            "Chessbox",
             SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
             SCREEN_WIDTH, SCREEN_HEIGHT,
@@ -200,20 +201,57 @@ public:
     virtual void bar() {
         printf("A foobar\n");
     }
+    virtual void cat() { printf("A cat\n"); }
 };
 
 class B : public A {
 public:
-    void bar() {
+    virtual void bar() {
         printf("B bar\n");
+    }
+    virtual void cat() { printf("B cat\n"); }
+};
+
+class Greet : public B {
+public:
+    string m_name;
+    Greet(string name) : m_name(name) {}
+    virtual void bar() {
+        printf("Hello %s\n",m_name.c_str());
     }
 };
 
 int main(int argc, char* argv[]) {
-//    B b;
-//    b.foo();
-//    return 1;
+#if 0
+    B b;
+    b.foo();
+    A* a = &b;
+    a->foo();
+    a->bar();
 
+    Greet lee("Lee");
+    Greet pauline("Pauline");
+    Greet frank("Frank");
+    
+    lee.foo();
+    a=&lee;
+    a->foo();
+    a->bar();
+
+    printf("---\n");
+    list<A*> ass;
+    ass.push_back(&lee);
+    ass.push_back(&pauline);
+    ass.push_back(&frank);
+
+    for (list<A *>::iterator it = ass.begin(); it != ass.end(); it++) {
+        B* b = static_cast<B*>(*it);
+        b->foo();
+        b->cat();
+    }
+
+    return 1;
+#endif
 
     char assets[255]="assets";
     if(argc>2) {

@@ -18,9 +18,9 @@ public:
     virtual void update(long ticks);
     virtual void draw(SDL_Renderer* r);
     list<Component*>* components() {return &m_components;}
-    list<Component *>::iterator UIGroup::begin();
-    list<Component *>::iterator UIGroup::end();
-    bool UIGroup::mouseEvent(SDL_Event* event,void(*f)(Component* b));
+    list<Component *>::iterator begin();
+    list<Component *>::iterator end();
+    Component* mouseEvent(SDL_Event* event);
 protected:
     list<Component*> m_components;
 };

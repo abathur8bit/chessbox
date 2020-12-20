@@ -31,3 +31,7 @@ void Component::copyRect(SDL_Rect* dest,SDL_Rect* src) {
     dest->w=src->w;
     dest->h=src->h;
 }
+
+Component* Component::mouseEvent(SDL_Event* event) {
+    return nullptr;
+}
