@@ -21,6 +21,7 @@ public:
     list<Component *>::iterator begin();
     list<Component *>::iterator end();
     Component* mouseEvent(SDL_Event* event);
+    Component* find(const char* id);
 protected:
     list<Component*> m_components;
 };

@@ -47,6 +47,7 @@ public:
     virtual Component* mouseEvent(SDL_Event* event);
 //    virtual bool mouseEvent(SDL_Event* event,void(*f)(Button* b));
     void setChecked(bool state);
+    bool isChecked() {return m_checked;}
 protected:
     int m_state;
     bool m_checked;

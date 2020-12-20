@@ -56,6 +56,13 @@ void processMouseEvent(SDL_Event* event) {
         } else if(!strcmp(result->id(),"ping")) {
             const char* fen = "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3";
             board.Forsyth(fen);
+        } else if(!strcmp(result->id(),"image")) {
+            int i=0;
+            Button* b = static_cast<Button*>(buttonGroup.find("image"));
+            b->setChecked(!b->isChecked());
+            board.highlightSquare(i,!board.isHighlighted(i));
+            i++;
+            board.highlightSquare(i,!board.isHighlighted(i));
         }
     }
 
@@ -82,11 +89,12 @@ void coolSpot(const char* assets) {
 
     window = SDL_CreateWindow(
             "Chessbox",
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
+//            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
+            200,100,
             SCREEN_WIDTH, SCREEN_HEIGHT,
             FULL_SCREEN_MODE);
 
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     TTF_Init();
     r.w = 100;
     r.h = 50;
@@ -124,7 +132,6 @@ void coolSpot(const char* assets) {
     TextButton pingButton("ping","Ping",xx,yy,ww,hh);
     xx+=ww;
     AnimButton imageButton("image",renderer,"assets/button-twoplayer-whiteblack.png",1,xx,yy);
-    imageButton.setChecked(true);
     xx+=ww;
     snprintf(filename,sizeof(filename),"%s/coolspot_dusting.png",assets);
     AnimButton animButton("anim",renderer,filename,10,xx,yy);

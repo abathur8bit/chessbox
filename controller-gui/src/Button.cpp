@@ -106,7 +106,8 @@ TextButton::TextButton(string id, string text, int x, int y, int w, int h) : But
     m_fontTexture = nullptr;
     m_text = text;
     if (!m_text.empty()) {
-        m_font = TTF_OpenFont("assets/fonts/FiraSans-Book.otf", 16);
+        m_font = TTF_OpenFont("assets/fonts/Inconsolata-Medium.ttf", 16);
+//        m_font = TTF_OpenFont("assets/fonts/FiraSans-Book.otf", 16);
         if (!m_font) {
             printf("TTF_OpenFont: %s\n", TTF_GetError());
             // handle error

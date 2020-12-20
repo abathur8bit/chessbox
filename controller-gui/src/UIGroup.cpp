@@ -59,3 +59,11 @@ Component* UIGroup::mouseEvent(SDL_Event* event) {
     }
     return nullptr;
 }
+
+Component* UIGroup::find(const char *id) {
+    for (list<Component *>::iterator it = m_components.begin(); it != m_components.end(); it++) {
+        if(!strcmp(id,(*it)->id()))
+            return *it;
+    }
+    return nullptr;
+}

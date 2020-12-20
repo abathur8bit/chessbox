@@ -8,58 +8,63 @@ Board::Board(int x, int y, int w, int h) : Component("board",x,y,w,h),m_rules() 
     m_rectSquare = {x, y, w / 8, h / 8};
     m_whiteColor = {0x4B,0x99,0xC5,0xFF};
     m_blackColor = {0x00,0x6A,0xA6,0xFF};
-    for(int i=0; i<16; i++)
+    for(int i=0; i<NUM_PIECES; i++)
         m_pieces[i]=nullptr;
+    for(int i=0; i<NUM_SQUARES; i++)
+        m_highlight[i]=false;
 }
 
 void Board::loadPieces(SDL_Renderer* renderer,const char* setName) {
     char buffer[255];
-    const char* piece[12]= {"bk","bq","br","bb","bn","bp",
-                            "wk","wq","wr","wb","wn","wp"};
-
-    int w=60,h=60;
-    int i=0;
-    int x=0,y=0;
-    for(int i=0; i<12; i++) {
-//    for(int y=0; y<8; y++) {
-//        for(int x=0; x<8; x++) {
+    const char* piece[NUM_PIECES]= {"bk","bq","br","bb","bn","bp","wk","wq","wr","wb","wn","wp"};
+    for(int i=0; i<NUM_PIECES; i++) {
         snprintf(buffer, sizeof(buffer), "assets/pieces/%s/%s.png", setName, piece[i]);
         m_pieces[i] = new Sprite();
-        m_pieces[i]->load(renderer, buffer, 0, 0);
-        printf("loading %s x=%d y=%d\n", buffer,x,y);
-        if(x+w>=480 || (i==5)) {
-            x=0;
-            y+=h;
+        if(!m_pieces[i]->load(renderer, buffer, 0, 0)) {
+            printf("failed to load %s\n",buffer);
         } else {
-            x+=w;
+            printf("loaded %s\n", buffer);
         }
-//        i++;
-//        }
-//    }
     }
 }
 
 void Board::draw(SDL_Renderer *renderer) {
+    drawSquares(renderer);
+    drawPieces(renderer);
+}
+
+void Board::drawSquares(SDL_Renderer *renderer) {
     int white=1;
+    int i=0;
+    SDL_Color color;
     for(int y=0; y<8; y++) {
         for(int x=0; x<8; x++) {
             int xx= m_rectSquare.x + m_rectSquare.w * x;
             int yy= m_rectSquare.y + m_rectSquare.h * y;
             SDL_Rect r = {xx, yy, m_rectSquare.w, m_rectSquare.h};
             if(white) {
-                SDL_SetRenderDrawColor(renderer, m_whiteColor.r, m_whiteColor.g, m_whiteColor.b, m_whiteColor.a);
+                color = m_whiteColor;
                 white=0;
             } else {
-                SDL_SetRenderDrawColor(renderer,m_blackColor.r,m_blackColor.g,m_blackColor.b,m_blackColor.a);
+                color = m_blackColor;
                 white=1;
             }
+            if(m_highlight[i]) {
+                color.r+=100;
+                color.g+=100;
+                color.b+=100;
+            }
+            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
             SDL_RenderFillRect(renderer, &r);
+            i++;
         }
         white=!white;
     }
+}
 
+void Board::drawPieces(SDL_Renderer *renderer) {
     int i=0;
-    SDL_Rect dest = {0,0,60,60};
+    SDL_Rect dest = {0,0,m_rectSquare.w,m_rectSquare.h};
     for(int y=0; y<8; y++) {
         for (int x = 0; x < 8; x++) {
             Sprite *piece = nullptr;
@@ -103,8 +108,8 @@ void Board::draw(SDL_Renderer *renderer) {
                     break;
             }
             if(piece) {
-                dest.x=x*60;
-                dest.y=y*60;
+                dest.x=x*dest.w;
+                dest.y=y*dest.h;
                 piece->draw(renderer,&dest);
             }
         }
@@ -113,4 +118,8 @@ void Board::draw(SDL_Renderer *renderer) {
 
 void Board::Forsyth(const char *fen) {
     m_rules.Forsyth(fen);
+}
+
+void Board::highlightSquare(int square, bool highlight) {
+    m_highlight[square]=highlight;
 }

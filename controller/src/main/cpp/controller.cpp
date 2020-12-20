@@ -59,8 +59,8 @@
 #include "chessmove.hpp"
 #include "chessaction.hpp"
 
-#define TITLE "ChessLR"
-#define VERSION "0.1.0"
+#define TITLE "Chessbox Controller"
+#define VERSION "0.2.0"
 
 #define WAIT_SLOW 500
 #define WAIT_FAST 100

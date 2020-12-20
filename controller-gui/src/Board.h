@@ -34,9 +34,12 @@ public:
     }
 };
 
+#define NUM_SQUARES 64
+#define NUM_PIECES 12
 class Board : public Component {
 protected:
-    Sprite* m_pieces[16];
+    Sprite* m_pieces[NUM_PIECES];
+    bool m_highlight[NUM_SQUARES];
     SDL_Rect m_rectSquare;
     SDL_Color m_blackColor;
     SDL_Color m_whiteColor;
@@ -46,6 +49,12 @@ public:
     virtual void draw(SDL_Renderer* renderer);
     void loadPieces(SDL_Renderer* renderer,const char* setName);
     void Forsyth(const char* fen);
+    void highlightSquare(int square,bool highlight);
+    bool isHighlighted(int square) {return m_highlight[square];}
+
+protected:
+    void drawSquares(SDL_Renderer* r);
+    void drawPieces(SDL_Renderer* r);
 };
 
 
