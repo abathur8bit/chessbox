@@ -1,6 +1,3 @@
-//
-// Created by patte on 12/20/2020.
-//
 
 #include "Label.h"
 

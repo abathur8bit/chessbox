@@ -33,6 +33,7 @@
 #include "thc.h"
 #include "Label.h"
 #include "MovesPanel.h"
+#include "Connector.h"
 
 using namespace std;
 
@@ -374,6 +375,12 @@ int main(int argc, char* argv[]) {
 #endif
 
 #if 1
+    printf("Connecting\n");
+    Connector c;
+    c.open("192.168.1.54",9999);
+    printf("Done\n");
+#endif
+#if 0
     char assets[255]="assets";
     if(argc>2) {
         strncpy(assets,argv[1],sizeof(assets));

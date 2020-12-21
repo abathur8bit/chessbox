@@ -18,34 +18,41 @@
  * limitations under the License.
  * ******************************************************************************/
 
-#ifndef CONTROLLER_GUI_MOVESPANEL_H
-#define CONTROLLER_GUI_MOVESPANEL_H
+#ifndef CONTROLLER_GUI_CONNECTOR_H
+#define CONTROLLER_GUI_CONNECTOR_H
 
-#include <list>
+#ifdef WIN32
+#include <winsock.h>
+#endif
+#include <sys/types.h>
+#include <ctype.h>
+#ifndef WIN32
+# include <netinet/in.h>
+# include <netdb.h>
+# ifndef USE_POLL
+#   include <sys/select.h>    //not using select, using poll instead as select gave me some headaches
+# else
+#   include <sys/poll.h>
+# endif
+# include <arpa/inet.h>
+# include <sys/time.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <unistd.h>
+#endif
 
-#include "thc.h"
-#include "Component.h"
-#include "Label.h"
-#include "Board.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-#define MOVE_WHITE 0
-#define MOVE_BLACK 1
-
-#define NUM_LINES 16
-
-class MovesPanel : public Component {
+class Connector {
 public:
-    MovesPanel(const char* id,int x,int y,int w,int h,BoardRules* rules);
-    virtual void draw(SDL_Renderer* r);
-    virtual void update(long ticks);
-
-    void add(thc::Move mv);
-    void showMove(int moveNum,int side);
-
-protected:
-    Label* m_moveLabels[NUM_LINES];
-    BoardRules* m_rules;
+#ifdef WIN32
+    WSADATA             m_wsd;              ///< WSA startup information (Windows only)
+    static bool         m_bWSAStarted;      ///< Flag indicating if we have started socket layer.
+#endif
+    Connector();
+    int open(const char* host,unsigned short port);
 };
 
 
-#endif //CONTROLLER_GUI_MOVESPANEL_H
+#endif //CONTROLLER_GUI_CONNECTOR_H
