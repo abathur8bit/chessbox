@@ -4,7 +4,9 @@
 
 #include "Sprite.h"
 
-SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int x, int y) {
+Sprite::Sprite(const char *id) : Component(id,0,0,0,0) {
+}
+SDL_Texture* Sprite::load(SDL_Renderer* renderer,const char* filename,int x,int y) {
     return load(renderer,filename,1,x,y);
 }
 SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int frameCount, int x, int y)
@@ -28,14 +30,12 @@ SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int fram
 void Sprite::draw(SDL_Renderer* renderer,SDL_Rect* dest) {
     SDL_RenderCopyEx(renderer, m_texture, &m_sourceRect, dest, 0, 0, SDL_FLIP_NONE);
 }
-void Sprite::draw(SDL_Renderer* renderer)
-{
+void Sprite::draw(SDL_Renderer* renderer) {
     SDL_RenderCopyEx(renderer, m_texture, &m_sourceRect, &m_destinationRect, 0, 0, SDL_FLIP_NONE);
 }
-void Sprite::update(int ticks)
+void Sprite::update(long ticks)
 {
     m_sourceRect.x = m_sourceRect.w * int(((ticks / m_delay) % m_frameCount));
-
 }
 void Sprite::setPos(int x, int y)
 {

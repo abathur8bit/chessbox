@@ -59,7 +59,7 @@ protected:
 
 class AnimButton : public Button {
 public:
-    AnimButton(string id,SDL_Renderer* renderer,const char* filename,int frameCount,int x,int y);
+    AnimButton(const char* id,SDL_Renderer* renderer,const char* filename,int frameCount,int x,int y);
     virtual void update(long ticks);
     virtual void draw(SDL_Renderer* renderer);
 protected:

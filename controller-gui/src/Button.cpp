@@ -82,8 +82,8 @@ Component* Button::mouseEvent(SDL_Event* event) {
     return nullptr;
 }
 
-AnimButton::AnimButton(string id,SDL_Renderer* renderer,const char* filename,int frameCount,int x,int y) : Button(id,x,y,0,0),m_delay(0) {
-    const int border=10;
+AnimButton::AnimButton(const char* id,SDL_Renderer* renderer,const char* filename,int frameCount,int x,int y) : Button(id,x,y,0,0),m_sprite(id),m_delay(0) {
+    const int border=5;
     m_sprite.load(renderer, filename, frameCount, x, y);
     m_sprite.setPos(border, border);
     m_rect.w = m_sprite.destRect()->w + border + border;   //border*2

@@ -30,7 +30,8 @@
 #include "Button.h"
 #include "Board.h"
 #include "UIGroup.h"
-#include "../../common/thc.h"
+#include "thc.h"
+#include "Label.h"
 
 using namespace std;
 
@@ -40,11 +41,16 @@ const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
 
 
-list<Button*> buttons;
-UIGroup buttonGroup("buttons",0,800-60,480,60);
+list<Component*> uistuff;
+UIGroup buttonGroup("buttons",0,670,280,130);
+UIGroup movesGroup("moves",480-200,480,200,800-320);
+
 bool running=false;
 Board board(0,0,480,480);
-
+Sprite logo("logo");
+Sprite movesBG("moves-bg1");
+Label* blackPlayerText;
+Label* whitePlayerText;
 
 void processMouseEvent(SDL_Event* event) {
     Component* result = buttonGroup.mouseEvent(event);
@@ -53,16 +59,20 @@ void processMouseEvent(SDL_Event* event) {
         if(!strcmp(result->id(),"quit")) {
             printf("User wants to quit\n");
             running=false;
-        } else if(!strcmp(result->id(),"ping")) {
+        } else if(!strcmp(result->id(),"settings")) {
+            whitePlayerText->setText("XXX");
+        } else if(!strcmp(result->id(),"back")) {
             const char* fen = "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3";
             board.Forsyth(fen);
-        } else if(!strcmp(result->id(),"image")) {
-            int i=0;
-            Button* b = static_cast<Button*>(buttonGroup.find("image"));
-            b->setChecked(!b->isChecked());
-            board.highlightSquare(i,!board.isHighlighted(i));
-            i++;
-            board.highlightSquare(i,!board.isHighlighted(i));
+        } else if(!strcmp(result->id(),"hint")) {
+            int i = 0;
+            Button *b = static_cast<Button *>(buttonGroup.find("hint"));
+            if (b) {
+                b->setChecked(!b->isChecked());
+                board.highlightSquare(i, !board.isHighlighted(i));
+                i++;
+                board.highlightSquare(i, !board.isHighlighted(i));
+            }
         }
     }
 
@@ -106,50 +116,49 @@ void coolSpot(const char* assets) {
     renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
 
-    const int max = 25;
-    Sprite cool[max];
-    int x = 0;
-    int y = 500;
-    char filename[255];
-    snprintf(filename, sizeof(filename), "%s/coolspot_fingersnap.png", assets);
-    for (int i = 0; i < max; i++)
-    {
-        SDL_Texture* t = cool[i].load(renderer, filename, 10, x, y);
-        if (!t) {
-            printf("Couldn't initialize SDL: %s\n", SDL_GetError());
+    blackPlayerText = new Label("black", 0, 480, 140, 25);
+    whitePlayerText = new Label("white", 140, 480, 140, 25);
 
-        }
-        cool[i].setFrame(i % 10);
-        x += cool[i].widthSource() * SCALE;
-        if (x > SCREEN_WIDTH - cool[i].widthSource()) {
-            x = 0;
-            y += cool[i].heightSource() * SCALE;
-        }
-    }
+    logo.load(renderer,"assets/logo-sm.png",1,82,518);
+    uistuff.push_back(&logo);
+    movesBG.load(renderer,"assets/moves-bg1.png",1,480-200,480);
+    uistuff.push_back(&movesBG);
+    uistuff.push_back(whitePlayerText);
+    uistuff.push_back(blackPlayerText);
+
+    SDL_Color whiteColor = {255,255,255};
+    blackPlayerText->setColor(whiteColor);
+    whitePlayerText->setColor(whiteColor);
+    blackPlayerText->setText("B: 1:00:00");
+    whitePlayerText->setText("    W: 1:00:00");
+
     int ww=60,hh=60,xx=0,yy=0;
-    TextButton quitButton("quit","Quit", xx, yy, ww, hh);
-    xx+=ww;
-    TextButton pingButton("ping","Ping",xx,yy,ww,hh);
-    xx+=ww;
-    AnimButton imageButton("image",renderer,"assets/button-twoplayer-whiteblack.png",1,xx,yy);
-    xx+=ww;
-    snprintf(filename,sizeof(filename),"%s/coolspot_dusting.png",assets);
-    AnimButton animButton("anim",renderer,filename,10,xx,yy);
-    xx+=ww;
+    AnimButton settingsButton("settings",renderer,"assets/button-gear.png",1,xx,yy);
+    xx+=ww+10;
+    AnimButton quitButton("quit",renderer,"assets/button_power.png",1,xx,yy);
+    xx+=ww+10;
+    TextButton hintButton("hint","Hint",xx,yy,ww,hh);
+    xx+=ww+10;
+
+    xx=0;
+    yy+=70;
+    AnimButton fastbackButton("fastback",renderer,"assets/button-fastback.png",1,xx,yy);
+    xx+=ww+10;
+    AnimButton backButton("back",renderer,"assets/button-back.png",1,xx,yy);
+    xx+=ww+10;
+    AnimButton fwdButton("fwd",renderer,"assets/button-fwd.png",1,xx,yy);
+    xx+=ww+10;
+    AnimButton fastfwdButton("fastfwd",renderer,"assets/button-fastfwd.png",1,xx,yy);
+    xx+=ww+10;
 
     board.loadPieces(renderer,"spatial");
+    buttonGroup.add(&settingsButton);
     buttonGroup.add(&quitButton);
-    buttonGroup.add(&quitButton);
-    buttonGroup.add(&pingButton);
-    buttonGroup.add(&animButton);
-    buttonGroup.add(&imageButton);
-
-    buttons.push_back(&quitButton);
-    buttons.push_back(&pingButton);
-    buttons.push_back(&animButton);
-    buttons.push_back(&imageButton);
-
-
+    buttonGroup.add(&hintButton);
+    buttonGroup.add(&fastbackButton);
+    buttonGroup.add(&backButton);
+    buttonGroup.add(&fwdButton);
+    buttonGroup.add(&fastfwdButton);
 
     running=true;
     while (running)
@@ -183,26 +192,18 @@ void coolSpot(const char* assets) {
         SDL_RenderClear(renderer);
 
         board.draw(renderer);
-        for (int i = 0; i < max; i++)
-        {
-            cool[i].draw(renderer);
+        for (list<Component *>::iterator it = uistuff.begin(); it != uistuff.end(); it++) {
+            (*it)->draw(renderer);
         }
         buttonGroup.draw(renderer);
-//        for(std::list<Button*>::iterator it=buttons.begin(); it != buttons.end(); ++it) {
-//            (*it)->draw(renderer);
-//        }
 
         SDL_RenderPresent(renderer);
 
         Uint32 ticks = SDL_GetTicks();
-        for (int i = 0; i < max; i++)
-        {
-            cool[i].update(ticks);
+        for (list<Component *>::iterator it = uistuff.begin(); it != uistuff.end(); it++) {
+            (*it)->update(ticks);
         }
         buttonGroup.update(ticks);
-//        for(std::list<Button*>::iterator it=buttons.begin(); it != buttons.end(); ++it) {
-//            (*it)->update(ticks);
-//        }
         board.update(ticks);
 
     }

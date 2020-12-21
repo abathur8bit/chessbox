@@ -19,7 +19,7 @@ void Board::loadPieces(SDL_Renderer* renderer,const char* setName) {
     const char* piece[NUM_PIECES]= {"bk","bq","br","bb","bn","bp","wk","wq","wr","wb","wn","wp"};
     for(int i=0; i<NUM_PIECES; i++) {
         snprintf(buffer, sizeof(buffer), "assets/pieces/%s/%s.png", setName, piece[i]);
-        m_pieces[i] = new Sprite();
+        m_pieces[i] = new Sprite(buffer);
         if(!m_pieces[i]->load(renderer, buffer, 0, 0)) {
             printf("failed to load %s\n",buffer);
         } else {

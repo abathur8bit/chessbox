@@ -9,19 +9,21 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
+#include "Component.h"
+
 using namespace std;
 
 #define SCALE 1
 
-class Sprite
+class Sprite : public Component
 {
 public:
-    Sprite() {}
+    Sprite(const char* id);
     SDL_Texture * load(SDL_Renderer* renderer, const char* filename, int x, int y);
     SDL_Texture* load(SDL_Renderer* renderer, const char* filename, int frameCount, int x, int y);
     void draw(SDL_Renderer* renderer,SDL_Rect* dest);
-    void draw(SDL_Renderer* renderer);
-    void update(int ticks);
+    virtual void draw(SDL_Renderer* renderer);
+    virtual void update(long ticks);
     void setPos(int x, int y);
     SDL_Rect* destRect() {return &m_destinationRect;}
     void setFrame(int frame);
