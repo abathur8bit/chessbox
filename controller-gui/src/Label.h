@@ -12,7 +12,7 @@
 
 class Label : public Component {
 public:
-    Label(string id, int x, int y, int w, int h);
+    Label(string id, int x, int y, int w, int h,int size=20);
     virtual void draw(SDL_Renderer* r);
     void setText(const char* s);
     void appendText(const char* s);

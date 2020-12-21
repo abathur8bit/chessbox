@@ -39,6 +39,7 @@ const int FULL_SCREEN_MODE = SDL_WINDOW_RESIZABLE;
 //const int FULL_SCREEN_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
+#define NUM_MOVES 16
 
 
 list<Component*> uistuff;
@@ -49,8 +50,9 @@ bool running=false;
 Board board(0,0,480,480);
 Sprite logo("logo");
 Sprite movesBG("moves-bg1");
-Label* blackPlayerText;
-Label* whitePlayerText;
+Label* blackClockText;
+Label* whiteClockText;
+Label* moveText[NUM_MOVES];
 
 void processMouseEvent(SDL_Event* event) {
     Component* result = buttonGroup.mouseEvent(event);
@@ -60,7 +62,7 @@ void processMouseEvent(SDL_Event* event) {
             printf("User wants to quit\n");
             running=false;
         } else if(!strcmp(result->id(),"settings")) {
-            whitePlayerText->setText("XXX");
+            whiteClockText->setText("XXX");
         } else if(!strcmp(result->id(),"back")) {
             const char* fen = "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3";
             board.Forsyth(fen);
@@ -116,21 +118,21 @@ void coolSpot(const char* assets) {
     renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
 
-    blackPlayerText = new Label("black", 0, 480, 140, 25);
-    whitePlayerText = new Label("white", 140, 480, 140, 25);
+    whiteClockText = new Label("whiteclock", 0, 480, 140, 25, 26);
+    blackClockText = new Label("blackclock", 140, 480, 140, 25, 26);
 
     logo.load(renderer,"assets/logo-sm.png",1,82,518);
     uistuff.push_back(&logo);
     movesBG.load(renderer,"assets/moves-bg1.png",1,480-200,480);
     uistuff.push_back(&movesBG);
-    uistuff.push_back(whitePlayerText);
-    uistuff.push_back(blackPlayerText);
+    uistuff.push_back(whiteClockText);
+    uistuff.push_back(blackClockText);
 
     SDL_Color whiteColor = {255,255,255};
-    blackPlayerText->setColor(whiteColor);
-    whitePlayerText->setColor(whiteColor);
-    blackPlayerText->setText("B: 1:00:00");
-    whitePlayerText->setText("    W: 1:00:00");
+    blackClockText->setColor(whiteColor);
+    whiteClockText->setColor(whiteColor);
+    whiteClockText->setText(" W 1:00:00");
+    blackClockText->setText(" B 1:00:00");
 
     int ww=60,hh=60,xx=0,yy=0;
     AnimButton settingsButton("settings",renderer,"assets/button-gear.png",1,xx,yy);
@@ -159,6 +161,36 @@ void coolSpot(const char* assets) {
     buttonGroup.add(&backButton);
     buttonGroup.add(&fwdButton);
     buttonGroup.add(&fastfwdButton);
+
+    ww=180;
+    hh=20;
+    xx=480-200+5;
+    yy=481;
+    char buffer[255];
+    const char* moves[17] = {"1.d4        d5     ",
+                             "2.c4        c6     ",
+                             "3.Nf3       Nf6    ",
+                             "4.Nc3       e6     ",
+                             "5.Bg5       h6     ",
+                             "6.Bxf6      Qxf6   ",
+                             "7.e3        Nd7    ",
+                             "8.Rc1       g6     ",
+                             "9.Be2       Bg7    ",
+                             "10.cxd5     exd5   ",
+                             "11.b4       a6     ",
+                             "12.a4       O-O    ",
+                             "13.b5       axb5   ",
+                             "14.axb5     Qd6    ",
+                             "15.O-O      Nb6    ",
+                             "16.Qb3      Rb8    ",
+                             "17.Nd1      Bf5    "};
+    for(int i=0; i<NUM_MOVES; i++) {
+        snprintf(buffer,sizeof(buffer),"moveline%02d",i);
+        moveText[i] = new Label(buffer,xx,yy,ww,12,16);
+        moveText[i]->setText(moves[i]);
+        uistuff.push_back(moveText[i]);
+        yy+=hh;
+    }
 
     running=true;
     while (running)
