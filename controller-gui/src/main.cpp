@@ -32,6 +32,7 @@
 #include "UIGroup.h"
 #include "thc.h"
 #include "Label.h"
+#include "MovesPanel.h"
 
 using namespace std;
 
@@ -39,20 +40,83 @@ const int FULL_SCREEN_MODE = SDL_WINDOW_RESIZABLE;
 //const int FULL_SCREEN_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
-#define NUM_MOVES 16
+//#define NUM_MOVES 16
 
 
 list<Component*> uistuff;
 UIGroup buttonGroup("buttons",0,670,280,130);
-UIGroup movesGroup("moves",480-200,480,200,800-320);
+//UIGroup movesGroup("moves",480-200,480,200,800-320);
 
 bool running=false;
 Board board(0,0,480,480);
+MovesPanel* movesPanel;
 Sprite logo("logo");
 Sprite movesBG("moves-bg1");
 Label* blackClockText;
 Label* whiteClockText;
-Label* moveText[NUM_MOVES];
+int gameMovesIndex=0;
+const char* gameMoves[] = {
+        "d4","d5",
+        "c4","c6",
+        "Nf3","Nf6",
+        "Nc3","e6",
+        "Bg5","h6",
+        "Bxf6","Qxf6",
+        "e3","Nd7",
+        "Rc1","g6",
+        "Be2","Bg7",
+        "cxd5","exd5",
+        "b4","a6",
+        "a4","O-O",
+        "b5","axb5",
+        "axb5","Qd6",
+        "O-O","Nb6",
+        "Qb3","Rb8",
+        "Nd1","Bf5",
+        "Nb2","Rfc8",
+        "Nd3","Bxd3",
+        "Qxd3","c5",
+        "dxc5","Rxc5",
+        "h4","Na4",
+        "h5","Rbc8",
+        "Rxc5","Nxc5",
+        "Qc2","gxh5",
+        "Nd4","Qg6",
+        "Nf5","Bf8",
+        "Rd1","Qe6",
+        "Rc1","Nb3",
+        "Qxc8","Nxc1",
+        "Qxc1","Qxf5",
+        "Qc7","Qb1+",
+        "Bf1","d4",
+        "exd4","Qd1",
+        "Qe5","Bg7",
+        "Qe8+","Bf8",
+        "Qd8","Kg7",
+        "Qd5","b6",
+        "Qe5+","Kg8",
+        "Qf6","Bg7",
+        "Qxb6","Bxd4",
+        "Qxh6","Qg4",
+        "Qd6","Qd1",
+        "Qd8+","Kh7",
+        "Qc7","Kg7",
+        "b6","Qg4",
+        "b7","Qh4",
+        "g3","Qf6",
+        "Qc2","Qe5",
+        "Qd3","Ba7",
+        "Qf3","Qf6",
+        "Qe2","Qc3",
+        "Kh2","Qd4",
+        "Qf3","Bb8",
+        "Kh3","Bc7",
+        "Be2","Bb8",
+        "Bd1","f5",
+        "Be2","f4",
+        "Qxh5","Qxf2",
+        "Qg5+","Kf7"
+};
 
 void processMouseEvent(SDL_Event* event) {
     Component* result = buttonGroup.mouseEvent(event);
@@ -63,6 +127,10 @@ void processMouseEvent(SDL_Event* event) {
             running=false;
         } else if(!strcmp(result->id(),"settings")) {
             whiteClockText->setText("XXX");
+        } else if(!strcmp(result->id(),"fwd")) {
+            thc::Move mv;
+            mv.NaturalIn(board.rules(),gameMoves[gameMovesIndex++]);
+            movesPanel->add(mv);
         } else if(!strcmp(result->id(),"back")) {
             const char* fen = "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3";
             board.Forsyth(fen);
@@ -102,7 +170,7 @@ void coolSpot(const char* assets) {
     window = SDL_CreateWindow(
             "Chessbox",
 //            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
-            200,100,
+            300,100,
             SCREEN_WIDTH, SCREEN_HEIGHT,
             FULL_SCREEN_MODE);
 
@@ -118,6 +186,7 @@ void coolSpot(const char* assets) {
     renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
 
+    movesPanel = new MovesPanel("moves",480-200,480,200,800-320,board.rules());
     whiteClockText = new Label("whiteclock", 0, 480, 140, 25, 26);
     blackClockText = new Label("blackclock", 140, 480, 140, 25, 26);
 
@@ -141,6 +210,9 @@ void coolSpot(const char* assets) {
     xx+=ww+10;
     TextButton hintButton("hint","Hint",xx,yy,ww,hh);
     xx+=ww+10;
+    TextButton inspectButton("inspect","Inspect",xx,yy,ww,hh);
+    xx+=ww+10;
+
 
     xx=0;
     yy+=70;
@@ -157,40 +229,11 @@ void coolSpot(const char* assets) {
     buttonGroup.add(&settingsButton);
     buttonGroup.add(&quitButton);
     buttonGroup.add(&hintButton);
+    buttonGroup.add(&inspectButton);
     buttonGroup.add(&fastbackButton);
     buttonGroup.add(&backButton);
     buttonGroup.add(&fwdButton);
     buttonGroup.add(&fastfwdButton);
-
-    ww=180;
-    hh=20;
-    xx=480-200+5;
-    yy=481;
-    char buffer[255];
-    const char* moves[17] = {"1.d4        d5     ",
-                             "2.c4        c6     ",
-                             "3.Nf3       Nf6    ",
-                             "4.Nc3       e6     ",
-                             "5.Bg5       h6     ",
-                             "6.Bxf6      Qxf6   ",
-                             "7.e3        Nd7    ",
-                             "8.Rc1       g6     ",
-                             "9.Be2       Bg7    ",
-                             "10.cxd5     exd5   ",
-                             "11.b4       a6     ",
-                             "12.a4       O-O    ",
-                             "13.b5       axb5   ",
-                             "14.axb5     Qd6    ",
-                             "15.O-O      Nb6    ",
-                             "16.Qb3      Rb8    ",
-                             "17.Nd1      Bf5    "};
-    for(int i=0; i<NUM_MOVES; i++) {
-        snprintf(buffer,sizeof(buffer),"moveline%02d",i);
-        moveText[i] = new Label(buffer,xx,yy,ww,12,16);
-        moveText[i]->setText(moves[i]);
-        uistuff.push_back(moveText[i]);
-        yy+=hh;
-    }
 
     running=true;
     while (running)
@@ -228,6 +271,7 @@ void coolSpot(const char* assets) {
             (*it)->draw(renderer);
         }
         buttonGroup.draw(renderer);
+        movesPanel->draw(renderer);
 
         SDL_RenderPresent(renderer);
 
@@ -237,6 +281,7 @@ void coolSpot(const char* assets) {
         }
         buttonGroup.update(ticks);
         board.update(ticks);
+        movesPanel->update(ticks);
 
     }
     SDL_DestroyWindow(window);
@@ -312,6 +357,23 @@ int main(int argc, char* argv[]) {
     return 1;
 #endif
 
+#if 0
+    BoardRules rules;
+    printf("history index=%d\n",rules.historyIndex());
+    thc::Move mv;
+    mv.NaturalIn(&rules,"d4");  //    mv.TerseIn(&rules, buffer);
+    rules.PlayMove(mv);
+    mv.NaturalIn(&rules,"d5");
+    rules.PlayMove(mv);
+    rules.display_position();
+    mv = rules.historyAt(1);
+    printf("move %s %s\n",mv.NaturalOut(&rules).c_str(),mv.TerseOut().c_str());
+    mv = rules.historyAt(2);
+    printf("move %s %s\n",mv.NaturalOut(&rules).c_str(),mv.TerseOut().c_str());
+    printf("history index=%d\n",rules.historyIndex());
+#endif
+
+#if 1
     char assets[255]="assets";
     if(argc>2) {
         strncpy(assets,argv[1],sizeof(assets));
@@ -320,6 +382,8 @@ int main(int argc, char* argv[]) {
     [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
     coolSpot(assets);
-
+#endif
     return 0;
 }
+//todo lee settings should allow for piece choosing
+//todo lee setting to inspect mode

@@ -13,5 +13,5 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
-add_executable(controller_gui ../common/thc.cpp ../common/thc.h src/main.cpp src/Sprite.cpp src/Sprite.h src/Button.cpp src/Button.h src/Board.cpp src/Board.h src/Component.cpp src/Component.h src/UIGroup.cpp src/UIGroup.h src/Label.cpp src/Label.h)
+add_executable(controller_gui ../common/thc.cpp ../common/thc.h src/main.cpp src/Sprite.cpp src/Sprite.h src/Button.cpp src/Button.h src/Board.cpp src/Board.h src/Component.cpp src/Component.h src/UIGroup.cpp src/UIGroup.h src/Label.cpp src/Label.h src/MovesPanel.cpp src/MovesPanel.h)
 target_link_libraries(controller_gui PRIVATE SDL2main SDL2 SDL2_image SDL2_ttf)
