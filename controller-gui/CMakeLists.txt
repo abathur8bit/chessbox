@@ -13,7 +13,7 @@ else()
     link_directories(/usr/local/lib)
 endif()
 
-add_executable(controller_gui ../common/thc.cpp ../common/thc.h src/main.cpp src/Sprite.cpp src/Sprite.h src/Button.cpp src/Button.h src/Board.cpp src/Board.h src/Component.cpp src/Component.h src/UIGroup.cpp src/UIGroup.h src/Label.cpp src/Label.h src/MovesPanel.cpp src/MovesPanel.h src/Connector.cpp src/Connector.h src/generalexception.cpp src/generalexception.h src/socketinstance.cpp src/socketinstance.h)
+add_executable(controller_gui ../common/thc.cpp ../common/thc.h src/main.cpp src/Sprite.cpp src/Sprite.h src/Button.cpp src/Button.h src/Board.cpp src/Board.h src/Component.cpp src/Component.h src/UIGroup.cpp src/UIGroup.h src/Label.cpp src/Label.h src/MovesPanel.cpp src/MovesPanel.h src/Connector.cpp src/Connector.h ../common/generalexception.cpp ../common/generalexception.h ../common/socketinstance.cpp ../common/socketinstance.h)
 if(WIN32)
     target_link_libraries(controller_gui PRIVATE SDL2main SDL2 SDL2_image SDL2_ttf Ws2_32.lib)
 else()
