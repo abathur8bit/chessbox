@@ -181,7 +181,7 @@ void SocketInstance::close()
   m_hSocket = 0;
 }
 
-void SocketInstance::connect(const char* host,word port)
+void SocketInstance::connect(const char* host,unsigned short port)
 {
     SockAddr sa(host,port);
     create();

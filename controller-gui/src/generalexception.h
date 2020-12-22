@@ -17,6 +17,8 @@
 
 #include <string>
 
+using namespace std;
+
 namespace ssobjects
 {
 
@@ -27,15 +29,15 @@ class GeneralException
   private:
     string        m_sMessage;
     string        m_sFullMessage;
-    int         m_nError;
+    int           m_nError;
 
   public:       // Constructor/destructor
     GeneralException(const char* pszMessage,const char* pszFname,const int iLine);
     virtual ~GeneralException() {}
 
   public:
-    char*       getErrorMsg()           {return m_sMessage;}
-    char*       getFullErrorMsg()       {return m_sFullMessage;}
+    const char*       getErrorMsg()           {return m_sMessage.c_str();}
+    const char*       getFullErrorMsg()       {return m_sFullMessage.c_str();}
     int         getError()              {return m_nError;}
 };
 

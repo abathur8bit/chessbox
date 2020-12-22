@@ -377,7 +377,7 @@ int main(int argc, char* argv[]) {
 #if 1
     printf("Connecting\n");
     Connector c;
-    c.open("192.168.1.54",9999);
+    c.open3("192.168.1.54",9999);
     printf("Done\n");
 #endif
 #if 0

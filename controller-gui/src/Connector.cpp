@@ -61,7 +61,9 @@ int Connector::open(const char *host, unsigned short port) {
         iResult = closesocket(ConnectSocket);
         if (iResult == SOCKET_ERROR)
             printf("closesocket function failed with error: %ld\n", WSAGetLastError());
+#ifdef WIN32
         WSACleanup();
+#endif
         return 1;
     }
 
@@ -74,6 +76,72 @@ int Connector::open(const char *host, unsigned short port) {
         return 1;
     }
 
+#ifdef WIN32
     WSACleanup();
+#endif
     return 0;
+}
+
+int Connector::open2(const char* host,unsigned short port) {
+    printf("Creating socket\n");
+    ssobjects::SocketInstance sock;
+    printf("Connecting to %s:%d\n",host,port);
+    sock.connect(host,port);
+    char buffer[255];
+    printf("Recieving data\n");
+    int n=sock.recv(buffer,sizeof(buffer),60);
+    buffer[n]=NULL;
+    printf("read=%s\n",buffer);
+    snprintf(buffer,sizeof(buffer),"{\"action\":\"ping\"}\r\n");
+    n=sock.send(buffer,strlen(buffer),1);
+    printf("sent %d of %d bytes\n",n,strlen(buffer));
+    printf("Recieving data\n");
+    n=sock.recv(buffer,sizeof(buffer),60);
+    buffer[n]=NULL;
+    printf("read=%s\n",buffer);
+    return 0;
+}
+
+void Connector::open3(const char* host,unsigned short port) {
+    printf("Creating socket\n");
+    ssobjects::SocketInstance sock;
+    printf("Connecting to %s:%d\n",host,port);
+    sock.connect(host,port);
+    char buffer[255]="";
+
+    int ready=0;
+    while(!ready) {
+        printf("Waiting for data\n");
+
+        fd_set rset;
+        FD_ZERO(&rset);
+        FD_SET(sock,&rset);
+
+        struct timeval tv={0,0};
+        ready=select(sock+1,&rset,NULL,NULL,&tv);
+        if(-1 == ready) {
+            printf("select error %d\n",ready);
+        }
+    }
+
+
+    printf("Recieving data\n");
+    int n=sock.recv(buffer,sizeof(buffer),60);
+    buffer[n]=NULL;
+    printf("read=%s\n",buffer);
+    snprintf(buffer,sizeof(buffer),"{\"action\":\"ping\"}\r\n");
+    n=sock.send(buffer,strlen(buffer),1);
+    printf("sent %d of %d bytes\n",n,strlen(buffer));
+    printf("Recieving data\n");
+    n=sock.recv(buffer,sizeof(buffer),60);
+    buffer[n]=NULL;
+    printf("read=%s\n",buffer);
+
+//
+//
+//    fd_set rset,wset,*pwset=NULL;
+//    FD_ZERO(&rset);
+//    FD_ZERO(&wset);
+//
+//    FD_SET(*m_pSocket,&rset);
 }

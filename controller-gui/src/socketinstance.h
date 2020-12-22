@@ -105,6 +105,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "defs.h"
 #include "generalexception.h"
 #include "errno.h"
 
@@ -245,7 +246,7 @@ class SocketInstance
     void close();
     void bind(LPCSOCKADDR psa);
     void listen();
-    void connect(const char* host,word port);
+    void connect(const char* host,unsigned short port);
     void connect(LPCSOCKADDR psa);
     bool accept(SocketInstance& s, LPSOCKADDR psa);
     bool accept(SocketInstance* s, LPSOCKADDR psa);
@@ -314,12 +315,12 @@ class SockAddr
       {
         struct hostent* pHostEnt = gethostbyname(pchIP);
         if(pHostEnt == NULL) {
-          CStr s;
-          int err = WSAGetLastError();
-          strerror(err);
-          s.format("SockAddr GetHostByName error %d:%s",err,strerror(err));
-      
-          throwSocketInstanceException((const char*)s);
+//          CStr s;
+//          int err = WSAGetLastError();
+//          strerror(err);
+//          s.format("SockAddr GetHostByName error %d:%s",err,strerror(err));
+//          throwSocketInstanceException((const char*)s);
+            throwSocketInstanceException("GetHostByName error");
         }
         ULONG* pulAddr = (ULONG*) pHostEnt->h_addr_list[0];
         m_sa.sin_family = AF_INET;
@@ -382,7 +383,7 @@ class TelnetSocket : public SocketInstance
   public:
     //login information
     char* m_pLoginName;
-    WORD m_wFlags;
+    unsigned short m_wFlags;
 
   private:
     char* m_pReadBuf; // read buffer

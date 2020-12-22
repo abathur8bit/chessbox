@@ -19,6 +19,8 @@ using namespace ssobjects;
 GeneralException::GeneralException(const char* pszMessage,const char* pszFname,const int iLine)
 		: m_sMessage(pszMessage),m_sFullMessage(),m_nError(0)
 {
-	m_sFullMessage.format("%s in file %s line %d",pszMessage,pszFname,iLine);
+    char buffer[256];
+    snprintf(buffer,sizeof(buffer),"%s in file %s line %d",pszMessage,pszFname,iLine);
+	m_sFullMessage = buffer;
 }
 

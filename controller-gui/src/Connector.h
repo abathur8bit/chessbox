@@ -44,6 +44,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "socketinstance.h"
+
 class Connector {
 public:
 #ifdef WIN32
@@ -52,6 +54,8 @@ public:
 #endif
     Connector();
     int open(const char* host,unsigned short port);
+    int open2(const char* host,unsigned short port);
+    void open3(const char* host,unsigned short port);
 };
 
 
