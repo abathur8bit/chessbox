@@ -49,6 +49,7 @@ list<Component*> uistuff;
 UIGroup buttonGroup("buttons",0,670,280,130);
 //UIGroup movesGroup("moves",480-200,480,200,800-320);
 
+Connector connector;
 bool running=false;
 Board board(0,0,480,480);
 MovesPanel* movesPanel;
@@ -124,9 +125,9 @@ void processMouseEvent(SDL_Event* event) {
     Component* result = buttonGroup.mouseEvent(event);
     if(result) {
         printf("Event for %s\n",result->id());
-        if(!strcmp(result->id(),"quit")) {
-            printf("User wants to quit\n");
-            running=false;
+        if(!strcmp(result->id(),"power")) {
+            connector.connect("192.168.1.54",9999);
+            printf("Connected to controller\n");
         } else if(!strcmp(result->id(),"settings")) {
             whiteClockText->setText("XXX");
         } else if(!strcmp(result->id(),"fwd")) {
@@ -208,7 +209,7 @@ void coolSpot(const char* assets) {
     int ww=60,hh=60,xx=0,yy=0;
     AnimButton settingsButton("settings",renderer,"assets/button-gear.png",1,xx,yy);
     xx+=ww+10;
-    AnimButton quitButton("quit",renderer,"assets/button_power.png",1,xx,yy);
+    AnimButton quitButton("power",renderer,"assets/button_power.png",1,xx,yy);
     xx+=ww+10;
     TextButton hintButton("hint","Hint",xx,yy,ww,hh);
     xx+=ww+10;
@@ -285,6 +286,14 @@ void coolSpot(const char* assets) {
         board.update(ticks);
         movesPanel->update(ticks);
 
+        if(connector.isConnected()) {
+            char buffer[1024];
+            if(connector.readline(buffer, sizeof(buffer))) {
+                printf("Read from socket: %s\n",buffer);
+                if(buffer[0]=='W')
+                    connector.send("{\"action\":\"ping\"}\r\n");
+            }
+        }
     }
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
@@ -375,7 +384,7 @@ int main(int argc, char* argv[]) {
     printf("history index=%d\n",rules.historyIndex());
 #endif
 
-#if 1
+#if 0
     printf("Connecting\n");
     Connector c;
     c.connect("192.168.1.54",9999);
@@ -398,7 +407,7 @@ int main(int argc, char* argv[]) {
 
     printf("Done\n");
 #endif
-#if 0
+#if 1
     char assets[255]="assets";
     if(argc>2) {
         strncpy(assets,argv[1],sizeof(assets));

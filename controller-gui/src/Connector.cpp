@@ -25,7 +25,7 @@
 bool Connector::m_bWSAStarted=false;
 #endif
 
-Connector::Connector() : m_sock(),m_bufferIndex(0) {
+Connector::Connector() : m_sock(),m_connected(false),m_bufferIndex(0) {
 #ifdef WIN32
     if(!m_bWSAStarted)
     {
@@ -38,121 +38,29 @@ Connector::Connector() : m_sock(),m_bufferIndex(0) {
 #endif
 }
 
-int Connector::open(const char *host, unsigned short port) {
-    int iResult;
-    // Create a SOCKET for connecting to server
-    SOCKET ConnectSocket;
-    ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (ConnectSocket == INVALID_SOCKET) {
-        printf("socket function failed with error: %ld\n", WSAGetLastError());
-        WSACleanup();
-        return 1;
-    }
-    // The sockaddr_in structure specifies the address family,
-    // IP address, and port of the server to be connected to.
-    sockaddr_in clientService = {0,0,0};
-    clientService.sin_family = AF_INET;
-    clientService.sin_addr.s_addr = inet_addr(host);
-    clientService.sin_port = htons(port);
-
-    // Connect to server.
-    iResult = ::connect(ConnectSocket, (SOCKADDR *) & clientService, sizeof (clientService));
-    if (iResult == SOCKET_ERROR) {
-        printf("connect function failed with error: %ld\n", WSAGetLastError());
-        iResult = closesocket(ConnectSocket);
-        if (iResult == SOCKET_ERROR)
-            printf("closesocket function failed with error: %ld\n", WSAGetLastError());
-#ifdef WIN32
-        WSACleanup();
-#endif
-        return 1;
-    }
-
-    printf("Connected to server.\n");
-
-    iResult = closesocket(ConnectSocket);
-    if (iResult == SOCKET_ERROR) {
-        printf("closesocket function failed with error: %ld\n", WSAGetLastError());
-        WSACleanup();
-        return 1;
-    }
-
-#ifdef WIN32
-    WSACleanup();
-#endif
-    return 0;
-}
-
-int Connector::open2(const char* host,unsigned short port) {
-    printf("Creating socket\n");
-    ssobjects::SocketInstance sock;
-    printf("Connecting to %s:%d\n",host,port);
-    sock.connect(host,port);
-    char buffer[255];
-    printf("Recieving data\n");
-    int n=sock.recv(buffer,sizeof(buffer),60);
-    buffer[n]=NULL;
-    printf("read=%s\n",buffer);
-    snprintf(buffer,sizeof(buffer),"{\"action\":\"ping\"}\r\n");
-    n=sock.send(buffer,strlen(buffer),1);
-    printf("sent %d of %d bytes\n",n,strlen(buffer));
-    printf("Recieving data\n");
-    n=sock.recv(buffer,sizeof(buffer),60);
-    buffer[n]=NULL;
-    printf("read=%s\n",buffer);
-    return 0;
-}
-
-void Connector::open3(const char* host,unsigned short port) {
-    printf("Creating socket\n");
-    SocketInstance sock;
-    printf("Connecting to %s:%d\n",host,port);
-    sock.connect(host,port);
-    printf("Connected\n");
-    char buffer[255]="";
-
-    int ready=0;
-    while(!ready) {
-        printf("Waiting for data\n");
-
-        fd_set rset;
-        FD_ZERO(&rset);
-        FD_SET(sock,&rset);
-
-        struct timeval tv={0,0};
-        ready=select(sock+1,&rset,NULL,NULL,&tv);
-        if(-1 == ready) {
-            printf("select error %d\n",ready);
-        }
-    }
-
-
-    printf("Recieving data\n");
-    int n=sock.recv(buffer,sizeof(buffer),60);
-    buffer[n]=NULL;
-    printf("read=%s\n",buffer);
-    snprintf(buffer,sizeof(buffer),"{\"action\":\"ping\"}\r\n");
-    n=sock.send(buffer,strlen(buffer),1);
-    printf("sent %d of %d bytes\n",n,strlen(buffer));
-    printf("Recieving data\n");
-    n=sock.recv(buffer,sizeof(buffer),60);
-    buffer[n]=NULL;
-    printf("read=%s\n",buffer);
-
-//
-//
-//    fd_set rset,wset,*pwset=NULL;
-//    FD_ZERO(&rset);
-//    FD_ZERO(&wset);
-//
-//    FD_SET(*m_pSocket,&rset);
-}
-
 void Connector::connect(const char *host, unsigned short port) {
     m_sock.connect(host,port);
+    m_connected=true;
 }
 
-/** Reads data until it gets a full line of data. A full line is ended by a \n char sequence. If less then a full line of data is read, it's buffered.
+void Connector::close() {
+    m_sock.close();
+    m_connected=false;
+}
+
+/**
+ * Send a string of data. The number of bytes sent is the length of the null terminated string passed
+ * in. Send operation typically doesn't block.
+ *
+ * @param s String to send.
+ * @return The number of bytes that were actually sent.
+ */
+int Connector::send(const char* s) {
+    return m_sock.send(s,strlen(s));
+}
+
+/**
+ * Reads data until it gets a full line of data. A full line is ended by a \n char sequence. If less then a full line of data is read, it's buffered.
  * If there is a full line the next call, then the line is copied to buffer, null terminated, and \n is removed. If the buffer is too small to fit the
  * entire line, only size-n bytes are copied, buffer is null terminated, and the rest of the line is tossed. If a full line of data exceeds CONNECTOR_BUFFER_SIZE
  * we will keep reading, but will toss the excess data. A null terminated line containing the entire buffer would be copied to dest if dest is large enough.
