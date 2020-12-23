@@ -46,6 +46,10 @@
 
 #include "socketinstance.h"
 
+using namespace ssobjects;
+
+#define CONNECTOR_BUFFER_SIZE   4000
+
 class Connector {
 public:
 #ifdef WIN32
@@ -53,9 +57,16 @@ public:
     static bool         m_bWSAStarted;      ///< Flag indicating if we have started socket layer.
 #endif
     Connector();
+    void connect(const char* host,unsigned short port);
     int open(const char* host,unsigned short port);
     int open2(const char* host,unsigned short port);
     void open3(const char* host,unsigned short port);
+    int readline(char* buffer, size_t size);
+
+protected:
+    char m_buffer[CONNECTOR_BUFFER_SIZE];
+    int m_bufferIndex;
+    SocketInstance m_sock;
 };
 
 

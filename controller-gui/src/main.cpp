@@ -25,6 +25,7 @@
 #include <list>
 
 #include <SDL.h>
+#include <time.h>
 
 #include "Sprite.h"
 #include "Button.h"
@@ -377,7 +378,24 @@ int main(int argc, char* argv[]) {
 #if 1
     printf("Connecting\n");
     Connector c;
-    c.open3("192.168.1.54",9999);
+    c.connect("192.168.1.54",9999);
+    char buf[]="123456789012345678901234567890123456789012345678901234567890";
+    int n=0;
+    while((n=c.readline(buf,10))==0)
+        printf("waiting for data %lu\n",time(NULL));
+    memset(buf,'z',sizeof(buf));
+    n=c.readline(buf,10);
+    memset(buf,'z',sizeof(buf));
+    n=c.readline(buf,10);
+    memset(buf,'z',sizeof(buf));
+    n=c.readline(buf,10);
+    memset(buf,'z',sizeof(buf));
+    n=c.readline(buf,10);
+    memset(buf,'z',sizeof(buf));
+    n=c.readline(buf,10);
+    memset(buf,'z',sizeof(buf));
+
+
     printf("Done\n");
 #endif
 #if 0
