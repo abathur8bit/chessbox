@@ -232,12 +232,21 @@ public:
                 } else if (!action.compare("setposition")) {
                     setPosition(j, jresult);
                     psocket->println(jresult.dump().c_str());
+                } else if(!action.compare("fen")) {
+                    requestFen(psocket);
                 }
             }
 
         } catch(json::parse_error& e) {
             psocket->println("json parse error: %s",e.what());
         }
+    }
+
+    void requestFen(TelnetServerSocket* sock) {
+        json j;
+        j["action"]="setposition";
+        j["fen"]=rules.ForsythPublish();
+        sock->print("%s\n",j.dump().c_str());
     }
 
     /** Turn on the specified LED. Example:
@@ -416,7 +425,7 @@ public:
         for (int i = 0; i < 64; i++) {
             int state = readState(i);
             if (state != squareState[i]) {
-                snprintf(buffer, sizeof(buffer), "%c%c %s\r\n", toCol(i), toRow(i), (state ? "pieceDown" : "pieceUp"));
+                snprintf(buffer, sizeof(buffer), "%c%c %s\n", toCol(i), toRow(i), (state ? "pieceDown" : "pieceUp"));
                 printf(buffer);
                 send2All(buffer);
             }
@@ -557,7 +566,7 @@ public:
                 j["san"] = mv.NaturalOut(&rules);
                 printf("%s\n",j.dump().c_str());
                 send2All(j.dump().c_str());
-                send2All("\r\n");
+                send2All("\n");
                 setPosition(rules.ForsythPublish().c_str());
                 return;
             }
@@ -581,7 +590,7 @@ public:
             printf("%s\n",j.dump().c_str());
 
             send2All(j.dump().c_str());
-            send2All("\r\n");
+            send2All("\n");
             rules.PlayMove(mv);
             display_position(rules);
             printf("san=%s check=%d kingChecked=%d\n",san.c_str(),san.find_first_of('+'),kingChecked);
@@ -608,7 +617,7 @@ public:
                 j["square"] = buffer;
                 printf("%s state=%d moveIndex=%d\n",j.dump().c_str(),state,moveIndex);
                 send2All(j.dump().c_str());
-                send2All("\r\n");
+                send2All("\n");
 
                 if (!state && !moveIndex) {
                     //picked up first piece
@@ -637,7 +646,7 @@ public:
                         j["square"] = buffer;
                         printf("%s state=%d moveIndex=%d\n",j.dump().c_str(),state,moveIndex);
                         send2All(j.dump().c_str());
-                        send2All("\r\n");
+                        send2All("\n");
                     }
                 } else if(!state && moveIndex<2) {
                     //picked up another piece
@@ -685,7 +694,7 @@ public:
                         gameMode = MODE_PLAY;
                         printf("Move finished json=\n",waitMove.tojson().dump().c_str());
                         send2All(waitMove.tojson().dump().c_str());
-                        send2All("\r\n");
+                        send2All("\n");
                         finishMove(moveSquareIndex[moveIndex-1]);
                     }
                 } else {
@@ -696,7 +705,7 @@ public:
                     j["square"] = buffer;
                     printf("%s\n",j.dump().c_str());
                     send2All(j.dump().c_str());
-                    send2All("\r\n");
+                    send2All("\n");
                 }
             }
             squareState[i] = state;
@@ -729,7 +738,7 @@ public:
             j["status"] = "complete";
             printf("%s\n",j.dump().c_str());
             send2All(j.dump().c_str());
-            send2All("\r\n");
+            send2All("\n");
         }
     }
 

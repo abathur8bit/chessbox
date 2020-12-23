@@ -31,6 +31,7 @@
 #include "Component.h"
 
 using namespace std;
+using namespace thc;
 
 class BoardRules : public thc::ChessRules {
 public:
@@ -67,8 +68,11 @@ public:
 
 #define NUM_SQUARES 64
 #define NUM_PIECES 12
+#define SAN_BUF_SIZE 6      ///< Minimum buffer size to hold a san or long san move. Something like long "h7h8q" or san "h8=Q+"
 class Board : public Component {
 public:
+    const char* rowNames="87654321";
+    const char* colNames="abcdefgh";
     Board(int x,int y,int w,int h);
     virtual void draw(SDL_Renderer* renderer);
     void loadPieces(SDL_Renderer* renderer,const char* setName);
@@ -76,6 +80,55 @@ public:
     void highlightSquare(int square,bool highlight);
     bool isHighlighted(int square) {return m_highlight[square];}
     BoardRules* rules() {return &m_rules;}
+    void playMove(const char* sanLong);
+
+    /** Returns a string like "a1" give a col='a' and row='1'. */
+    char* toMove(char* buffer, size_t n, char col, char row) {
+        snprintf(buffer, n, "%c%c", col, row);
+        return buffer;
+    }
+    /** Returns a string like "a1" given a square index like 56 (lower left corner). */
+    char* toMove(char* buffer,size_t n,int index) {
+        snprintf(buffer,n,"%c%c",toCol(index),toRow(index));
+        return buffer;
+    }
+
+    /** Return the letter character of the column the index points to. The column should display before the row. */
+    char toCol(int index) {
+        int y = index/8;
+        int x = index-y*8;
+        return colNames[x];
+    }
+
+    /** Returns the number character of the row the index points to. You should use the column, then row. */
+    char toRow(int index) {
+        int y = index/8;
+        int x = index-y*8;
+        return rowNames[y];
+    }
+
+    /** Convert a string like "a1" (n)ot case sensitive) into an index like 56, or "a8" to 0. Top left corner is 0, bottom right is 63. */
+    int toIndex(const char* square) {
+        int col=tolower(square[0])-'a';
+        int row=8-(square[1]-'0');
+        return row*8+col;
+    }
+
+    int toIndex(char col,char row) {
+        char buffer[SAN_BUF_SIZE];
+        toMove(buffer,sizeof(buffer),col,row);
+        return toIndex(buffer);
+    }
+
+    void fromTo(const char* sanLong,char* from,char* to) {
+        char buffer[SAN_BUF_SIZE];
+        from[0]=sanLong[0];
+        from[1]=sanLong[1];
+        from[2]='\0';
+        to[0]=sanLong[2];
+        to[1]=sanLong[3];
+        to[2]='\0';
+    }
 
 protected:
     void drawSquares(SDL_Renderer* r);

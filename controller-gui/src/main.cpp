@@ -35,8 +35,11 @@
 #include "Label.h"
 #include "MovesPanel.h"
 #include "Connector.h"
+#include "chessaction.hpp"
+#include "json.hpp"
 
 using namespace std;
+using namespace nlohmann;   //trying this
 
 const int FULL_SCREEN_MODE = SDL_WINDOW_RESIZABLE;
 //const int FULL_SCREEN_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -49,7 +52,10 @@ list<Component*> uistuff;
 UIGroup buttonGroup("buttons",0,670,280,130);
 //UIGroup movesGroup("moves",480-200,480,200,800-320);
 
+char host[80]="192.168.1.54";
+unsigned short port=9999;
 Connector connector;
+bool attemptConnect=true;
 bool running=false;
 Board board(0,0,480,480);
 MovesPanel* movesPanel;
@@ -121,13 +127,23 @@ const char* gameMoves[] = {
         "Qg5+","Kf7"
 };
 
+ChessAction* parseJson(const char* s) {
+    json j = json::parse(s);
+    ChessAction* c = new ChessAction(j);
+    return c;
+}
+
+
 void processMouseEvent(SDL_Event* event) {
     Component* result = buttonGroup.mouseEvent(event);
     if(result) {
         printf("Event for %s\n",result->id());
         if(!strcmp(result->id(),"power")) {
-            connector.connect("192.168.1.54",9999);
+            printf("Connecting to controller at %s:%d\n",host,port);
+            connector.connect(host,port);
             printf("Connected to controller\n");
+            Button* b=static_cast<Button*>(result);
+            b->setChecked(true);
         } else if(!strcmp(result->id(),"settings")) {
             whiteClockText->setText("XXX");
         } else if(!strcmp(result->id(),"fwd")) {
@@ -156,24 +172,43 @@ void processMouseEvent(SDL_Event* event) {
 //    }
 }
 
-void coolSpot(const char* assets) {
+void coolSpot() {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Rect r;
     SDL_Rect r2;
     SDL_Point center;
 
-    SDL_EnableScreenSaver();
+//    SDL_EnableScreenSaver();
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
         return;
     }
 
+//    SDL_RendererInfo info;
+//    int numRenderDrivers = SDL_GetNumRenderDrivers();
+//    printf("Number of render driver: %d\n", numRenderDrivers);
+//    for(int i=0; i < numRenderDrivers; i++)
+//    {
+//        if ( SDL_GetRenderDriverInfo(i,&info) == 0 )
+//        {
+//            printf("%s\n",info.name);
+//        }
+//    }
+
+//    const char* drivername="RPI";
+//    if (SDL_VideoInit(drivername) != 0) {
+//        printf("unable to init video %s\n",SDL_GetError());
+//    }
+
+//    int err=SDL_CreateWindowAndRenderer(480,800,FULL_SCREEN_MODE,&window,&renderer);
+//    if(err!=0) printf("SDL_CreateWindowAndRenderer error %s\n",SDL_GetError());
+
     window = SDL_CreateWindow(
             "Chessbox",
-//            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
-            300,100,
+            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
+//            300,100,
             SCREEN_WIDTH, SCREEN_HEIGHT,
             FULL_SCREEN_MODE);
 
@@ -187,6 +222,9 @@ void coolSpot(const char* assets) {
     center.y = r.h / 2;
 
     renderer = SDL_CreateRenderer(window, -1, 0);
+    if(!renderer) {
+        printf("rederer error %s\n",SDL_GetError());
+    }
     SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
 
     movesPanel = new MovesPanel("moves",480-200,480,200,800-320,board.rules());
@@ -286,12 +324,48 @@ void coolSpot(const char* assets) {
         board.update(ticks);
         movesPanel->update(ticks);
 
+        if(!connector.isConnected() && attemptConnect) {
+            attemptConnect=false;
+            try {
+                printf("Connecting to controller at %s:%d\n",host,port);
+                connector.connect(host, port);
+                printf("Connected to controller\n");
+                quitButton.setChecked(true);
+            } catch(SocketInstanceException& e) {
+                printf("Not able to connect to %s:%d\n",host,port);
+            }
+        }
         if(connector.isConnected()) {
             char buffer[1024];
             if(connector.readline(buffer, sizeof(buffer))) {
                 printf("Read from socket: %s\n",buffer);
-                if(buffer[0]=='W')
+                if(buffer[0]=='{') {
+                    json j = json::parse(buffer);
+                    if(j.contains("action")) {
+                        string action = j["action"];
+                        if(!action.compare("pieceUp")) {
+                            string square=j["square"];
+                            board.highlightSquare(board.toIndex(square.c_str()),true);
+                        } else if(!action.compare("pieceDown")) {
+                            string square=j["square"];
+                            board.highlightSquare(board.toIndex(square.c_str()),false);
+                        } else if(!action.compare("move")) {
+                            ChessAction* a=new ChessAction(j);
+                            ChessMove m = a->move(0);
+                            printf("Move from=%s to=%s lan=%s\n",m.from(),m.to(),m.lan());
+                            board.playMove(m.lan());
+                        } else if(!action.compare("setposition")) {
+                            string fen=j["fen"];
+                            board.Forsyth(fen.c_str());
+                            board.rules()->display_position();
+                        }
+                    }
+                }
+
+                if(buffer[0]=='W') {
                     connector.send("{\"action\":\"ping\"}\r\n");
+                    connector.send("{\"action\":\"fen\"}\r\n");
+                }
             }
         }
     }
@@ -337,6 +411,7 @@ public:
 };
 
 int main(int argc, char* argv[]) {
+    printf("You may need to run 'export SDL_VIDEODRIVER=rpi'\n");
 #if 0
     B b;
     b.foo();
@@ -408,15 +483,43 @@ int main(int argc, char* argv[]) {
     printf("Done\n");
 #endif
 #if 1
-    char assets[255]="assets";
-    if(argc>2) {
-        strncpy(assets,argv[1],sizeof(assets));
-    }
-
     [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
-    coolSpot(assets);
+    if(argc>2) {
+        strncpy(host,argv[1],sizeof(host));
+        NULL_TERMINATE(host, sizeof(host));
+    }
+    coolSpot();
 #endif
+#if 0
+int numdrivers, i, working;
+const char* drivername;
+
+if (SDL_Init(0) != 0) {
+  printf("Error initializing SDL:  %s\n", SDL_GetError());
+   return 1;
+ }
+ atexit(SDL_Quit);
+
+ numdrivers = SDL_GetNumVideoDrivers();
+ working = 0;
+
+ for (i = 0; i < numdrivers; ++i) {
+   drivername = SDL_GetVideoDriver(i);
+
+   if (SDL_VideoInit(drivername) == 0) {
+     SDL_VideoQuit();
+     ++working;
+     printf("Driver %s works.\n", drivername);
+   }
+   else {
+     printf("Driver %s doesn't work.\n", drivername);
+   }
+ }
+
+ printf("\n%d video drivers total (%d work)\n", numdrivers, working);
+
+ #endif
     return 0;
 }
 //todo lee settings should allow for piece choosing

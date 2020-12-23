@@ -79,6 +79,17 @@ The controller is able to sense when a piece has been put down or lifted up and 
     * 1  56 57 58 59 60 61 62 63  1
     *    a  b  c  d  e  f  g  h
 
+# Notation
+Standard algebraic notation (SAN) can be long or short. <https://en.wikipedia.org/wiki/Chess_notation>
+- Long algebraic notation (LAN) includes the starting file and rank of the piece. Can also use a hyphen.
+    - **a4, Nf3, exd5, Bxd5, Qe4+, qe4#**
+    - a2a3, Nb1-c3, Rd3xd7
+- Short algebraic notation omits the starting file and rank of the piece, unless it is necessary to disambiguate the move. This is the standard.
+    - a4, Nf3, exd5, Bxd5, Qe4+, qe4#
+- Reversible algebraic notation (RAN) is based on LAN, but adds an additional letter for the piece that was captured, if any.
+    - Rd2xBd6
+    
+
 # JSON
 
 Sample JSON

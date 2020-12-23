@@ -105,6 +105,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstring>
+
 #include "defs.h"
 #include "generalexception.h"
 #include "errno.h"
@@ -284,23 +286,10 @@ class SockAddr
     
   public:
     // constructors
-    SockAddr() : m_sa()
-    { 
-      	memset(&m_sa,0,sizeof(m_sa)); 
-      	m_sa.sin_family = AF_INET; 
-      	m_sa.sin_port = 0; 
-      	m_sa.sin_addr.s_addr = 0; 
-    } // Default
-    SockAddr(const sockaddr& sa) : m_sa() { memcpy(&m_sa, &sa, sizeof(SOCKADDR)); }
-    SockAddr(const sockaddr_in& sin) : m_sa() { memcpy(&m_sa, &sin, sizeof(SOCKADDR_IN)); }
-    SockAddr(const ULONG ulAddr, const USHORT ushPort = 0) : m_sa() // parms are host byte ordered
-    { 
-    	memset(&m_sa,0,sizeof(sockaddr_in));
-        m_sa.sin_family = AF_INET;
-        m_sa.sin_port = htons(ushPort);
-        m_sa.sin_addr.s_addr = htonl(ulAddr); 
-        
-    }
+    SockAddr();
+    SockAddr(const sockaddr& sa);
+    SockAddr(const sockaddr_in& sin);
+    SockAddr(const ULONG ulAddr, const USHORT ushPort = 0);
 #ifdef OS_LINUX
     SockAddr(const uint32_t ulAddr, const USHORT ushPort = 0) : m_sa() // parms are host byte ordered
     { 

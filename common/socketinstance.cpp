@@ -48,6 +48,25 @@ SockAddr::operator == (const sockaddr_in& sa)
 
   return false;
 }
+
+SockAddr::SockAddr() : m_sa()
+{
+    memset(&m_sa,0,sizeof(m_sa));
+    m_sa.sin_family = AF_INET;
+    m_sa.sin_port = 0;
+    m_sa.sin_addr.s_addr = 0;
+}
+SockAddr::SockAddr(const sockaddr& sa) : m_sa() { memcpy(&m_sa, &sa, sizeof(SOCKADDR)); }
+SockAddr::SockAddr(const sockaddr_in& sin) : m_sa() { memcpy(&m_sa, &sin, sizeof(SOCKADDR_IN)); }
+SockAddr::SockAddr(const ULONG ulAddr, const USHORT ushPort) : m_sa() // parms are host byte ordered
+{
+    memset(&m_sa,0,sizeof(sockaddr_in));
+    m_sa.sin_family = AF_INET;
+    m_sa.sin_port = htons(ushPort);
+    m_sa.sin_addr.s_addr = htonl(ulAddr);
+
+}
+
 #endif
 
 

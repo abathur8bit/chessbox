@@ -18,8 +18,9 @@
  * limitations under the License.
  * ******************************************************************************/
 
+#include <string.h>
+
 #include "Connector.h"
-#include <winsock.h>
 
 #ifdef WIN32
 bool Connector::m_bWSAStarted=false;

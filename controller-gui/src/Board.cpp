@@ -23,7 +23,7 @@ void Board::loadPieces(SDL_Renderer* renderer,const char* setName) {
         if(!m_pieces[i]->load(renderer, buffer, 0, 0)) {
             printf("failed to load %s\n",buffer);
         } else {
-            printf("loaded %s\n", buffer);
+//            printf("loaded %s\n", buffer);
         }
     }
 }
@@ -122,4 +122,17 @@ void Board::Forsyth(const char *fen) {
 
 void Board::highlightSquare(int square, bool highlight) {
     m_highlight[square]=highlight;
+}
+
+void Board::playMove(const char* sanLong) {
+    Move mv;
+    mv.TerseIn(rules(),sanLong);
+    m_rules.PlayMove(mv);
+    char from[3],to[3];
+    fromTo(sanLong,from,to);
+    for(int i=0; i<64; i++) {               //turn off all squares
+        highlightSquare(i,false);
+    }
+    highlightSquare(toIndex(from),true);    //then turn on the ones we just moved from&to
+    highlightSquare(toIndex(to),true);
 }

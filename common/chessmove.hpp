@@ -26,11 +26,21 @@ public:
     string m_type; //move, capture, takeback
     string m_from;
     string m_to;
+    string m_lan;
     string m_description;
 
     char buff[80];
     const char* rowNames="87654321";
     const char* colNames="ABCDEFGH";
+
+    const char* lan() {
+        m_lan=from();
+        m_lan+=to();
+        return m_lan.c_str();
+    }
+
+    const char* from() {return m_from.c_str();}
+    const char* to() {return m_to.c_str();}
 
     int fromIndex() {
         return squaresIndex(m_from);
@@ -73,9 +83,16 @@ public:
         return rowNames[y];
     }
 
+    string str_tolower(string s) {
+        transform(s.begin(), s.end(), s.begin(),
+                  [](unsigned char c){ return std::tolower(c); }
+        );
+        return s;
+    }
+
     string str_toupper(string s) {
         transform(s.begin(), s.end(), s.begin(),
-            [](unsigned char c){ return std::toupper(c); } // correct
+            [](unsigned char c){ return std::toupper(c); }
         );
         return s;
     }
@@ -83,13 +100,13 @@ public:
     ChessMove() : m_from(),m_to(),m_type(),m_description() {}
     ChessMove(const char* from,const char* to,const char* type,const char* description)
             : m_from(from),m_to(to),m_type(type),m_description(description) {
-        m_from = str_toupper(from);
-        m_to = str_toupper(to);
-        m_type = str_toupper(type);
+        m_from = str_tolower(from);
+        m_to = str_tolower(to);
+        m_type = str_tolower(type);
     }
     ChessMove(json j) {
-        m_from = str_toupper(j["from"]);
-        m_to = str_toupper(j["to"]);
+        m_from = str_tolower(j["from"]);
+        m_to = str_tolower(j["to"]);
         m_type = j["type"];
     }
 
