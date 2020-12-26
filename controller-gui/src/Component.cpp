@@ -21,8 +21,9 @@
 #include "Component.h"
 
 Component::Component(string id, int x, int y, int w, int h) {
-    m_rect = {x, y, w, h};
-    m_id = id;
+    m_rect={x, y, w, h};
+    m_id=id;
+    m_backgroundColor={191,37,0};
 }
 
 void Component::copyRect(SDL_Rect* dest,SDL_Rect* src) {

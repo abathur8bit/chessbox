@@ -38,9 +38,11 @@ public:
     virtual const char* id() { return m_id.c_str(); }
     virtual SDL_Rect* rect() {return &m_rect;}
     void copyRect(SDL_Rect* dest,SDL_Rect* src);
+    SDL_Color backgroundColor();
 protected:
     SDL_Rect m_rect;
     string m_id;
+    SDL_Color m_backgroundColor;
 };
 
 

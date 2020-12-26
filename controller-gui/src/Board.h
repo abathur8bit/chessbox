@@ -40,7 +40,7 @@ public:
     }
 
     thc::Move historyAt(unsigned char index) {
-        return history[index];  //todo lee Seems like a bad idea to limit history to only 256 moves, should use a list.
+        return history[index];
     }
 
     unsigned char historyIndex() {return history_idx;}

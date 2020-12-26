@@ -40,6 +40,7 @@
 #include "json.hpp"
 #include "ControllerGUI.h"
 #include "Dialog.h"
+#include "TextField.h"
 
 using namespace std;
 using namespace nlohmann;   //trying this
@@ -168,6 +169,8 @@ void processMouseEvent(SDL_Event* event) {
                 } else {
                     printf("user selected cancel\n");
                 }
+            } else if (!strcmp(result->id(), "inspect")) {
+
             } else if (!strcmp(result->id(), "fwd")) {
                 thc::Move mv;
                 mv.NaturalIn(board.rules(), gameMoves[gameMovesIndex++]);
@@ -300,6 +303,10 @@ void coolSpot(bool fullscreen) {
     buttonGroup.add(&backButton);
     buttonGroup.add(&fwdButton);
     buttonGroup.add(&fastfwdButton);
+
+    TextField tf("textfield",10,10,460,30);
+    tf.setText("your name here");
+    uistuff.push_back(&tf);
 
     running=true;
     while (running)
@@ -648,11 +655,10 @@ int main(int argc, char* argv[]) {
     }
 //    scrolltest();
     coolSpot(fullscreen);
-//    ControllerGUI gui(fullscreen,host,port);
-//    gui.startGame();
+//    ControllerGUI gui(host,port);
+//    gui.startGame(fullscreen);
 #endif
 //    svgtest("assets/chessbox-box.svg",false);
     return 0;
 }
 //todo lee settings should allow for piece choosing
-//todo lee setting to inspect mode

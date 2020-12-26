@@ -12,8 +12,8 @@
 
 class ControllerGUI {
 public:
-    ControllerGUI(bool fullscreen,const char* host,unsigned short port);
-    void startGame();
+    ControllerGUI(const char* host,unsigned short port);
+    void startGame(bool fullscreen);
     void processMouseEvent(SDL_Event* event);
 
 protected:
