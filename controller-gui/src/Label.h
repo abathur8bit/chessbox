@@ -15,9 +15,11 @@ public:
     Label(string id, int x, int y, int w, int h,int size=20);
     virtual void draw(SDL_Renderer* r);
     void setText(const char* s);
+    const char* getText() {return m_text.c_str();}
     void appendText(const char* s);
     void invalidateTexture();
     void setColor(SDL_Color& c);
+    void clear() {setText("");}
 protected:
     string m_text;
     SDL_Texture* m_fontTexture;

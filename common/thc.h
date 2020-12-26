@@ -170,7 +170,7 @@ class ChessRules;
 //
 // Note this is really an old school C struct, designed for speed
 // There is no contructor on purpose, we don't want unnecessary
-// contruction of an array of Moves in a MOVELIST when we are running
+// contruction of an array of Moves in a MOVELIST when we are m_running
 // the fast move generator.
 // The default assignment operator (bitwise copy) is ideal.
 // We define bitwise == and != operators

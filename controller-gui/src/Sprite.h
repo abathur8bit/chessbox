@@ -25,11 +25,11 @@ public:
     virtual void draw(SDL_Renderer* renderer);
     virtual void update(long ticks);
     void setPos(int x, int y);
-    SDL_Rect* destRect() {return &m_destinationRect;}
+    SDL_Rect* destRect() {return &m_rect;}
     void setFrame(int frame);
     void setDelay(Uint32 delayMilliSeconds);
-    int widthDest() { return m_destinationRect.w; }
-    int heightDest() { return m_destinationRect.h; }
+    int widthDest() { return m_rect.w; }
+    int heightDest() { return m_rect.h; }
     int widthSource() { return m_sourceRect.w; }
     int heightSource() { return m_sourceRect.h; }
     const char* name() {return m_name.c_str();}
@@ -39,7 +39,6 @@ protected:
     int m_currentFrame;
     Uint32 m_delay;
     SDL_Rect m_sourceRect;
-    SDL_Rect m_destinationRect;
     string m_name;
 };
 

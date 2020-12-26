@@ -778,16 +778,26 @@ public:
     }
 };
 
+void usage(const char* name) {
+    printf("%s {-h,--help,-s,-p,-l}\n",name);
+    printf("  --help,-h This message\n");
+    printf("  -s Swap switches for Lee's board\n");
+    printf("  -p What port to run on\n");
+    printf("  -l,--leds-off Turn off all LEDs and exit\n");
+    exit(0);
+}
 int main(int argc,char* argv[]) {
     bool swap=false;
     bool turnOffLeds=false;
     unsigned16 wPort = 9999;
     for(int i=0; i<argc; i++) {
-        if(!strcmp(argv[i],"-s")) {
+        if(!strcmp(argv[i],"-h") || !strcmp(argv[i],"--help"))
+            usage(argv[0]);
+        else if(!strcmp(argv[i],"-s")) {
             swap=true;
         } else if(!strcmp(argv[i],"-p")) {
             wPort = atoi(argv[++i]);
-        } else if(!strcmp(argv[i],"--leds-off")) {
+        } else if(!strcmp(argv[i],"-l") || !strcmp(argv[i],"--leds-off")) {
             turnOffLeds=true;
         }
     }

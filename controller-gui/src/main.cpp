@@ -26,6 +26,7 @@
 
 #include <SDL.h>
 #include <time.h>
+#include <SDL_image.h>
 
 #include "Sprite.h"
 #include "Button.h"
@@ -37,17 +38,18 @@
 #include "Connector.h"
 #include "chessaction.hpp"
 #include "json.hpp"
+#include "ControllerGUI.h"
 
 using namespace std;
 using namespace nlohmann;   //trying this
 
-const int FULL_SCREEN_MODE = SDL_WINDOW_RESIZABLE;
-//const int FULL_SCREEN_MODE = SDL_WINDOW_FULLSCREEN_DESKTOP;
+char buffer[1024];
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
+int counter=0;
 //#define NUM_MOVES 16
 
-
+bool invalidated = true;
 list<Component*> uistuff;
 UIGroup buttonGroup("buttons",0,670,280,130);
 //UIGroup movesGroup("moves",480-200,480,200,800-320);
@@ -133,36 +135,52 @@ ChessAction* parseJson(const char* s) {
     return c;
 }
 
+void validate() {
+    invalidated=false;
+}
+
+void invalidate() {
+    invalidated=true;
+}
+
+bool isInvalidated() {
+    return invalidated;
+}
 
 void processMouseEvent(SDL_Event* event) {
     Component* result = buttonGroup.mouseEvent(event);
     if(result) {
-        printf("Event for %s\n",result->id());
-        if(!strcmp(result->id(),"power")) {
-            printf("Connecting to controller at %s:%d\n",host,port);
-            connector.connect(host,port);
-            printf("Connected to controller\n");
-            Button* b=static_cast<Button*>(result);
-            b->setChecked(true);
-        } else if(!strcmp(result->id(),"settings")) {
-            whiteClockText->setText("XXX");
-        } else if(!strcmp(result->id(),"fwd")) {
-            thc::Move mv;
-            mv.NaturalIn(board.rules(),gameMoves[gameMovesIndex++]);
-            movesPanel->add(mv);
-        } else if(!strcmp(result->id(),"back")) {
-            const char* fen = "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3";
-            board.Forsyth(fen);
-        } else if(!strcmp(result->id(),"hint")) {
-            int i = 0;
-            Button *b = static_cast<Button *>(buttonGroup.find("hint"));
-            if (b) {
-                b->setChecked(!b->isChecked());
-                board.highlightSquare(i, !board.isHighlighted(i));
-                i++;
-                board.highlightSquare(i, !board.isHighlighted(i));
+//        printf("Event for %s\n",result->id());
+        if(event->type == SDL_MOUSEBUTTONUP) {
+            if (!strcmp(result->id(), "power")) {
+                printf("Connecting to controller at %s:%d\n", host, port);
+                connector.connect(host, port);
+                printf("Connected to controller\n");
+                Button *b = static_cast<Button *>(result);
+                b->setChecked(true);
+            } else if (!strcmp(result->id(), "settings")) {
+                whiteClockText->setText("XXX");
+            } else if (!strcmp(result->id(), "fwd")) {
+                thc::Move mv;
+                mv.NaturalIn(board.rules(), gameMoves[gameMovesIndex++]);
+                movesPanel->add(mv);
+            } else if (!strcmp(result->id(), "back")) {
+                const char *fen = "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq - 0 3";
+                board.Forsyth(fen);
+            } else if (!strcmp(result->id(), "hint")) {
+                snprintf(buffer,sizeof(buffer),"hint %d",++counter);
+                movesPanel->add(buffer);
+                int i = 0;
+                Button *b = static_cast<Button *>(buttonGroup.find("hint"));
+                if (b) {
+                    b->setChecked(!b->isChecked());
+                    board.highlightSquare(i, !board.isHighlighted(i));
+                    i++;
+                    board.highlightSquare(i, !board.isHighlighted(i));
+                }
             }
         }
+        invalidate();
     }
 
     //was processing the components here, then using a lamba. Will see about using a lambda again later.
@@ -172,12 +190,13 @@ void processMouseEvent(SDL_Event* event) {
 //    }
 }
 
-void coolSpot() {
+void coolSpot(bool fullscreen) {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Rect r;
     SDL_Rect r2;
     SDL_Point center;
+    Uint32 timer=0;
 
 //    SDL_EnableScreenSaver();
 
@@ -202,15 +221,15 @@ void coolSpot() {
 //        printf("unable to init video %s\n",SDL_GetError());
 //    }
 
-//    int err=SDL_CreateWindowAndRenderer(480,800,FULL_SCREEN_MODE,&window,&renderer);
+//    int err=SDL_CreateWindowAndRenderer(480,800,FULL_SCREEN_MODE,&m_window,&m_renderer);
 //    if(err!=0) printf("SDL_CreateWindowAndRenderer error %s\n",SDL_GetError());
 
     window = SDL_CreateWindow(
             "Chessbox",
-            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
-//            300,100,
+//            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
+            300,100,
             SCREEN_WIDTH, SCREEN_HEIGHT,
-            FULL_SCREEN_MODE);
+            fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_RESIZABLE);
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     TTF_Init();
@@ -231,9 +250,9 @@ void coolSpot() {
     whiteClockText = new Label("whiteclock", 0, 480, 140, 25, 26);
     blackClockText = new Label("blackclock", 140, 480, 140, 25, 26);
 
-    logo.load(renderer,"assets/logo-sm.png",1,82,518);
+    logo.load(renderer,"assets/logo-sm.png",1,82+105/2,518+130/2);
     uistuff.push_back(&logo);
-    movesBG.load(renderer,"assets/moves-bg1.png",1,480-200,480);
+    movesBG.load(renderer,"assets/moves-bg1.png",1,480-100,480+320/2);
     uistuff.push_back(&movesBG);
     uistuff.push_back(whiteClockText);
     uistuff.push_back(blackClockText);
@@ -295,7 +314,7 @@ void coolSpot() {
                 running = false;
                 break;
             case SDL_WINDOWEVENT:
-//                printf("had a window event!!!\n");
+//                printf("had a m_window event!!!\n");
                 break;
             case SDL_KEYDOWN:
                 running = false;
@@ -304,18 +323,20 @@ void coolSpot() {
                 break;
             }
         }
-        SDL_SetRenderDrawColor(renderer, 191, 37, 0, SDL_ALPHA_OPAQUE);
-        SDL_RenderClear(renderer);
+        if(isInvalidated()) {
+            validate();
+            SDL_SetRenderDrawColor(renderer, 191, 37, 0, SDL_ALPHA_OPAQUE);
+            SDL_RenderClear(renderer);
 
-        board.draw(renderer);
-        for (list<Component *>::iterator it = uistuff.begin(); it != uistuff.end(); it++) {
-            (*it)->draw(renderer);
+            board.draw(renderer);
+            for (list<Component *>::iterator it = uistuff.begin(); it != uistuff.end(); it++) {
+                (*it)->draw(renderer);
+            }
+            buttonGroup.draw(renderer);
+            movesPanel->draw(renderer);
+
+            SDL_RenderPresent(renderer);
         }
-        buttonGroup.draw(renderer);
-        movesPanel->draw(renderer);
-
-        SDL_RenderPresent(renderer);
-
         Uint32 ticks = SDL_GetTicks();
         for (list<Component *>::iterator it = uistuff.begin(); it != uistuff.end(); it++) {
             (*it)->update(ticks);
@@ -324,17 +345,23 @@ void coolSpot() {
         board.update(ticks);
         movesPanel->update(ticks);
 
-        if(!connector.isConnected() && attemptConnect) {
-            attemptConnect=false;
-            try {
-                printf("Connecting to controller at %s:%d\n",host,port);
-                connector.connect(host, port);
-                printf("Connected to controller\n");
-                quitButton.setChecked(true);
-            } catch(SocketInstanceException& e) {
-                printf("Not able to connect to %s:%d\n",host,port);
-            }
+        if(ticks>timer) {
+            invalidate();
+            timer=ticks+100;
         }
+
+#if 1
+//        if(!connector.isConnected() && attemptConnect) {
+//            attemptConnect=false;
+//            try {
+//                printf("Connecting to controller at %s:%d\n",host,port);
+//                connector.connect(host, port);
+//                printf("Connected to controller\n");
+//                quitButton.setChecked(true);
+//            } catch(SocketInstanceException& e) {
+//                printf("Not able to connect to %s:%d\n",host,port);
+//            }
+//        }
         if(connector.isConnected()) {
             char buffer[1024];
             if(connector.readline(buffer, sizeof(buffer))) {
@@ -346,18 +373,23 @@ void coolSpot() {
                         if(!action.compare("pieceUp")) {
                             string square=j["square"];
                             board.highlightSquare(board.toIndex(square.c_str()),true);
+                            invalidate();
                         } else if(!action.compare("pieceDown")) {
                             string square=j["square"];
                             board.highlightSquare(board.toIndex(square.c_str()),false);
+                            invalidate();
                         } else if(!action.compare("move")) {
                             ChessAction* a=new ChessAction(j);
                             ChessMove m = a->move(0);
                             printf("Move from=%s to=%s lan=%s\n",m.from(),m.to(),m.lan());
                             board.playMove(m.lan());
+                            invalidate();
                         } else if(!action.compare("setposition")) {
                             string fen=j["fen"];
                             board.Forsyth(fen.c_str());
                             board.rules()->display_position();
+                            movesPanel->clear();
+                            invalidate();
                         }
                     }
                 }
@@ -368,6 +400,7 @@ void coolSpot() {
                 }
             }
         }
+#endif
     }
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
@@ -409,6 +442,86 @@ public:
         printf("Hello %s\n",m_name.c_str());
     }
 };
+
+void svgtest(const char* filename,bool fullscreen) {
+    SDL_Window* m_window;
+    SDL_Renderer* m_renderer;
+    bool m_running;
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
+        return;
+    }
+    m_window = SDL_CreateWindow(
+            "Chessbox",
+            300,100,
+//            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
+            SCREEN_WIDTH, SCREEN_HEIGHT,
+            fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_RESIZABLE);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    m_renderer = SDL_CreateRenderer(m_window, -1, 0);
+    if(!m_renderer) {
+        printf("m_renderer error %s\n",SDL_GetError());
+    }
+
+    SDL_RWops *src = SDL_RWFromFile(filename, "rb");
+    SDL_Surface * surface = IMG_LoadSVG_RW(src);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(m_renderer,surface);
+    SDL_Rect srcrect={0,0,0,0};
+    SDL_QueryTexture(texture, NULL, NULL, &srcrect.w, &srcrect.h);
+    SDL_Rect destrect={0,0,srcrect.w,srcrect.h};
+
+    bool running=true;
+    while(running) {
+        SDL_Event event;
+        if (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+                case SDL_QUIT:
+                    running = false;
+                    break;
+                case SDL_WINDOWEVENT:
+                    break;
+                case SDL_KEYDOWN:
+                    running = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+        SDL_SetRenderDrawColor(m_renderer, 128, 0, 0, 255);
+        SDL_RenderClear(m_renderer);
+        SDL_RenderCopyEx(m_renderer,texture, &srcrect, &destrect, 0, 0, SDL_FLIP_NONE);
+        SDL_RenderPresent(m_renderer);
+    }
+    SDL_DestroyWindow(m_window);
+    SDL_DestroyRenderer(m_renderer);
+    SDL_Quit();
+
+
+}
+
+void add(MovesPanel& m,const char* s) {
+    m.add(s);
+}
+void show(MovesPanel& m) {
+    for(int i=0; i<17; i++) {
+        printf("%02d %s\n",i,m.text(i));
+    }
+}
+void scrolltest() {
+    BoardRules rules;
+    MovesPanel m("moves",0,0,100,100,&rules);
+    int i;
+    show(m);
+    for(int i=0; i<20; i++) {
+        snprintf(buffer,sizeof(buffer),"add %d",i);
+        printf("%s (enter)\n",buffer);
+        getchar();
+        add(m,buffer);
+        show(m);
+    }
+}
 
 int main(int argc, char* argv[]) {
     printf("You may need to run 'export SDL_VIDEODRIVER=rpi'\n");
@@ -483,43 +596,56 @@ int main(int argc, char* argv[]) {
     printf("Done\n");
 #endif
 #if 1
+    int numdrivers, i, working;
+    const char* drivername;
+
+    if (SDL_Init(0) != 0) {
+        printf("Error initializing SDL:  %s\n", SDL_GetError());
+        return 1;
+    }
+    atexit(SDL_Quit);
+
+    numdrivers = SDL_GetNumVideoDrivers();
+    working = 0;
+
+    for (i = 0; i < numdrivers; ++i) {
+        drivername = SDL_GetVideoDriver(i);
+
+        if (SDL_VideoInit(drivername) == 0) {
+            SDL_VideoQuit();
+            ++working;
+            printf("Driver %s works.\n", drivername);
+        }
+        else {
+            printf("Driver %s doesn't work.\n", drivername);
+        }
+    }
+
+    printf("\n%d video drivers total (%d work)\n", numdrivers, working);
+
+#endif
+#if 1
     [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
+    bool fullscreen=false;
+    for(int i=1; i<argc; i++) {
+        if(!strcmp("-f",argv[i])) {
+            fullscreen=true;
+        } else if(!strcmp("-h",argv[i]) && i+1 <= argc) {
+            strncpy(host,argv[++i],sizeof(host));
+            NULL_TERMINATE(host, sizeof(host));
+        }
+    }
     if(argc>2) {
         strncpy(host,argv[1],sizeof(host));
         NULL_TERMINATE(host, sizeof(host));
     }
-    coolSpot();
+//    scrolltest();
+    coolSpot(fullscreen);
+//    ControllerGUI gui(fullscreen,host,port);
+//    gui.startGame();
 #endif
-#if 0
-int numdrivers, i, working;
-const char* drivername;
-
-if (SDL_Init(0) != 0) {
-  printf("Error initializing SDL:  %s\n", SDL_GetError());
-   return 1;
- }
- atexit(SDL_Quit);
-
- numdrivers = SDL_GetNumVideoDrivers();
- working = 0;
-
- for (i = 0; i < numdrivers; ++i) {
-   drivername = SDL_GetVideoDriver(i);
-
-   if (SDL_VideoInit(drivername) == 0) {
-     SDL_VideoQuit();
-     ++working;
-     printf("Driver %s works.\n", drivername);
-   }
-   else {
-     printf("Driver %s doesn't work.\n", drivername);
-   }
- }
-
- printf("\n%d video drivers total (%d work)\n", numdrivers, working);
-
- #endif
+//    svgtest("assets/chessbox-box.svg",false);
     return 0;
 }
 //todo lee settings should allow for piece choosing

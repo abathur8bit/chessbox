@@ -40,10 +40,14 @@ public:
     virtual void update(long ticks);
 
     void add(thc::Move mv);
+    void add(const char* s);
     void showMove(int moveNum,int side);
-
+    void scroll(int n);
+    void clear();
+    const char* text(int i) {return m_moveLabels[i]->getText();}
 protected:
-    Label* m_moveLabels[NUM_LINES];
+    Label* m_moveLabels[NUM_LINES+1];
+    int m_currentLine;
     BoardRules* m_rules;
 };
 

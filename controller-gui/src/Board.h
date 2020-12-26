@@ -121,7 +121,6 @@ public:
     }
 
     void fromTo(const char* sanLong,char* from,char* to) {
-        char buffer[SAN_BUF_SIZE];
         from[0]=sanLong[0];
         from[1]=sanLong[1];
         from[2]='\0';

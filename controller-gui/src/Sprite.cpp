@@ -21,17 +21,17 @@ SDL_Texture* Sprite::load(SDL_Renderer* renderer, const char* filename, int fram
     SDL_QueryTexture(m_texture, NULL, NULL, &m_sourceRect.w, &m_sourceRect.h);
     m_sourceRect.w /= frameCount;   //each frame of the animation
     m_frameCount = frameCount;
-    m_destinationRect.x = x;
-    m_destinationRect.y = y;
-    m_destinationRect.w = m_sourceRect.w * SCALE;
-    m_destinationRect.h = m_sourceRect.h * SCALE;
+    m_rect.x = x-m_sourceRect.w/2;
+    m_rect.y = y-m_sourceRect.h/2;
+    m_rect.w = m_sourceRect.w * SCALE;
+    m_rect.h = m_sourceRect.h * SCALE;
     return m_texture;
 }
 void Sprite::draw(SDL_Renderer* renderer,SDL_Rect* dest) {
     SDL_RenderCopyEx(renderer, m_texture, &m_sourceRect, dest, 0, 0, SDL_FLIP_NONE);
 }
 void Sprite::draw(SDL_Renderer* renderer) {
-    SDL_RenderCopyEx(renderer, m_texture, &m_sourceRect, &m_destinationRect, 0, 0, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(renderer, m_texture, &m_sourceRect, &m_rect, 0, 0, SDL_FLIP_NONE);
 }
 void Sprite::update(long ticks)
 {
@@ -39,8 +39,8 @@ void Sprite::update(long ticks)
 }
 void Sprite::setPos(int x, int y)
 {
-    m_destinationRect.x = x;
-    m_destinationRect.y = y;
+    m_rect.x = x;
+    m_rect.y = y;
 }
 void Sprite::setFrame(int frame)
 {

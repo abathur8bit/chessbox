@@ -20,17 +20,29 @@
 
 #include "MovesPanel.h"
 
-MovesPanel::MovesPanel(const char *id, int x, int y, int w, int h,BoardRules* rules) : Component(id,x,y,w,h),m_moveLabels(),m_rules(rules) {
-    int ww=180;
+MovesPanel::MovesPanel(const char *id, int x, int y, int w, int h,BoardRules* rules)
+    : Component(id,x,y,w,h),m_moveLabels(),m_currentLine(0),m_rules(rules)
+{
+    int ww=w;
     int hh=20;
-    int xx=480-200+5;
-    int yy=481;
+    int xx=x;
+    int yy=y;
     char buffer[255];
-    for(int i=0; i<NUM_LINES; i++) {
-        snprintf(buffer,sizeof(buffer),"moveline%02d",i);
+    for(int i=0; i<NUM_LINES+1; i++) {
         m_moveLabels[i] = new Label(buffer,xx,yy,ww,12,16);
+//        snprintf(buffer,sizeof(buffer),"moveline%02d",i);
 //        m_moveLabels[i]->setText(buffer);
         yy+=hh;
+    }
+}
+
+void MovesPanel::add(const char* s) {
+    if(m_currentLine == NUM_LINES) {
+        scroll(1);
+        m_moveLabels[m_currentLine-1]->setText(s);
+    } else {
+        m_moveLabels[m_currentLine]->setText(s);
+        m_currentLine++;
     }
 }
 
@@ -69,4 +81,16 @@ void MovesPanel::update(long ticks) {
     for(int i=0; i<NUM_LINES; i++) {
         m_moveLabels[i]->update(ticks);
     }
+}
+
+void MovesPanel::scroll(int n) {
+    for(int i=0; i<NUM_LINES-1; i++) {
+        printf("%s < %s\n",m_moveLabels[i]->getText(),m_moveLabels[i+1]->getText());
+        m_moveLabels[i]->setText(m_moveLabels[i+1]->getText());
+    }
+}
+
+void MovesPanel::clear() {
+    for(int i=0; i<NUM_LINES; i++)
+        m_moveLabels[i]->clear();
 }

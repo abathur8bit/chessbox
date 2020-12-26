@@ -18,15 +18,15 @@ You need to have
     $ make 
 
 ## Running
-You might need to use **sudo** when running, since the wiringPI lib needs access to the i2c hardware.
+You might need to use **sudo** when m_running, since the wiringPI lib needs access to the i2c hardware.
 
     $ sudo ./chesslrcontroller
     binding to port 9999
     construction
     Turning off led's...
-    server running on port 9999
+    server m_running on port 9999
 
-The server is now running and listening for connections on port **9999**. 
+The server is now m_running and listening for connections on port **9999**. 
 
 ## Sending commands
 To send chesslrcontroller commands, you connect make a tcp/ip connection to port **9999**. You can do this using **telnet** or **nc**. The preferred way is **nc**, as you can also use it to send batch commands instead of typing commands out by hand.
@@ -57,7 +57,7 @@ Capture
     $ echo '{"action":"move","description":null,"moves":[{"from":"a1","to":"a2","type":"capture"}]}' | nc -C -N localhost 9999
 
 ## Detecting piece and down
-The controller is able to sense when a piece has been put down or lifted up and lets any one connected know. When chesslrcontroller running in a different terminal run **nc** again without the echo in front. When you see the **Hello** you can put a piece down on the A1 square, then lift it up. You should see the following appear:
+The controller is able to sense when a piece has been put down or lifted up and lets any one connected know. When chesslrcontroller m_running in a different terminal run **nc** again without the echo in front. When you see the **Hello** you can put a piece down on the A1 square, then lift it up. You should see the following appear:
 
      $ nc -C localhost 9999
      Hello

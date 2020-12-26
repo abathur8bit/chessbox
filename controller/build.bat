@@ -1,4 +1,5 @@
 @echo off
+pscp -r -p ../common/* pi@millipede:workspace/chessbox/common
 pscp -r -p src README.md CMakeLists.txt pi@millipede:workspace/chessbox/controller
 if "%1" == "chessbox" (
     echo Build and deploy to Chessbox

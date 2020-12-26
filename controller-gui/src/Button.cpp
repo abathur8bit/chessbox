@@ -57,7 +57,7 @@ void Button::draw(SDL_Renderer* renderer) {
 
     //draw line through middle of button
 //    SDL_Rect center={m_rectSquare.x,m_rectSquare.y+m_rectSquare.h/2,m_rectSquare.w,m_rectSquare.h/2};
-//    SDL_RenderDrawRect(renderer, &center);
+//    SDL_RenderDrawRect(m_renderer, &center);
 }
 
 Component* Button::mouseEvent(SDL_Event* event) {
@@ -65,9 +65,11 @@ Component* Button::mouseEvent(SDL_Event* event) {
         switch(event->type) {
             case  SDL_MOUSEMOTION:
                 m_state=BUTTON_STATE_MOUSE_OVER;
+                return this;
                 break;
             case SDL_MOUSEBUTTONDOWN:
                 m_state=BUTTON_STATE_MOUSE_DOWN;
+                return this;
                 break;
             case SDL_MOUSEBUTTONUP:
                 m_state=BUTTON_STATE_MOUSE_OVER;
