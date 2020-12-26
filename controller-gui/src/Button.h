@@ -70,9 +70,11 @@ protected:
 class TextButton : public Button {
 public:
     TextButton(string id, string text, int x, int y, int w, int h);
+    void setText(const char* s);
     virtual const char* text() { return m_text.c_str(); }
     virtual void draw(SDL_Renderer* renderer);
 protected:
+    void invalidateTexture();
     string m_text;
     SDL_Texture* m_fontTexture;
     TTF_Font* m_font;

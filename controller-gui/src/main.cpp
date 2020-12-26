@@ -39,6 +39,7 @@
 #include "chessaction.hpp"
 #include "json.hpp"
 #include "ControllerGUI.h"
+#include "Dialog.h"
 
 using namespace std;
 using namespace nlohmann;   //trying this
@@ -49,6 +50,8 @@ const int SCREEN_HEIGHT = 800;
 int counter=0;
 //#define NUM_MOVES 16
 
+SDL_Window* window=NULL;
+SDL_Renderer* renderer=NULL;
 bool invalidated = true;
 list<Component*> uistuff;
 UIGroup buttonGroup("buttons",0,670,280,130);
@@ -159,7 +162,12 @@ void processMouseEvent(SDL_Event* event) {
                 Button *b = static_cast<Button *>(result);
                 b->setChecked(true);
             } else if (!strcmp(result->id(), "settings")) {
-                whiteClockText->setText("XXX");
+                Dialog message("Demo","Fast bunnies",DIALOG_TYPE_OK_CANCEL);
+                if(message.show(renderer)==DIALOG_SELECTED_OKAY) {
+                    printf("user selected okay\n");
+                } else {
+                    printf("user selected cancel\n");
+                }
             } else if (!strcmp(result->id(), "fwd")) {
                 thc::Move mv;
                 mv.NaturalIn(board.rules(), gameMoves[gameMovesIndex++]);
@@ -191,8 +199,6 @@ void processMouseEvent(SDL_Event* event) {
 }
 
 void coolSpot(bool fullscreen) {
-    SDL_Window* window;
-    SDL_Renderer* renderer;
     SDL_Rect r;
     SDL_Rect r2;
     SDL_Point center;

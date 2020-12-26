@@ -24,7 +24,7 @@ void Label::appendText(const char *s) {
 
 void Label::invalidateTexture() {
     if(m_fontTexture) {
-        SDL_DestroyTexture(m_fontTexture);
+        SDL_DestroyTexture(m_fontTexture);  //todo when this happens, the chess board blacks out, need to find out why
         m_fontTexture= nullptr;
     }
 }

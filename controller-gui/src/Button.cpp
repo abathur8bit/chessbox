@@ -104,9 +104,12 @@ void AnimButton::draw(SDL_Renderer* renderer) {
     copyRect(m_sprite.destRect(),&r);
 }
 
-TextButton::TextButton(string id, string text, int x, int y, int w, int h) : Button(id, x, y, w, h) {
-    m_fontTexture = nullptr;
-    m_text = text;
+TextButton::TextButton(string id, string text, int x, int y, int w, int h)
+    : Button(id, x, y, w, h),
+      m_text(text),
+    m_fontTexture(nullptr),
+    m_font(nullptr)
+{
     if (!m_text.empty()) {
         m_font = TTF_OpenFont("assets/fonts/Inconsolata-Medium.ttf", 16);
 //        m_font = TTF_OpenFont("assets/fonts/FiraSans-Book.otf", 16);
@@ -117,21 +120,34 @@ TextButton::TextButton(string id, string text, int x, int y, int w, int h) : But
     }
 }
 
+void TextButton::setText(const char *s) {
+    m_text = s;
+    invalidateTexture();
+}
+
+void TextButton::invalidateTexture() {
+    if(m_fontTexture) {
+        SDL_DestroyTexture(m_fontTexture);  //todo when this happens, the chess board blacks out, need to find out why
+        m_fontTexture= nullptr;
+    }
+}
+
+
 void TextButton::draw(SDL_Renderer* renderer) {
+    if(m_text.empty())
+        return;
+
     Button::draw(renderer);
     if (!m_fontTexture) {
+        //find text size, and center text on button
         SDL_Color textColor = { 0, 0, 0 };
         SDL_Surface* surface = TTF_RenderText_Blended(m_font, m_text.c_str(), textColor);
         SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-        //todo lee Once we have the texture, we can free the surface
         m_fontTexture = texture;
         SDL_QueryTexture(m_fontTexture, NULL, NULL, &m_fontRect.w, &m_fontRect.h);
         m_fontRect.x = m_rect.x + m_rect.w / 2 - m_fontRect.w / 2;
         m_fontRect.y = m_rect.y + m_rect.h / 2 - m_fontRect.h / 2;
+        SDL_FreeSurface(surface);
     }
-    //find text size, and center text on button
     SDL_RenderCopy(renderer, m_fontTexture, NULL, &m_fontRect);
-
-    //    SDL_DestroyTexture(m_fontTexture);
-    //    SDL_FreeSurface(surface);
 }

@@ -24,6 +24,11 @@ if(TTF_Init()==-1) {
     exit(2);
 }
 
+# On screen keyboard 
+Launch matchbox-keyboard from the command line to get the keyboard to display.
+
+    sudo apt-get install matchbox-keyboard
+
 # Display
 Notes about PI display rotation. [My article](https://8bitcoder.com/chesslr/9) which doesn't work with the xinput command any more. 
 
