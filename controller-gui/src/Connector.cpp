@@ -57,9 +57,30 @@ void Connector::close() {
  * @return The number of bytes that were actually sent.
  */
 int Connector::send(const char* s) {
-    return m_sock.send(s,strlen(s));
+    string buf=s;
+    buf+="\r\n";
+    return m_sock.send(buf.c_str(),buf.length());
 }
 
+int Connector::waitline(char* dest,size_t size) {
+    //read any new data
+    dest[0]='\0';   //null terminate right away
+    char buf[1000];
+    int n = m_sock.recv(buf, sizeof(buf));
+    if(n>0) {
+        int max=n;
+        if(m_bufferIndex + n>=CONNECTOR_BUFFER_SIZE) {
+            max=CONNECTOR_BUFFER_SIZE - m_bufferIndex;
+        }
+        if(max) {
+            memcpy(m_buffer + m_bufferIndex, buf, max);
+            m_bufferIndex+=max;
+        }
+        parse(dest, size);
+    } else {
+        return n;
+    }
+}
 /**
  * Reads data until it gets a full line of data. A full line is ended by a \n char sequence. If less then a full line of data is read, it's buffered.
  * If there is a full line the next call, then the line is copied to buffer, null terminated, and \n is removed. If the buffer is too small to fit the
@@ -98,6 +119,11 @@ int Connector::readline(char* dest,size_t size) {
     }
 
     //parse any existing data into lines
+    parse(dest,size);
+    return strlen(dest);
+}
+
+char* Connector::parse(char* dest,size_t size) {
     int i;
     for(i=0; i<m_bufferIndex; i++) {
         if('\n'==m_buffer[i]) {
@@ -118,5 +144,13 @@ int Connector::readline(char* dest,size_t size) {
     if(i==m_bufferIndex) {
         dest[0]='\0';   //we didn't find a new line, returning an empty string
     }
-    return strlen(dest);
+    return dest;
+}
+
+void Connector::inspect(bool b) {
+    if(b) {
+        send("{\"action\":\"setmode\",\"mode\":\"inspect\"}");
+    } else {
+        send("{\"action\":\"setmode\",\"mode\":\"play\"}");
+    }
 }

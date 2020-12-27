@@ -11,6 +11,7 @@
 #include "Window.h"
 #include "Board.h"
 #include "MovesPanel.h"
+#include "Connector.h"
 
 class ControllerGUI : Window {
 public:
@@ -20,7 +21,10 @@ public:
     void saveGame();
     void initComponents();
     virtual void processButtonClicked(Button* c);
-
+    virtual void update(long ticks);
+    void connectController();
+    void disconnectController();
+    void processJson(const char* buffer);
 protected:
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
@@ -31,6 +35,8 @@ protected:
     Board* m_board;
     BoardRules m_rules;
     MovesPanel* m_movesPanel;
+    Connector* m_connector;
+    char m_buffer[1024];
 };
 
 

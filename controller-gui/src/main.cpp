@@ -414,8 +414,8 @@ void coolSpot(bool fullscreen) {
                 }
 
                 if(buffer[0]=='W') {
-                    connector.send("{\"action\":\"ping\"}\r\n");
-                    connector.send("{\"action\":\"fen\"}\r\n");
+                    connector.send("{\"action\":\"ping\"}");
+                    connector.send("{\"action\":\"fen\"}");
                 }
             }
         }

@@ -6,6 +6,7 @@
 #define CONTROLLER_GUI_WINDOW_H
 
 #include <string>
+#include <map>
 #include <list>
 
 #include "Component.h"
@@ -23,6 +24,8 @@ public:
     void addButton(Button* b);
     void show(SDL_Renderer* renderer);
     void processMouseEvent(SDL_Event* event);
+    Button* findButton(const char* name);
+    Component* findComponent(const char* name);
 protected:
     SDL_Color m_backgroundColor;
     list<Component*> m_components;

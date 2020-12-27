@@ -358,6 +358,7 @@ public:
     {
         TelnetServerSocket* psocket = (TelnetServerSocket*)pmsg->socket();
         psocket->println("Welcome to %s v%s", TITLE,VERSION);
+        printf("New connection\n");
     }
 
     /** Returns a string like "a1". */

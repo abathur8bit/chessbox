@@ -58,12 +58,14 @@ public:
 #endif
     Connector();
     void connect(const char* host,unsigned short port);
+    int waitline(char* buffer, size_t size);
     int readline(char* buffer, size_t size);
     int send(const char* s);
     void close();
     bool isConnected() {return m_connected;}
-
+    void inspect(bool b);
 protected:
+    char* parse(char* dest,size_t size);
     SocketInstance m_sock;
     bool m_connected;
     int m_bufferIndex;

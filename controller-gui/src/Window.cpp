@@ -67,3 +67,18 @@ void Window::processMouseEvent(SDL_Event *event) {
             processButtonClicked(result);
     }
 }
+
+Button* Window::findButton(const char *name) {
+    for (list<Button *>::iterator it = m_buttons.begin(); it != m_buttons.end(); it++) {
+        if(!strcmp((*it)->id(),name))
+            return *it;
+    }
+    return nullptr;
+}
+
+Component* Window::findComponent(const char *name) {
+    for (list<Component *>::iterator it = m_components.begin(); it != m_components.end(); it++) {
+        if(!strcmp((*it)->id(),name))
+            return *it;
+    }
+}
