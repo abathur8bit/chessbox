@@ -29,7 +29,7 @@ MovesPanel::MovesPanel(const char *id, int x, int y, int w, int h,BoardRules* ru
     int yy=y;
     char buffer[255];
     for(int i=0; i<NUM_LINES+1; i++) {
-        m_moveLabels[i] = new Label(buffer,xx,yy,ww,12,16);
+        m_moveLabels[i] = new Label(buffer,xx,yy,ww,12);
 //        snprintf(buffer,sizeof(buffer),"moveline%02d",i);
 //        m_moveLabels[i]->setText(buffer);
         yy+=hh;

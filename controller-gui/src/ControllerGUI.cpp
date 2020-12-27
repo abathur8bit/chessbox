@@ -19,7 +19,10 @@ ControllerGUI::ControllerGUI(const char* host,unsigned short port)
 }
 
 void ControllerGUI::startGame(bool fullscreen) {
-    SDL_Color background={189,37,0};
+    FontManager::instance()->add("small","Inconsolata-Medium.ttf",10);
+    FontManager::instance()->add("normal","Inconsolata-Medium.ttf",16);
+    FontManager::instance()->add("large","Inconsolata-Medium.ttf",26);
+    SDL_Color background={191,37,0};
     m_fullscreen=fullscreen;
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
@@ -36,7 +39,7 @@ void ControllerGUI::startGame(bool fullscreen) {
     if(!m_renderer) {
         printf("m_renderer error %s\n",SDL_GetError());
     }
-    UIGroup group("group1",0,0,320,240);
+    UIGroup group("group1",0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
     Sprite logo("logo");
     logo.load(m_renderer, "assets/logo-sm.png", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
     SDL_Rect rect = {10,10,SCREEN_WIDTH-20,SCREEN_HEIGHT-20};
@@ -52,15 +55,12 @@ void ControllerGUI::startGame(bool fullscreen) {
                 case SDL_MOUSEMOTION:
                 case SDL_MOUSEWHEEL:
                     break;
-
                 case SDL_QUIT:
                     m_running = false;
                     break;
-                case SDL_WINDOWEVENT:
-//                printf("had a m_window event!!!\n");
-                    break;
                 case SDL_KEYDOWN:
-                    m_running = false;
+                    if(SDL_SCANCODE_ESCAPE==event.key.keysym.scancode)
+                        m_running = false;
                     break;
                 default:
                     break;

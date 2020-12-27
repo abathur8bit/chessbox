@@ -6,3 +6,7 @@
 # SVG
 https://github.com/memononen/nanosvg
 https://www.libsdl.org/projects/SDL_image/
+
+# Phase 1
+Goal: To be able to play and record a single player game. Each move will be recorded as LAN and SAN in two seperate files. 
+

@@ -12,7 +12,7 @@
 
 class Label : public Component {
 public:
-    Label(string id, int x, int y, int w, int h,int size=20);
+    Label(string id, int x, int y, int w, int h);
     virtual void draw(SDL_Renderer* r);
     void setText(const char* s);
     const char* getText() {return m_text.c_str();}
@@ -20,6 +20,7 @@ public:
     void invalidateTexture();
     void setColor(SDL_Color& c);
     void clear() {setText("");}
+    void setFont(TTF_Font* font);
 protected:
     string m_text;
     SDL_Texture* m_fontTexture;

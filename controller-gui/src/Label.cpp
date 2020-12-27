@@ -1,15 +1,21 @@
 
+#include "FontManager.h"
 #include "Label.h"
 
-Label::Label(string id, int x, int y, int w, int h,int size) : Component(id, x, y, w, h), m_text() {
+Label::Label(string id, int x, int y, int w, int h) : Component(id, x, y, w, h), m_text() {
     m_fontTexture = nullptr;
     m_color = {0,0,0};
-    m_font = TTF_OpenFont("assets/fonts/Inconsolata-Medium.ttf", size);
+    m_font = FontManager::instance()->font("normal");
 //        m_font = TTF_OpenFont("assets/fonts/FiraSans-Book.otf", 16);
     if (!m_font) {
         printf("TTF_OpenFont: %s\n", TTF_GetError());
         // handle error
     }
+}
+
+void Label::setFont(TTF_Font* font) {
+    m_font=font;
+    invalidateTexture();
 }
 
 void Label::setText(const char *s) {

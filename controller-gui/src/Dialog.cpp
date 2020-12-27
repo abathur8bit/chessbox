@@ -35,6 +35,10 @@ Dialog::Dialog(const char* title,const char* message,int type)
             m_okayButton.setText("Yes");
             m_cancelButton.setText("No");
             break;
+        case DIALOG_TYPE_CANCEL:
+            m_cancelButton.setText("Cancel");
+            break;
+
     }
     if (!m_message.empty()) {
         m_font = TTF_OpenFont("assets/fonts/Inconsolata-Medium.ttf", 16);

@@ -15,6 +15,7 @@ public:
     ControllerGUI(const char* host,unsigned short port);
     void startGame(bool fullscreen);
     void processMouseEvent(SDL_Event* event);
+    void saveGame();
 
 protected:
     SDL_Window* m_window;

@@ -65,3 +65,6 @@ bcm2708_fb
 [    1.354882] vc-mem: phys_addr:0x00000000 mem_base=0x3ec00000 mem_size:0x40000000(1024 MiB)
 [    1.355591] vc-sm: Videocore shared memory driver
 ```
+# Pieces
+https://github.com/pychess/pychess/tree/master/pieces
+spatial

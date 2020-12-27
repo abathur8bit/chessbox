@@ -19,6 +19,7 @@
  * ******************************************************************************/
 
 #include "Button.h"
+#include "FontManager.h"
 
 Button::Button(string id,int x,int y,int w,int h) : Component(id,x,y,w,h){
     m_checked = false;
@@ -107,16 +108,11 @@ void AnimButton::draw(SDL_Renderer* renderer) {
 TextButton::TextButton(string id, string text, int x, int y, int w, int h)
     : Button(id, x, y, w, h),
       m_text(text),
-    m_fontTexture(nullptr),
-    m_font(nullptr)
+      m_fontTexture(nullptr),
+      m_font(nullptr)
 {
     if (!m_text.empty()) {
-        m_font = TTF_OpenFont("assets/fonts/Inconsolata-Medium.ttf", 16);
-//        m_font = TTF_OpenFont("assets/fonts/FiraSans-Book.otf", 16);
-        if (!m_font) {
-            printf("TTF_OpenFont: %s\n", TTF_GetError());
-            // handle error
-        }
+        m_font = FontManager::instance()->font("normal");
     }
 }
 

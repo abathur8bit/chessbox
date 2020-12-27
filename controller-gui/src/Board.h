@@ -35,6 +35,13 @@ using namespace thc;
 
 class BoardRules : public thc::ChessRules {
 public:
+    /** Move in simple algebraic notation, like "d4", "Nc6" or "Nxd4". */
+    void playMove(const char* san) {
+        Move mv;
+        mv.NaturalIn(this,san);
+        PlayMove(mv);
+    }
+
     char pieceAt(int i) {
         return squares[i];
     }

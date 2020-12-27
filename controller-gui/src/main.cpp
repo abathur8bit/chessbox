@@ -41,6 +41,7 @@
 #include "ControllerGUI.h"
 #include "Dialog.h"
 #include "TextField.h"
+#include "FontManager.h"
 
 using namespace std;
 using namespace nlohmann;   //trying this
@@ -241,7 +242,9 @@ void coolSpot(bool fullscreen) {
             fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_RESIZABLE);
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-    TTF_Init();
+    FontManager::instance()->add("small","Inconsolata-Medium.ttf",10);
+    FontManager::instance()->add("normal","Inconsolata-Medium.ttf",16);
+    FontManager::instance()->add("large","Inconsolata-Medium.ttf",26);
     r.w = 100;
     r.h = 50;
     r2.w = r.w;
@@ -255,9 +258,11 @@ void coolSpot(bool fullscreen) {
     }
     SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
 
-    movesPanel = new MovesPanel("moves",480-200,480,200,800-320,board.rules());
-    whiteClockText = new Label("whiteclock", 0, 480, 140, 25, 26);
-    blackClockText = new Label("blackclock", 140, 480, 140, 25, 26);
+    movesPanel=new MovesPanel("moves",480-200,480,200,800-320,board.rules());
+    whiteClockText=new Label("whiteclock", 0, 480, 140, 25);
+    whiteClockText->setFont(FontManager::instance()->font("large"));
+    blackClockText=new Label("blackclock", 140, 480, 140, 25);
+    blackClockText->setFont(FontManager::instance()->font("large"));
 
     logo.load(renderer,"assets/logo-sm.png",1,82+105/2,518+130/2);
     uistuff.push_back(&logo);
@@ -294,7 +299,7 @@ void coolSpot(bool fullscreen) {
     AnimButton fastfwdButton("fastfwd",renderer,"assets/button-fastfwd.png",1,xx,yy);
     xx+=ww+10;
 
-    board.loadPieces(renderer,"spatial");
+    board.loadPieces(renderer,"merida_new");
     buttonGroup.add(&settingsButton);
     buttonGroup.add(&quitButton);
     buttonGroup.add(&hintButton);
@@ -330,7 +335,8 @@ void coolSpot(bool fullscreen) {
 //                printf("had a m_window event!!!\n");
                 break;
             case SDL_KEYDOWN:
-                running = false;
+                if(SDL_SCANCODE_ESCAPE==event.key.keysym.scancode)
+                    running = false;
                 break;
             default:
                 break;
@@ -496,7 +502,8 @@ void svgtest(const char* filename,bool fullscreen) {
                 case SDL_WINDOWEVENT:
                     break;
                 case SDL_KEYDOWN:
-                    running = false;
+                    if(SDL_SCANCODE_ESCAPE==event.key.keysym.scancode)
+                        running = false;
                     break;
                 default:
                     break;
@@ -637,7 +644,27 @@ int main(int argc, char* argv[]) {
     printf("\n%d video drivers total (%d work)\n", numdrivers, working);
 
 #endif
+#if 0
+    BoardRules rules;
+    //1.d4 Nc6 2.Nf3 d5 3.Bf4 Bg4 4.h3 Bh5 5.Nbd2
+    rules.playMove("d4");
+    rules.playMove("Nc6");
+    rules.playMove("Nf3");
+    rules.playMove("d5");
+    rules.playMove("Bf4");
+    rules.playMove("Bg4");
+    rules.playMove("h3");
+    rules.playMove("Bh5");
+    rules.playMove("Nbd2");
+    rules.display_position();
+
+    for(int i=1; i<rules.historyIndex(); i++) {
+        Move mv=rules.historyAt(i);
+        printf("%s %s\n",mv.TerseOut().c_str(),mv.NaturalOut(&rules).c_str());
+    }
+#endif
 #if 1
+
     [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
     bool fullscreen=false;
@@ -654,9 +681,9 @@ int main(int argc, char* argv[]) {
         NULL_TERMINATE(host, sizeof(host));
     }
 //    scrolltest();
-    coolSpot(fullscreen);
-//    ControllerGUI gui(host,port);
-//    gui.startGame(fullscreen);
+//    coolSpot(fullscreen);
+    ControllerGUI gui(host,port);
+    gui.startGame(fullscreen);
 #endif
 //    svgtest("assets/chessbox-box.svg",false);
     return 0;

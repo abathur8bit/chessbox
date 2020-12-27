@@ -11,6 +11,7 @@
 #define DIALOG_TYPE_OK          0
 #define DIALOG_TYPE_OK_CANCEL   1
 #define DIALOG_TYPE_YES_NO      2
+#define DIALOG_TYPE_CANCEL      3
 
 #define DIALOG_SELECTED_NONE    0
 #define DIALOG_SELECTED_OKAY    1
