@@ -17,10 +17,12 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
       m_running(false),
       m_host(host),
       m_port(port),
-      m_board(0,0,SCREEN_WIDTH,SCREEN_WIDTH),
+      m_board(nullptr),
       m_rules(),
-      m_movesPanel("moves",SCREEN_WIDTH-200,480,200,320,&m_rules)
+      m_movesPanel(nullptr)
 {
+    m_board=new Board(0,0,SCREEN_WIDTH,SCREEN_WIDTH);
+    m_movesPanel=new MovesPanel("moves",SCREEN_WIDTH-200,480,200,320,&m_rules);
     m_fullscreen=fullscreen;
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
@@ -41,13 +43,18 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
         printf("m_renderer error %s\n",SDL_GetError());
     }
 }
+ControllerGUI::~ControllerGUI() {
+    for (list<Component *>::iterator it = m_components.begin(); it != m_components.end(); it++) {
+        delete *it;
+    }
+}
 
 void ControllerGUI::initComponents() {
     Sprite* logo=new Sprite("logo");
     logo->load(m_renderer, "assets/logo-sm.png", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
     addComponent(logo);
 
-    m_movesPanel.init();
+    m_movesPanel->init();
 
     int x=0,y=510,w=110,h=40,gap=10;
     Label* label=new Label("playersettingslabel",0,510,SCREEN_WIDTH/2,290);
@@ -110,9 +117,9 @@ void ControllerGUI::initComponents() {
     addComponent(back);
     addComponent(fwd);
     addComponent(fastFwd);
-    addComponent(&m_board);
-    addComponent(&m_movesPanel);
-    m_board.loadPieces(m_renderer,"merida_new");
+    addComponent(m_board);
+    addComponent(m_movesPanel);
+    m_board->loadPieces(m_renderer,"merida_new");
 }
 void ControllerGUI::startGame() {
     initComponents();

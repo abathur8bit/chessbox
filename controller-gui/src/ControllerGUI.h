@@ -15,6 +15,7 @@
 class ControllerGUI : Window {
 public:
     ControllerGUI(bool fullscreen,const char* host,unsigned short port);
+    ~ControllerGUI();
     void startGame();
     void saveGame();
     void initComponents();
@@ -27,9 +28,9 @@ protected:
     bool m_fullscreen;
     string m_host;
     unsigned short m_port;
-    Board m_board;
+    Board* m_board;
     BoardRules m_rules;
-    MovesPanel m_movesPanel;
+    MovesPanel* m_movesPanel;
 };
 
 

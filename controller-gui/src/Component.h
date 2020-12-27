@@ -31,6 +31,7 @@ using namespace std;
 class Component {
 public:
     Component(string id,int x,int y,int w,int h);
+    ~Component() {printf("%s deleted\n",id());}
     virtual void draw(SDL_Renderer* renderer)=0;
     virtual void update(long ticks){}
     virtual Component * mouseEvent(SDL_Event* event);
