@@ -682,8 +682,8 @@ int main(int argc, char* argv[]) {
     }
 //    scrolltest();
 //    coolSpot(fullscreen);
-    ControllerGUI gui(host,port);
-    gui.startGame(fullscreen);
+    ControllerGUI gui(fullscreen,host,port);
+    gui.startGame();
 #endif
 //    svgtest("assets/chessbox-box.svg",false);
     return 0;

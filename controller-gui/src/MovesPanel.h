@@ -45,6 +45,7 @@ public:
     void scroll(int n);
     void clear();
     const char* text(int i) {return m_moveLabels[i]->getText();}
+    void init();
 protected:
     Label* m_moveLabels[NUM_LINES+1];
     int m_currentLine;

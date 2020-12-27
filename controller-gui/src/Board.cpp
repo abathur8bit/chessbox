@@ -23,7 +23,7 @@ void Board::loadPieces(SDL_Renderer* renderer,const char* setName) {
         if(!m_pieces[i]->load(renderer, buffer, 0, 0)) {
             printf("failed to load %s\n",buffer);
         } else {
-//            printf("loaded %s\n", buffer);
+            printf("loaded %s\n", buffer);
         }
     }
 }

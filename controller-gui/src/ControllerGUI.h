@@ -8,14 +8,17 @@
 #include <SDL.h>
 #include "Sprite.h"
 #include "Button.h"
+#include "Window.h"
+#include "Board.h"
+#include "MovesPanel.h"
 
-
-class ControllerGUI {
+class ControllerGUI : Window {
 public:
-    ControllerGUI(const char* host,unsigned short port);
-    void startGame(bool fullscreen);
-    void processMouseEvent(SDL_Event* event);
+    ControllerGUI(bool fullscreen,const char* host,unsigned short port);
+    void startGame();
     void saveGame();
+    void initComponents();
+    virtual void processButtonClicked(Button* c);
 
 protected:
     SDL_Window* m_window;
@@ -24,6 +27,9 @@ protected:
     bool m_fullscreen;
     string m_host;
     unsigned short m_port;
+    Board m_board;
+    BoardRules m_rules;
+    MovesPanel m_movesPanel;
 };
 
 

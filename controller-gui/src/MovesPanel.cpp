@@ -23,19 +23,21 @@
 MovesPanel::MovesPanel(const char *id, int x, int y, int w, int h,BoardRules* rules)
     : Component(id,x,y,w,h),m_moveLabels(),m_currentLine(0),m_rules(rules)
 {
-    int ww=w;
+}
+
+void MovesPanel::init() {
+    int ww=m_rect.w;
     int hh=20;
-    int xx=x;
-    int yy=y;
+    int xx=m_rect.x;
+    int yy=m_rect.y;
     char buffer[255];
     for(int i=0; i<NUM_LINES+1; i++) {
+        snprintf(buffer,sizeof(buffer),"moveline%02d",i);
         m_moveLabels[i] = new Label(buffer,xx,yy,ww,12);
-//        snprintf(buffer,sizeof(buffer),"moveline%02d",i);
 //        m_moveLabels[i]->setText(buffer);
         yy+=hh;
     }
 }
-
 void MovesPanel::add(const char* s) {
     if(m_currentLine == NUM_LINES) {
         scroll(1);
@@ -71,9 +73,22 @@ void MovesPanel::add(thc::Move mv) {
     }
 }
 
-void MovesPanel::draw(SDL_Renderer *r) {
+void MovesPanel::draw(SDL_Renderer *renderer) {
+    int x=m_rect.x;
+    int y=m_rect.y;
+    int w=m_rect.w;
+    int h=m_rect.h/NUM_LINES;
+    SDL_Rect bg={x,y,w,h};
+    SDL_Color dark={0,153,156};
+    SDL_Color light={0,207,210};
     for(int i=0; i<NUM_LINES; i++) {
-        m_moveLabels[i]->draw(r);
+        if(i%2==0)
+            SDL_SetRenderDrawColor(renderer, dark.r, dark.g, dark.b, SDL_ALPHA_OPAQUE);
+        else
+            SDL_SetRenderDrawColor(renderer, light.r, light.g, light.b, SDL_ALPHA_OPAQUE);
+        SDL_RenderFillRect(renderer, &bg);
+        m_moveLabels[i]->draw(renderer);
+        bg.y+=h;
     }
 }
 
