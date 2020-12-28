@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <list>
+#include <stdlib.h>
 
 #include <SDL.h>
 #include <time.h>
@@ -663,7 +664,7 @@ int main(int argc, char* argv[]) {
         printf("%s %s\n",mv.TerseOut().c_str(),mv.NaturalOut(&rules).c_str());
     }
 #endif
-#if 1
+#if 0
 
     [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
@@ -686,6 +687,9 @@ int main(int argc, char* argv[]) {
     gui.startGame();
 #endif
 //    svgtest("assets/chessbox-box.svg",false);
+    int err=system(NULL);
+    printf("system returned %d\n",err);
+
     return 0;
 }
 //todo lee settings should allow for piece choosing

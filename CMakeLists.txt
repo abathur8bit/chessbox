@@ -4,4 +4,5 @@ project(controller_gui)
 set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(controller-gui)
-#add_subdirectory(controller)
+add_subdirectory(controller)
+#add_subdirectory(tiny-process-library)

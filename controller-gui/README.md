@@ -70,8 +70,22 @@ https://github.com/pychess/pychess/tree/master/pieces
 spatial
 
 # Stockfish
+## Download v8
+Using version 8, as it actually compiles on my PI.
+
+https://www.dropbox.com/sh/75gzfgu7qo94pvh/AACdQ6SKZYrwVY9Ufc8uLeN6a/Stockfish%208?dl=0&preview=stockfish-8-linux.zip&subfolder_nav_tracking=1
+
+## Process control
+You need to be able to launch and control the stockfish process. Sending commands and reading results is done by reading and writing to stdio and stdout.
+
+https://github.com/eidheim/tiny-process-library
+
+## UCI commands
         sendCommand("setoption name Skill Level value "+skillLevel);
         sendCommand("setoption name Slow Mover value "+slowMover);
         sendCommand("position fen " + fen);
             sendCommand("go");
             sendCommand("go movetime " + moveTime);
+
+Interesting boiler plate code: http://talkchess.com/forum3/viewtopic.php?t=73806
+

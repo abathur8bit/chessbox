@@ -32,7 +32,8 @@ void vector() {
     j["moves"]=moves;
     printf("vectory json=%s\n",j.dump().c_str());
 }
-int main(int argc,char* argv[]) {
+
+void jsonTest() {
     char square[3]="A1";
     printf("index=%d %s\n",toIndex(square),square);
     strcpy(square,"A8");
@@ -62,5 +63,14 @@ int main(int argc,char* argv[]) {
 
     printf("=========\n\n");
     vector();
+
+}
+
+void processTest() {
+
+}
+int main(int argc,char* argv[]) {
+//    jsonTest();
+    processTest();
     return 0;
 }
