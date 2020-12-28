@@ -68,3 +68,10 @@ bcm2708_fb
 # Pieces
 https://github.com/pychess/pychess/tree/master/pieces
 spatial
+
+# Stockfish
+        sendCommand("setoption name Skill Level value "+skillLevel);
+        sendCommand("setoption name Slow Mover value "+slowMover);
+        sendCommand("position fen " + fen);
+            sendCommand("go");
+            sendCommand("go movetime " + moveTime);

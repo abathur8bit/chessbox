@@ -82,23 +82,8 @@ using namespace nlohmann;   //trying this
 
 #define SAN_BUF_SIZE 6      ///< Minimum buffer size to hold a san or long san move. Something like long "h7h8q" or san "h8=Q+"
 
-class BoardRules : public thc::ChessRules {
-public:
-    char pieceAt(int i) {
-        return squares[i];
-    }
+#include "BoardRules.h"
 
-    /**
-     * Returns true if the move is a checking move (ends with '+'. Note
-     * you should do the check before calling PlayMove.
-     *
-     * @param mv Move before it is played.
-     * @return true if it is a check, false otherwise.
-     */
-    bool isCheck(thc::Move mv) {
-        return mv.NaturalOut(this).find_first_of('+') == string::npos ? false:true;
-    }
-};
 class ControllerServer : public TelnetServer {
 public:
     enum {MODE_SETUP,MODE_INSPECT,MODE_PLAY,MODE_MOVE,MODE_SETPOSITION,MODE_MATE};
@@ -787,6 +772,7 @@ void usage(const char* name) {
     printf("  -l,--leds-off Turn off all LEDs and exit\n");
     exit(0);
 }
+
 int main(int argc,char* argv[]) {
     bool swap=false;
     bool turnOffLeds=false;
