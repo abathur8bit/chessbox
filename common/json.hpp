@@ -2339,7 +2339,7 @@ Subclasses:
 
 @internal
 @note To have nothrow-copy-constructible exceptions, we internally use
-      `std::runtime_error` which can cope with arbitrary-length error messages.
+      `std::runtime_error` which can cope with arbitrary-length error queue.
       Intermediate strings are built with static functions and then passed to
       the actual constructor.
 @endinternal
@@ -2372,7 +2372,7 @@ class exception : public std::exception
     }
 
   private:
-    /// an exception object as storage for error messages
+    /// an exception object as storage for error queue
     std::runtime_error m;
 };
 
@@ -7201,7 +7201,7 @@ scan_number_done:
     This function provides the interface to the used input adapter. It does
     not throw in case the input reached EOF, but returns a
     `std::char_traits<char>::eof()` in that case.  Stores the scanned characters
-    for use in error messages.
+    for use in error queue.
 
     @return character read from the input
     */
@@ -7481,7 +7481,7 @@ scan_number_done:
     /// the start position of the current token
     position_t position {};
 
-    /// raw input token string (for error messages)
+    /// raw input token string (for error queue)
     std::vector<char_type> token_string {};
 
     /// buffer for variable-length tokens (numbers, strings)
@@ -23380,7 +23380,7 @@ class basic_json
     /*!
     @brief return the type as string
 
-    Returns the type name as string to be used in error messages - usually to
+    Returns the type name as string to be used in error queue - usually to
     indicate that a function was called on a wrong JSON type.
 
     @return a string representation of a the @a m_type member:

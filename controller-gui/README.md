@@ -70,8 +70,9 @@ https://github.com/pychess/pychess/tree/master/pieces
 spatial
 
 # Stockfish
+
 ## Download v8
-Using version 8, as it actually compiles on my PI.
+Using version 8, as it actually compiles on my RPI. 
 
 https://www.dropbox.com/sh/75gzfgu7qo94pvh/AACdQ6SKZYrwVY9Ufc8uLeN6a/Stockfish%208?dl=0&preview=stockfish-8-linux.zip&subfolder_nav_tracking=1
 
@@ -81,6 +82,46 @@ You need to be able to launch and control the stockfish process. Sending command
 https://github.com/eidheim/tiny-process-library
 
 ## UCI commands
+https://8bitcoder.com/uci
+
+--> = send to engine
+
+    --> uci
+    id name Deep Shredder 13 x64
+    id author Stefan Meyer-Kahlen
+    option name Hash type spin min 1 max 65536 default 32
+    option name Ponder type check default false
+    option name MultiPV type spin min 1 max 20 default 1
+    option name UCI_EngineAbout type string default Shredder by Stefan Meyer-Kahlen, www.shredderchess.com
+    option name UCI_Chess960 type check default false
+    option name UCI_ShowCurrLine type check default false
+    option name UCI_LimitStrength type check default false
+    option name UCI_Elo type spin min 850 max 2800 default 1400
+    option name Keep Hash Tables type check default true
+    option name Clear Hash type button
+    option name Use Shredderbases type check default true
+    option name UCI_ShredderbasesPath type string default shredderbases/bases.ini
+    option name Use Syzygy Databases type check default true
+    option name Syzygy 50 Moves Rule type check default true
+    option name Syzygy Path type string default <empty>
+    option name Contempt type spin min -300 max 300 default 0
+    option name Time Buffer (sec) type spin min 0 max 60 default 1
+    option name Time Usage Percent type spin min 50 max 200 default 100
+    option name Threads type spin min 1 max 128 default 1
+    uciok
+    registration checking
+    registration ok
+
+    --> ucinewgame
+    <no output>
+    --> position startpos 
+    --> position fen 
+
+
+Note that Shredder sends registration lines, but Stockfish doesn't. 
+
+
+
         sendCommand("setoption name Skill Level value "+skillLevel);
         sendCommand("setoption name Slow Mover value "+slowMover);
         sendCommand("position fen " + fen);

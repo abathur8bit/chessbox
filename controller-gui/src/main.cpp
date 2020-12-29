@@ -664,7 +664,7 @@ int main(int argc, char* argv[]) {
         printf("%s %s\n",mv.TerseOut().c_str(),mv.NaturalOut(&rules).c_str());
     }
 #endif
-#if 0
+#if 1
 
     [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
@@ -686,10 +686,11 @@ int main(int argc, char* argv[]) {
     ControllerGUI gui(fullscreen,host,port);
     gui.startGame();
 #endif
+#if 0
 //    svgtest("assets/chessbox-box.svg",false);
     int err=system(NULL);
     printf("system returned %d\n",err);
-
+#endif
     return 0;
 }
 //todo lee settings should allow for piece choosing
