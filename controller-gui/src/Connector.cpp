@@ -77,9 +77,8 @@ int Connector::waitline(char* dest,size_t size) {
             m_bufferIndex+=max;
         }
         parse(dest, size);
-    } else {
-        return n;
     }
+    return n;
 }
 /**
  * Reads data until it gets a full line of data. A full line is ended by a \n char sequence. If less then a full line of data is read, it's buffered.

@@ -23,107 +23,51 @@
 #include <cstring>
 #include <string>
 #include <time.h>
-#include "process.hpp"
 #include <mutex>
 #include <list>
 
-using namespace TinyProcessLib;
-using namespace std;
+#include "UCIClient.h"
 
-list<string> queue;
-std::mutex mtx;
-
-void push(string s) {
-    std::unique_lock<std::mutex> lck(mtx);
-    queue.push_back(s);
+void usage() {
+    printf("process <engine_path>\n");
+    printf("engine_path is a path to the UCI engine\n");
+    exit(0);
 }
-
-string pull() {
-    std::unique_lock<std::mutex> lck(mtx);
-    if(queue.empty())
-        return "";
-    string s=queue.front();
-    queue.pop_front();
-    return s;
-}
-
-//http://cplusplus.com/reference/mutex/mutex/
-//to have parent thread wait for child thread to notify it: http://cplusplus.com/reference/condition_variable/condition_variable/
-void startProcess(const char* filepath) {
-    auto output = make_shared<string>();
-    auto error = make_shared<string>();
-
-    Process p(filepath,"",[output](const char *bytes, size_t n) {
-        *output = string(bytes, n);
-        push(*output);
-        printf("--> %s\n",output->c_str());
-        if(output->find("Hello") != string::npos)
-            printf("HELLO found!\n");
-    }, nullptr,true);
-    p.write("uci\n");
-    time_t timer=time(NULL)+2;
-    while(time(NULL)<timer) {
-        printf("tick..");
-    }
-    printf("\n");
-    p.write("quit\n");
-    int status=0;
-    while(!p.try_get_exit_status(status)) {
-        printf("process exit=%d\n",status);
-        string s=pull();
-        if(!s.empty()) {
-            printf("got output [%s]\n",s.c_str());
-        }
-    }
-    printf("Listing output:\n");
-    string s=pull();
-    while(!s.empty()) {
-        printf("[%s]\n",s.c_str());
-        s=pull();
-    }
-}
-
-void snooze() {
-    time_t timer=time(NULL)+3;
-    while(time(NULL)<timer) {}
-}
-void foo() {
-    char buffer[80];
-    for(int i=0; i<10; i++) {
-        snprintf(buffer,sizeof buffer,"foo %d",i);
-        push(buffer);
-    }
-}
+//./process
 int main(int argc,char* argv[]) {
-    if(argc<=1) {
-        char buffer[80]="";
-        printf("Hello process, type 'quit' to stop echoing\n");
-        while(strcmp(buffer, "quit")) {
-            fgets(buffer, sizeof buffer, stdin);
-            buffer[strlen(buffer) - 1]='\0';  //remove newline char that fgets leaves
-            printf("Hello %s!\n", buffer);
-        }
-    } else {
-//        startProcess(argv[1]);
-//        thread first(foo);
-        thread first ([](){char buffer[80];
-            for(int i=0; i<10; i++) {
-                snprintf(buffer,sizeof buffer,"foo %d",i);
-                push(buffer);
-            }});
-        printf("adding data\n");
-        push("one");
-        push("two");
-        push("three");
-        push("four");
-        push("five");
-        first.join();
+    if(argc<2) usage();
 
-        printf("Listing output:\n");
-        string s=pull();
-        while(!s.empty()) {
-            printf("[%s]\n",s.c_str());
-            s=pull();
+    string engine="/home/pi/workspace/chessengine/stockfish-8-linux/src/stockfish";
+    string fen="8/p4kpp/2r5/2P1b3/8/7P/P5P1/4R2K w - -";
+    for(int i=0; i<argc; i++) {
+        if(!strcmp(argv[i],"-e")) {
+            engine=argv[++i];
+        } else if(!strcmp(argv[i],"-f")) {
+            fen=argv[++i];
         }
     }
+
+    UCIClient uci(engine);
+    uci.setDebug(false);
+    uci.start();
+    uci.sendCommand("uci");
+    uci.newGame();
+    string move;
+    string ponder;
+    uci.bestMove(move,ponder,fen);
+    printf("best move was [%s] ponder was [%s]\n",move.c_str(),ponder.c_str());
+
+//
+//    string s=uciPull();
+//    while(!s.empty()) {
+//        printf("read line [%s]\n",s.c_str());
+//        s=uciPull();
+//    }
+//
+//    printf("best move was [%s]\n",move.c_str());
+//
+//    uci.bestMove(&move,&ponder,fen);
+//    printf("best move was [%s] ponder was [%s]\n",move.c_str(),ponder.c_str());
+
+    uci.stop();
 }
