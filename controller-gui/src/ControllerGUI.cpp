@@ -11,7 +11,7 @@
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
 
-ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short port)
+ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short port,const char* engine)
     : Window("controllergui",0,0,SCREEN_WIDTH,SCREEN_HEIGHT),
       m_window(nullptr),
       m_renderer(nullptr),
@@ -21,8 +21,10 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
       m_board(nullptr),
       m_rules(),
       m_movesPanel(nullptr),
-      m_connector(nullptr)
+      m_connector(nullptr),
+      m_uci(engine)
 {
+    printf("using chess engine [%s]\n",engine);
     m_board=new Board(0,0,SCREEN_WIDTH,SCREEN_WIDTH);
     m_movesPanel=new MovesPanel("moves",SCREEN_WIDTH-200,480,200,320,&m_rules);
     m_connector=new Connector();
@@ -130,7 +132,11 @@ void ControllerGUI::initComponents() {
 }
 void ControllerGUI::startGame() {
     initComponents();
+    m_uci.start();
+    m_uci.sendCommand("uci");
+    m_uci.newGame();
     show(m_renderer);
+    m_uci.stop();
     SDL_DestroyWindow(m_window);
     SDL_DestroyRenderer(m_renderer);
     SDL_Quit();

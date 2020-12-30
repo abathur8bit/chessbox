@@ -56,6 +56,8 @@ Capture
 
     $ echo '{"action":"move","description":null,"moves":[{"from":"a1","to":"a2","type":"capture"}]}' | nc -C -N localhost 9999
 
+echo '{"action":"setmode","mode":"inspect"}' | nc -C -N localhost 9999
+
 ## Detecting piece and down
 The controller is able to sense when a piece has been put down or lifted up and lets any one connected know. When chesslrcontroller m_running in a different terminal run **nc** again without the echo in front. When you see the **Hello** you can put a piece down on the A1 square, then lift it up. You should see the following appear:
 

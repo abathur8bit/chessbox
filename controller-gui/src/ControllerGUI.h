@@ -12,10 +12,11 @@
 #include "Board.h"
 #include "MovesPanel.h"
 #include "Connector.h"
+#include "UCIClient.h"
 
 class ControllerGUI : Window {
 public:
-    ControllerGUI(bool fullscreen,const char* host,unsigned short port);
+    ControllerGUI(bool fullscreen,const char* host,unsigned short port,const char* engine);
     ~ControllerGUI();
     void startGame();
     void saveGame();
@@ -37,6 +38,7 @@ protected:
     MovesPanel* m_movesPanel;
     Connector* m_connector;
     char m_buffer[1024];
+    UCIClient m_uci;
 };
 
 

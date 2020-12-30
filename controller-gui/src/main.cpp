@@ -669,21 +669,20 @@ int main(int argc, char* argv[]) {
     [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
     bool fullscreen=false;
+    string engine="/home/pi/workspace/chessengine/stockfish-8-linux/src/stockfish";
     for(int i=1; i<argc; i++) {
         if(!strcmp("-f",argv[i])) {
             fullscreen=true;
         } else if(!strcmp("-h",argv[i]) && i+1 <= argc) {
             strncpy(host,argv[++i],sizeof(host));
             NULL_TERMINATE(host, sizeof(host));
+        } else if(!strcmp(argv[i],"-e")) {
+            engine=argv[++i];
         }
-    }
-    if(argc>2) {
-        strncpy(host,argv[1],sizeof(host));
-        NULL_TERMINATE(host, sizeof(host));
     }
 //    scrolltest();
 //    coolSpot(fullscreen);
-    ControllerGUI gui(fullscreen,host,port);
+    ControllerGUI gui(fullscreen,host,port,engine.c_str());
     gui.startGame();
 #endif
 #if 0

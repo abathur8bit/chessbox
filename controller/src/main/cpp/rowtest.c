@@ -1,4 +1,4 @@
-//compile with: gcc -Wall -o row rowtest.c -lwiringPi
+//compile with: gcc -Wall -o row boardtest.c -lwiringPi
 
 //pin numbers are BCM
 
@@ -126,26 +126,32 @@ void showRow(int base,int* rowState,int offset) {
 #define BASE_I2C_INPUT  BASE_I2C     //first 8 pins (bank A)
 #define BASE_I2C_OUTPUT BASE_I2C+8   //last 8 pins (bank B)
 
+void usage() {
+    printf("usage: rowtest addr\n");
+    printf("  addr is a decimal number\n");
+    printf("  Possible values:\n");
+    for(int i=0x20; i<0x28; i++) {
+        printf("  0x%02X %d\n",i,i);
+    }
+    exit(0);
+}
 int main(int argc,char* argv[]) {
     int i,j;
     int rowState[64];
     int rowInputBase[8] =  {BASE_I2C_INPUT, BASE_I2C_INPUT+0x10, BASE_I2C_INPUT+0x20, BASE_I2C_INPUT+0x30, BASE_I2C_INPUT+0x40, BASE_I2C_INPUT+0x50, BASE_I2C_INPUT+0x60, BASE_I2C_INPUT+0x70};
     int rowOutputBase[8] = {BASE_I2C_OUTPUT,BASE_I2C_OUTPUT+0x10,BASE_I2C_OUTPUT+0x20,BASE_I2C_OUTPUT+0x30,BASE_I2C_OUTPUT+0x40,BASE_I2C_OUTPUT+0x50,BASE_I2C_OUTPUT+0x60,BASE_I2C_OUTPUT+0x70};
 
+    if(argc<2)
+        usage();
+
+    int address = atoi(argv[1]);
     memset(rowState,0,sizeof(rowState));
     printf("MCP Tester %s\n",VERSION);
 
     wiringPiSetup();
-    mcp23017Setup(BASE_I2C,0x20);
-    mcp23017Setup(BASE_I2C+0x10,0x21);
-    mcp23017Setup(BASE_I2C+0x20,0x22);
-    mcp23017Setup(BASE_I2C+0x30,0x23);
-    mcp23017Setup(BASE_I2C+0x40,0x24);
-    mcp23017Setup(BASE_I2C+0x50,0x25);
-    mcp23017Setup(BASE_I2C+0x60,0x26);
-    mcp23017Setup(BASE_I2C+0x70,0x27);
+    mcp23017Setup(BASE_I2C,address);
 
-    for(j=0; j<8; j++) {
+    for(j=0; j<1; j++) {
         for(i=0; i<8; i++) {
             pinMode(rowOutputBase[j]+i,OUTPUT);
             pinMode(rowInputBase[j]+i,INPUT);
@@ -156,7 +162,7 @@ int main(int argc,char* argv[]) {
     printf("square lights up when piece down\n");
     while(1)
     {
-        for(j=0; j<8; j++) {
+        for(j=0; j<1; j++) {
 //            printf("input base=%02XH output base=%02XH rowstate=%02XH\n",rowInputBase[j],rowOutputBase[j],j*16);
             readRow(rowInputBase[j],rowState,j*8);
             showRow(rowOutputBase[j],rowState,j*8);

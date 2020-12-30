@@ -12,4 +12,8 @@ include_directories(../tiny-process-library)
 link_directories(../tiny-process-library/build)
 
 add_executable(cbcontroller src/main/cpp/controller.cpp ../common/thc.cpp)
+add_executable(boardtest src/main/cpp/boardtest.cpp)
+add_executable(rowtest src/main/cpp/rowtest.c)
 target_link_libraries(cbcontroller PRIVATE ssobjects wiringPi pthread tiny-process-library)
+target_link_libraries(boardtest PRIVATE wiringPi )
+target_link_libraries(rowtest PRIVATE wiringPi )
