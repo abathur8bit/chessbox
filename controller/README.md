@@ -148,23 +148,6 @@ fen
 ### Play
 Waits for a command to indicate a move, or to detect when a piece has been lifted. 
 
-# ChessLR replacement Names
-Some of the old games are chess challenger and chess mate.   
-
-- Cuttlefish Chess. A little play off Stockfish chess engine, and the image can be the cuttlefish holding a chess piece in its tentacle, or holding a king in one, and the crown broken off in the other.
-- pichallenger 
-- pi mate
-- PiMaster
-- PiEChess
-- EGambit2020
-- EChallenger2020
-- PiEGambit, 
-- PiEChallenger, 
-- DandyTandy, 
-- Challenger RS1850
-- TandyChess21 for next year
-- Gecko eChess
-
 # Referance links
 - [Lichess API](https://lichess.org/api)
 - [ChessBot API](https://github.com/ShailChoksi/lichess-bot)
@@ -175,6 +158,11 @@ I am considering the idea of connecting ChessLR to Lichess so I can use my eboar
 ## Explore moves
 Rather then submitting the move right away, a mode called **explore moves** will let you make as many moves for white and black as you want without submitting your move. You can hit a button to put the board back to the saved position and try different a variant. When you want to submit the move to lichess, you can make the move and tap a submit button and the move is sent to Lichess. 
 
-
-
-
+# Commands
+modified board
+echo '{"action":"setposition","fen":"rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR/8 w kq - 0 1"}' | nc -C -N chessbox 9999
+normal board:
+echo '{"action":"setposition","fen":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kq - 0 1"}' | nc -C -N chessbox 9999
+echo '{"action":"move","description":null,"moves":[{"from":"b3","long":"b3b4","san":"b4","to":"b4","type":"move"}]}' | nc -C -N chessbox 9999
+echo '{"action":"move","description":null,"moves":[{"from":"a2","long":"a2a3","san":"a3","to":"a3","type":"move"}]}' | nc -C -N chessbox 9999
+echo '{"action":"setmode","mode":"inspect"}' | nc -C -N chessbox 9999
