@@ -20,13 +20,14 @@ You will need to start the controller in one terminal, then the GUI in another. 
 
 **Controller** 
 
-$ cd ~/workspace/chessbox/controller
-$ ./cbcontroller
+    $ cd ~/workspace/chessbox/controller
+    $ ./cbcontroller
 
 **GUI**
 
 If you want the GUI to be full screen, use **-f**. **-e ./stockfish** points to the engine you want to use. 
 
-$ cd ~/workspace/chessbox/gui
-$ ./cbgui -f -e ./stockfish
+    $ cd ~/workspace/chessbox/gui
+    $ ./cbgui -f -e ./stockfish
 
+Once the controller and GUI are running, click the **Connect** button to connect the GUI to the controller. (This will be automatic in later versions.) Now you can play as white. The computer will sense when you pick up pieces, and when you put it down if the move is valid it will respond and indicate the move it wants you to make for it. 
