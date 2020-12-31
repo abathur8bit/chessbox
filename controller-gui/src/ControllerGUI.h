@@ -26,6 +26,7 @@ public:
     void connectController();
     void disconnectController();
     void processJson(const char* buffer);
+    void setupNewGame();
 protected:
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
@@ -34,7 +35,6 @@ protected:
     string m_host;
     unsigned short m_port;
     Board* m_board;
-    BoardRules m_rules;
     MovesPanel* m_movesPanel;
     Connector* m_connector;
     char m_buffer[1024];

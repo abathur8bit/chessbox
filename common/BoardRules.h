@@ -37,6 +37,11 @@ public:
         printf("Position = %s\n", s.c_str());
     }
 
+    bool isMoveValid(const char* lan) {
+        thc::Move mv;
+        return mv.TerseIn(this,lan);
+    }
+
 
     /**
      * Returns true if the move is a checking move (ends with '+'. Note

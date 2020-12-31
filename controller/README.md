@@ -174,3 +174,7 @@ I am considering the idea of connecting ChessLR to Lichess so I can use my eboar
 
 ## Explore moves
 Rather then submitting the move right away, a mode called **explore moves** will let you make as many moves for white and black as you want without submitting your move. You can hit a button to put the board back to the saved position and try different a variant. When you want to submit the move to lichess, you can make the move and tap a submit button and the move is sent to Lichess. 
+
+
+
+

@@ -4,8 +4,13 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include "chessmove.hpp"
+#include "BoardRules.h"
 #include "json.hpp"
+
 using namespace nlohmann;   //trying this
+using namespace std;
+using namespace thc;
 
 int toIndex(const char* square) {
     int col=toupper(square[0])-'A';
@@ -14,7 +19,7 @@ int toIndex(const char* square) {
     return row*8+col;
 }
 
-void vector() {
+void vectorTest() {
     std::vector<json> moves;
     json move;
     move["from"]="a2";
@@ -30,7 +35,7 @@ void vector() {
     j["action"]="move";
     j["description"]= nullptr;
     j["moves"]=moves;
-    printf("vectory json=%s\n",j.dump().c_str());
+    printf("vector json=%s\n",j.dump().c_str());
 }
 
 void jsonTest() {
@@ -62,15 +67,37 @@ void jsonTest() {
     printf("json=%s\n",j.dump().c_str());
 
     printf("=========\n\n");
-    vector();
+    vectorTest();
 
 }
 
-void processTest() {
+void moveTest() {
+    BoardRules rules;
+    rules.Forsyth("7k/5P2/8/5K2/8/7p/8/8 w - - 0 1");
+    rules.display_position();
+    Move mv;
+    mv.TerseIn(&rules,"f7f8N");
+    printf("move=%s\n",mv.TerseOut().c_str());
+    rules.playMove("f7f8");
+    rules.display_position();
+    mv = rules.historyAt(1);
+    printf("move after=%s\n",mv.TerseOut().c_str());
+//    mv.TerseIn(&rules,"")
+
+    json j = json::parse("{\"from\":\"b8\",\"to\":\"a6\",\"type\":\"move\"}");
+    ChessMove chessMove(json::parse("{\"from\":\"b8\",\"to\":\"a6\",\"type\":\"move\"}"));
+    printf("json=%s chessmove=%s index from=%d to=%d\n",j.dump().c_str(),chessMove.lan(),chessMove.fromIndex(),chessMove.toIndex());
+    string s="a8";
+    printf("square=%s index=%d\n",s.c_str(),chessMove.squaresIndex(s));
+    s="a1"; printf("square=%s index=%d\n",s.c_str(),chessMove.squaresIndex(s));
 
 }
+
 int main(int argc,char* argv[]) {
+    printf("Hello World\n");
+
 //    jsonTest();
-    processTest();
+//    processTest();
+    moveTest();
     return 0;
 }

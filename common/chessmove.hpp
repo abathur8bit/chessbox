@@ -50,7 +50,8 @@ public:
     }
 
     int squaresIndex(string square) {
-        return (8*('8'-square[1]))+(square[0]-'A');
+        string s = str_tolower(square);
+        return (8*('8'-s[1]))+(s[0]-'a');
     }
 
     void setFrom(int index) {

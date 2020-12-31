@@ -19,14 +19,13 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
       m_host(host),
       m_port(port),
       m_board(nullptr),
-      m_rules(),
       m_movesPanel(nullptr),
       m_connector(nullptr),
       m_uci(engine)
 {
     printf("using chess engine [%s]\n",engine);
     m_board=new Board(0,0,SCREEN_WIDTH,SCREEN_WIDTH);
-    m_movesPanel=new MovesPanel("moves",SCREEN_WIDTH-200,480,200,320,&m_rules);
+    m_movesPanel=new MovesPanel("moves",SCREEN_WIDTH-200,480,200,320,m_board->rules());
     m_connector=new Connector();
     m_fullscreen=fullscreen;
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -132,6 +131,7 @@ void ControllerGUI::initComponents() {
 }
 void ControllerGUI::startGame() {
     initComponents();
+    m_uci.setDebug(true);
     m_uci.start();
     m_uci.sendCommand("uci");
     m_uci.newGame();
@@ -169,6 +169,8 @@ void ControllerGUI::processButtonClicked(Button *c) {
             m_connector->inspect(true);
             c->setChecked(true);
         }
+    } else if(!strcmp(c->id(),"newgamebutton")) {
+        setupNewGame();
     }
 }
 

@@ -79,6 +79,17 @@ bool UCIClient::start() {
     auto output = make_shared<string>();
     auto error = make_shared<string>();
 
+    if(isDebug()) {
+        printf("connecting to uci engine at %s",m_enginePath.c_str());
+    }
+    //check if engine exists
+    FILE* fp = fopen(m_enginePath.c_str(),"r");
+    if(!fp) {
+        printf("ERROR: engine at %s doesn't exist\n",m_enginePath.c_str());
+        return false;
+    }
+    fclose(fp);
+
     m_pProcess = new Process(m_enginePath, "", [output](const char *bytes, size_t n) {
         char line[1024];
         *output += string(bytes, n);

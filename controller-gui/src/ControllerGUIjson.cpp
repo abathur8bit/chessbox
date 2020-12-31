@@ -45,13 +45,27 @@ void ControllerGUI::processJson(const char* buffer) {
             toSend["description"]=nullptr;
             toSend["moves"]=moves;
             m_connector->send(toSend.dump().c_str());
+            string buffer=m.lan();
+            buffer+=" ";
+            buffer+=bestMove;
+            m_movesPanel->add(buffer.c_str());
 //            invalidate();
         } else if(!action.compare("setposition")) {
             string fen=j["fen"];
             m_board->Forsyth(fen.c_str());
-            m_rules.display_position();
+            m_board->rules()->display_position();
             m_movesPanel->clear();
 //            invalidate();
         }
     }
+}
+
+void ControllerGUI::setupNewGame() {
+    const char* fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kq - 0 1";
+    m_board->Forsyth(fen);
+    m_uci.newGame();
+    json j;
+    j["action"]="setposition";
+    j["fen"]=fen;
+    m_connector->send(j.dump().c_str());
 }

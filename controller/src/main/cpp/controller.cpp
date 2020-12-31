@@ -89,7 +89,14 @@ using namespace TinyProcessLib;
 
 class ControllerServer : public TelnetServer {
 public:
-    enum {MODE_SETUP,MODE_INSPECT,MODE_PLAY,MODE_MOVE,MODE_SETPOSITION,MODE_MATE};
+
+    enum {
+        MODE_SETUP,
+        MODE_INSPECT,       //showing what pieces are detected on the board
+        MODE_PLAY,          //normal mode, waiting for the player to make a move
+        MODE_MOVE,          //board wants player to move certain pieces; a computer or remote player move.
+        MODE_SETPOSITION,   //Board wants player to place pieces in a certain setup.
+        MODE_MATE};         //check mate detected, no other moves can be made
 
     BoardRules rules;
     int gameMode;
@@ -161,11 +168,11 @@ public:
         }
 //        const char* fen = "8/8/8/8/8/K6k/8/8 w - - 0 1";    //two kings
 //        const char* fen = "8/8/8/8/4q3/1K2k3/8/8 w - - 0 1";  //a few pieces for testing
-        const char* fen = "rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR/8 w kq - 0 1"; //a new game. you can also just not set the fen on a new board instance
-        setPosition(fen);
+//        const char* fen = "rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR/8 w kq - 0 1"; //a new game. you can also just not set the fen on a new board instance
+//        setPosition(fen);
         display_position(rules);
         if(!isBoardSetup()) {
-            printf("Setup your board as shown, white king on left, black king on right\n");
+            printf("Setup your board as shown\n");
         }
     }
 
@@ -302,43 +309,53 @@ public:
 
     void doMove(TelnetServerSocket* psocket,const char* pszString) {
         ChessAction *ca = parseJson(pszString);
+        ChessMove m;
         int index=0;
-        waitMove.setFrom(ca->move(index).fromIndex());
-        waitMove.setTo(ca->move(index).toIndex());
-        waitMove.setType(ca->move(index).type());
-        ledState[ca->move(index).fromIndex()] = 1;
-        ledState[ca->move(index).toIndex()] = 1;
-        gameMode = MODE_MOVE;
-        moveIndex = 0;
-        if(!strcmp(ca->move(index).type(),"capture")) {
-            moveType[0] = MOVE_UP;
-            moveType[1] = MOVE_UP;
-            moveType[2] = MOVE_DOWN;
-            moveSquareIndex[0] = ca->move(index).fromIndex();
-            moveSquareIndex[1] = ca->move(index).toIndex();
-            moveSquareIndex[2] = ca->move(index).toIndex();
-            movesNeeded = 3;
-        } else if(!strcmp(ca->move(index).type(),"takeback_capture")) {
-            moveType[0] = MOVE_UP;
-            moveType[1] = MOVE_DOWN;
-            moveType[2] = MOVE_DOWN;
-            moveSquareIndex[0] = ca->move(index).fromIndex();
-            moveSquareIndex[1] = ca->move(index).fromIndex();
-            moveSquareIndex[2] = ca->move(index).toIndex();
-            led(ca->move(index).fromIndex(),LED_FLASH);
-            movesNeeded = 3;
+        printf("doMove from=%s to=%s lan=%s\n",ca->move(index).from(),ca->move(index).to(),ca->move(index).lan());
+        if(rules.isMoveValid(ca->move(index).lan())) {
+            waitMove.setFrom(ca->move(index).fromIndex());
+            waitMove.setTo(ca->move(index).toIndex());
+            waitMove.setType(ca->move(index).type());
+            ledState[ca->move(index).fromIndex()]=1;
+            ledState[ca->move(index).toIndex()]=1;
+            gameMode=MODE_MOVE;
+            moveIndex=0;
+            if(!strcmp(ca->move(index).type(), "capture")) {
+                moveType[0]=MOVE_UP;
+                moveType[1]=MOVE_UP;
+                moveType[2]=MOVE_DOWN;
+                moveSquareIndex[0]=ca->move(index).fromIndex();
+                moveSquareIndex[1]=ca->move(index).toIndex();
+                moveSquareIndex[2]=ca->move(index).toIndex();
+                movesNeeded=3;
+            } else if(!strcmp(ca->move(index).type(), "takeback_capture")) {
+                moveType[0]=MOVE_UP;
+                moveType[1]=MOVE_DOWN;
+                moveType[2]=MOVE_DOWN;
+                moveSquareIndex[0]=ca->move(index).fromIndex();
+                moveSquareIndex[1]=ca->move(index).fromIndex();
+                moveSquareIndex[2]=ca->move(index).toIndex();
+                led(ca->move(index).fromIndex(), LED_FLASH);
+                movesNeeded=3;
+            } else {
+                moveType[0]=MOVE_UP;
+                moveType[1]=MOVE_DOWN;
+                moveSquareIndex[0]=ca->move(index).fromIndex();
+                moveSquareIndex[1]=ca->move(index).toIndex();
+                movesNeeded=2;
+            }
+
+            for(int i=0; i<4; i++) {
+                printf("type[%d]=%c square index=%d\n", i, moveType[i], moveSquareIndex[i]);
+            }
         } else {
-            moveType[0] = MOVE_UP;
-            moveType[1] = MOVE_DOWN;
-            moveSquareIndex[0] = ca->move(index).fromIndex();
-            moveSquareIndex[1] = ca->move(index).toIndex();
-            movesNeeded = 2;
+            json j;
+            j["action"] = "invalid_move";
+            j["lan"] = ca->move(index).lan();
+            printf("%s\n",j.dump().c_str());
+            psocket->print("%s\n",j.dump().c_str());
+            return;
         }
-
-        for(int i=0; i<4; i++) {
-            printf("type[%d]=%c square index=%d\n",i,moveType[i],moveSquareIndex[i]);
-        }
-
         delete ca;
     }
 
@@ -538,7 +555,7 @@ public:
     }
 
     /** Piece was put down, now check what the move was. */
-    void finishMove(int toIndex) {
+    void finishMove(int toIndex,bool sendMove) {
         moveIndex = 0;
         clearLeds();
         if(toIndex != moveSquareIndex[0]) {
@@ -547,12 +564,11 @@ public:
             toLAN(buffer, sizeof(buffer), moveSquareIndex[0], toIndex);
             thc::Move mv;
             mv.TerseIn(&rules, buffer);
-//            printf("full move is %s - %s\n", buffer,mv.NaturalOut(&rules).c_str());
+            printf("full move is %s - %s\n", buffer,mv.NaturalOut(&rules).c_str());
             if(!mv.Valid()) {
                 json j;
                 j["action"] = "invalid_move";
-                j["long"] = mv.TerseOut();
-                j["san"] = mv.NaturalOut(&rules);
+                j["lan"] = buffer;
                 printf("%s\n",j.dump().c_str());
                 send2All(j.dump().c_str());
                 send2All("\n");
@@ -568,21 +584,23 @@ public:
             move["type"]=capture ? "capture":"move";
             move["from"]=toMove(buffer,sizeof(buffer),moveSquareIndex[0]);
             move["to"]=toMove(buffer,sizeof(buffer),toIndex);
-            move["long"] = mv.TerseOut().c_str();
+            move["lan"] = mv.TerseOut().c_str();
             move["san"] = san;
             moveList.push_back(move);
 
-            json j;
-            j["action"] = "move";
-            j["description"] = nullptr;
-            j["moves"]=moveList;
-            printf("%s\n",j.dump().c_str());
+            if(sendMove) {
+                json j;
+                j["action"] = "move";
+                j["description"] = nullptr;
+                j["moves"]=moveList;
+                printf("%s\n",j.dump().c_str());
 
-            send2All(j.dump().c_str());
-            send2All("\n");
+                send2All(j.dump().c_str());
+                send2All("\n");
+            }
             rules.PlayMove(mv);
-            display_position(rules);
-            printf("san=%s check=%d kingChecked=%d\n",san.c_str(),san.find_first_of('+'),kingChecked);
+//            display_position(rules);
+//            printf("san=%s check=%d kingChecked=%d\n",san.c_str(),san.find_first_of('+'),kingChecked);
             if(kingChecked) {
                 flashKingCheck();
             }
@@ -658,7 +676,7 @@ public:
                     moveType[moveIndex] = MOVE_DOWN;
                     moveSquareIndex[moveIndex] = i;
                     moveIndex++;
-                    finishMove(i);
+                    finishMove(i,true);
                 } else {
                     printf("WARNING should not get here\n");
                     assert(false);
@@ -668,6 +686,7 @@ public:
         }
     }
 
+    /** We are in move mode, waiting for player to finish making a designated move. */
     void idleMove() {
         for (int i = 0; i < 64 && gameMode==MODE_MOVE; i++) {
             int state = readState(i);
@@ -680,11 +699,12 @@ public:
                         led(i,LED_OFF);
                     moveIndex++;
                     if(moveIndex == movesNeeded) {
+                        //got all the moves we were waiting for
                         gameMode = MODE_PLAY;
                         printf("Move finished json=\n",waitMove.tojson().dump().c_str());
-                        send2All(waitMove.tojson().dump().c_str());
-                        send2All("\n");
-                        finishMove(moveSquareIndex[moveIndex-1]);
+//                        send2All(waitMove.tojson().dump().c_str());
+//                        send2All("\n");
+                        finishMove(moveSquareIndex[moveIndex-1],false);
                     }
                 } else {
                     char buffer[SAN_BUF_SIZE];
@@ -722,12 +742,12 @@ public:
         if(complete) {
             clearLeds();
             gameMode = MODE_PLAY;
-            json j;
-            j["action"] = "setposition";
-            j["status"] = "complete";
-            printf("%s\n",j.dump().c_str());
-            send2All(j.dump().c_str());
-            send2All("\n");
+//            json j;
+//            j["action"] = "setposition";
+//            j["status"] = "complete";
+//            printf("%s\n",j.dump().c_str());
+//            send2All(j.dump().c_str());
+//            send2All("\n");
         }
     }
 
