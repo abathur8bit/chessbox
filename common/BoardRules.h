@@ -5,8 +5,10 @@
 #ifndef CONTROLLER_GUI_BOARDRULES_H
 #define CONTROLLER_GUI_BOARDRULES_H
 
+#include <string>
 #include "thc.h"
 
+using namespace std;
 using namespace thc;
 
 /** Rules of chess. Add moves, and inspect history here. */
@@ -52,6 +54,24 @@ public:
      */
     bool isCheck(thc::Move mv) {
         return mv.NaturalOut(this).find_first_of('+') == string::npos ? false:true;
+    }
+
+    bool isMate() {
+        thc::TERMINAL terminal;
+        Evaluate(terminal);
+        return (TERMINAL_WCHECKMATE==terminal || TERMINAL_BCHECKMATE==terminal);
+    }
+
+    bool isWhiteMate() {
+        thc::TERMINAL terminal;
+        Evaluate(terminal);
+        return (TERMINAL_WCHECKMATE==terminal);
+    }
+
+    bool isBlackMate() {
+        thc::TERMINAL terminal;
+        Evaluate(terminal);
+        return (TERMINAL_BCHECKMATE==terminal);
     }
 };
 #endif //CONTROLLER_GUI_BOARDRULES_H

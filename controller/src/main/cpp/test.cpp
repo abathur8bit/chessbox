@@ -7,6 +7,7 @@
 #include "chessmove.hpp"
 #include "BoardRules.h"
 #include "json.hpp"
+#include "PGNUtils.h"
 
 using namespace nlohmann;   //trying this
 using namespace std;
@@ -93,11 +94,73 @@ void moveTest() {
 
 }
 
+void pgnfen() {
+    string fen="7k/3RP3/4K2p/8/8/8/8/8 w - - 0 1";
+    const char* pgnfile="/t/test.pgn";
+    BoardRules rules;
+//    rules.playMove("e4");
+//    rules.playMove("e5");
+//    rules.playMove("d4");
+//    rules.playMove("d6");
+//    rules.playMove("d5");
+
+//    rules.playMove("d3");
+//    rules.playMove("e6");
+//    rules.playMove("e4");
+//    rules.playMove("Bb4+");
+
+    rules.Forsyth(fen.c_str());
+    rules.playMove("e8=N");
+    rules.display_position();
+    if(rules.isMate()) {
+        printf("final position is check mate\n");
+    }
+
+    PGNUtils pgn;
+    pgn.save(pgnfile,&rules,PGN_RESULT_NO_WIN,"Lee Patterson","Chessbox Stockfish",1,PGN_EMPTY,"Chessbox",PGN_EMPTY,fen);
+    printf("done exporting to %s history index=%d\n",pgnfile,rules.historyIndex());
+}
+
+void pgnfenmatewhite() {
+    BoardRules rules;
+    const char* fen="7k/3RQ2r/4K3/7r/8/8/2q5/8 w - - 0 1";
+    const char* pgnfile="/t/test.pgn";
+
+    rules.Forsyth(fen);
+    rules.playMove("Qe8");
+    rules.display_position();
+    printf("is mate:%d\n",rules.isMate());
+
+    PGNUtils pgn;
+    pgn.save(pgnfile,&rules,PGN_RESULT_WHITE_WIN,"Lee Patterson","Chessbox Stockfish",1,PGN_EMPTY,"Chessbox");
+    printf("done exporting to %s history index=%d\n",pgnfile,rules.historyIndex());
+}
+void pgnmate() {
+    BoardRules rules;
+    const char* pgnfile="/t/test.pgn";
+
+    rules.playMove("c3");
+    rules.playMove("e6");
+    rules.playMove("f3");
+    rules.playMove("d5");
+    rules.playMove("g4");
+//    rules.playMove("Qh4#");
+    rules.display_position();
+
+    PGNUtils pgn;
+    pgn.save(pgnfile,&rules,PGN_RESULT_BLACK_WIN,"Lee Patterson","Chessbox Stockfish",1,PGN_EMPTY,"Chessbox");
+    printf("done exporting to %s history index=%d\n",pgnfile,rules.historyIndex());
+}
+
 int main(int argc,char* argv[]) {
     printf("Hello World\n");
 
 //    jsonTest();
 //    processTest();
-    moveTest();
+//    moveTest();
+
+//    pgntest();
+//    pgnmate();
+    pgnfenmatewhite();
     return 0;
 }

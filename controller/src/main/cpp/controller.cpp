@@ -168,7 +168,7 @@ public:
         }
 //        const char* fen = "8/8/8/8/8/K6k/8/8 w - - 0 1";    //two kings
 //        const char* fen = "8/8/8/8/4q3/1K2k3/8/8 w - - 0 1";  //a few pieces for testing
-//        const char* fen = "rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR/8 w kq - 0 1"; //a new game. you can also just not set the fen on a new board instance
+//        const char* fen = "rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR/8 w KQkq - 0 1"; //a new game. you can also just not set the fen on a new board instance
 //        setPosition(fen);
         display_position(rules);
         if(!isBoardSetup()) {
@@ -556,6 +556,7 @@ public:
 
     /** Piece was put down, now check what the move was. */
     void finishMove(int toIndex,bool sendMove) {
+        //todo didn't flash the rooks square when player castled, but did when computer wanted to move it
         moveIndex = 0;
         clearLeds();
         if(toIndex != moveSquareIndex[0]) {

@@ -166,3 +166,5 @@ echo '{"action":"setposition","fen":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
 echo '{"action":"move","description":null,"moves":[{"from":"b3","long":"b3b4","san":"b4","to":"b4","type":"move"}]}' | nc -C -N chessbox 9999
 echo '{"action":"move","description":null,"moves":[{"from":"a2","long":"a2a3","san":"a3","to":"a3","type":"move"}]}' | nc -C -N chessbox 9999
 echo '{"action":"setmode","mode":"inspect"}' | nc -C -N chessbox 9999
+rn1qk2r/pp2ppbp/2p1bnp1/8/2pPP3/2N2N2/PP2BPPP/R1BQK2R w KQkq -
+{"action":"setposition","fen":"rn1qk2r/pp2ppbp/2p1bnp1/8/2pPP3/2N2N2/PP2BPPP/R1BQK2R w KQkq - 2 8"}

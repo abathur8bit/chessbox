@@ -11,7 +11,7 @@
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
 
-ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short port,const char* engine)
+ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short port,const char* engine,const char* pgnPathname)
     : Window("controllergui",0,0,SCREEN_WIDTH,SCREEN_HEIGHT),
       m_window(nullptr),
       m_renderer(nullptr),
@@ -21,7 +21,8 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
       m_board(nullptr),
       m_movesPanel(nullptr),
       m_connector(nullptr),
-      m_uci(engine)
+      m_uci(engine),
+      m_pgnFile(pgnPathname)
 {
     printf("using chess engine [%s]\n",engine);
     m_board=new Board(0,0,SCREEN_WIDTH,SCREEN_WIDTH);

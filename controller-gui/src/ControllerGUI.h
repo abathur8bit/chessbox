@@ -16,7 +16,7 @@
 
 class ControllerGUI : Window {
 public:
-    ControllerGUI(bool fullscreen,const char* host,unsigned short port,const char* engine);
+    ControllerGUI(bool fullscreen,const char* host,unsigned short port,const char* engine,const char* pgnPathname="game.pgn");
     ~ControllerGUI();
     void startGame();
     void saveGame();
@@ -39,6 +39,7 @@ protected:
     Connector* m_connector;
     char m_buffer[1024];
     UCIClient m_uci;
+    string m_pgnFile;
 };
 
 

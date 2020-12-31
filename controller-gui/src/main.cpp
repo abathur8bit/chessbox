@@ -669,7 +669,13 @@ int main(int argc, char* argv[]) {
     [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
     bool fullscreen=false;
+#ifdef WIN32
+    string pgn="/t/game.pgn";
     string engine="/home/pi/workspace/chessengine/stockfish-8-linux/src/stockfish";
+#else
+    string pgn="/home/pi/game.pgn";
+    string engine="/home/pi/workspace/chessengine/stockfish-8-linux/src/stockfish";
+#endif
     for(int i=1; i<argc; i++) {
         if(!strcmp("-f",argv[i])) {
             fullscreen=true;
@@ -678,11 +684,13 @@ int main(int argc, char* argv[]) {
             NULL_TERMINATE(host, sizeof(host));
         } else if(!strcmp(argv[i],"-e")) {
             engine=argv[++i];
+        } else if(!strcmp("-p",argv[i])) {
+            pgn=argv[++i];
         }
     }
 //    scrolltest();
 //    coolSpot(fullscreen);
-    ControllerGUI gui(fullscreen,host,port,engine.c_str());
+    ControllerGUI gui(fullscreen,host,port,engine.c_str(),pgn.c_str());
     gui.startGame();
 #endif
 #if 0
