@@ -671,7 +671,7 @@ int main(int argc, char* argv[]) {
     bool fullscreen=false;
 #ifdef WIN32
     string pgn="/t/game.pgn";
-    string engine="/home/pi/workspace/chessengine/stockfish-8-linux/src/stockfish";
+    string engine="C:/Program Files (x86)/ShredderChess/Deep Shredder 13/EngineDeepShredder13UCIx64.exe";
 #else
     string pgn="/home/pi/game.pgn";
     string engine="/home/pi/workspace/chessengine/stockfish-8-linux/src/stockfish";

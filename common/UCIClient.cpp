@@ -80,7 +80,7 @@ bool UCIClient::start() {
     auto error = make_shared<string>();
 
     if(isDebug()) {
-        printf("connecting to uci engine at %s",m_enginePath.c_str());
+        printf("connecting to uci engine at %s\n",m_enginePath.c_str());
     }
     //check if engine exists
     FILE* fp = fopen(m_enginePath.c_str(),"r");
