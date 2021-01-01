@@ -33,5 +33,9 @@ If you want the GUI to be full screen, use **-f**. **-e ./stockfish** points to 
 Once the controller and GUI are running, click the **Connect** button to connect the GUI to the controller. (This will be automatic in later versions.) Now you can play as white. The computer will sense when you pick up pieces, and when you put it down if the move is valid it will respond and indicate the move it wants you to make for it. 
 
 # Reference
+- Chessbox [home page](https://8bitcoder.com/chessbox)
+- UCI command reference [with notes](https://8bitcoder.com/uci), [original from Shredder](http://download.shredderchess.com/div/uci.zip)
 - Chess rules from <https://github.com/billforsternz/thc-chess-library>
 - Decent chess program, I used it for capturing FEN and testing PGN files. <https://github.com/billforsternz/tarrasch-chess-gui>
+- [Stockfish](https://stockfishchess.org/) chess engine
+
