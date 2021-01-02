@@ -18,8 +18,19 @@ SDL is used for graphics layer. Download and install before building and running
     ./configure && make && sudo make install
 
 ## Compile
+You will need the tiny-process-library to compile the GUI. It provides the ability to launch and control processes, cross platform. This is required to launch and control chess engines. 
 
-    $ mkdir build
+    $ cd chessbox
+    $ git clone https://github.com/eidheim/tiny-process-library.git
+    $ mkdir -p tiny-process-library/build 
+    $ cd tiny-process-library/build
+    $ cmake ..
+    $ make 
+
+Once that is built, you can move onto building controller-gui.
+
+    $ cd ../../controller-gui/
+    $ mkdir -p build
     $ cd build
     $ cmake ..
     $ make

@@ -14,6 +14,7 @@ You need to have
 
 ## Compile 
 
+  $ cd chessbox/controller
   $ mkdir build
   $ cd build
   $ cmake ..
