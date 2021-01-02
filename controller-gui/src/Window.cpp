@@ -81,4 +81,5 @@ Component* Window::findComponent(const char *name) {
         if(!strcmp((*it)->id(),name))
             return *it;
     }
+    return nullptr;
 }
