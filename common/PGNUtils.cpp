@@ -89,4 +89,5 @@ bool PGNUtils::save(const char* pathname,BoardRules* rules,string result,string 
     fprintf(fp,"%s\n\n",result.c_str());
 
     fclose(fp);
+    return true;
 }
