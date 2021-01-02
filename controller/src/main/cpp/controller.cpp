@@ -168,8 +168,8 @@ public:
         }
 //        const char* fen = "8/8/8/8/8/K6k/8/8 w - - 0 1";    //two kings
 //        const char* fen = "8/8/8/8/4q3/1K2k3/8/8 w - - 0 1";  //a few pieces for testing
-//        const char* fen = "rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR/8 w KQkq - 0 1"; //a new game. you can also just not set the fen on a new board instance
-//        setPosition(fen);
+        const char* fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        setPosition(fen);   //lights leds to make sure player places all pieces
         display_position(rules);
         if(!isBoardSetup()) {
             printf("Setup your board as shown\n");
