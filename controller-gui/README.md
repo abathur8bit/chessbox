@@ -40,7 +40,7 @@ Once that is built, you can move onto building controller-gui.
 
 Run with the following command. ESCAPE key exists the program. Assumes that the stockfish executable is located in the GUI's folder. If it's somewhere else, point to that location instead.
 
-    $ build/cbgui -f -e ./stockfish
+    $ build/cbgui -f -e ../engine/stockfish-8-linux/src/stockfish
     
         -f = Full screen
         -e = Location of the engine to use.
