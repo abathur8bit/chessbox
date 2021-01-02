@@ -20,7 +20,7 @@ SDL is used for graphics layer. Download and install before building and running
 ## Compile
 
     $ mkdir build
-    $ build
+    $ cd build
     $ cmake ..
     $ make
     $ cd ..

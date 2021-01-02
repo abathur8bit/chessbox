@@ -15,7 +15,7 @@ You need to have
 ## Compile 
 
   $ mkdir build
-  $ build
+  $ cd build
   $ cmake ..
   $ make 
   $ cd ..

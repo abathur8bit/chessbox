@@ -54,8 +54,6 @@
 #include <ssobjects/telnetserver.h>
 #include <ssobjects/telnetserversocket.h>
 
-#include "process.hpp"
-
 #include "json.hpp"
 #include "thc.h"
 #include "chessmove.hpp"
@@ -72,8 +70,6 @@
 
 using namespace std;
 using namespace nlohmann;   //trying this
-using namespace TinyProcessLib;
-
 
 #define MOVE_UP 'U'
 #define MOVE_DOWN 'D'
