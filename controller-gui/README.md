@@ -1,132 +1,35 @@
 # Controller GUI
-The Controller GUI runs on the Chessbox PI. It is the layer between the user and the controller. 
+The Controller GUI runs on the Chessbox PI and is the layer between the user and the controller. The user interacts with the GUI, and it will tell the controller what to do, and display the controllers results.
 
-# Building notes
-sudo apt-get install libxext-dev
-wget https://libsdl.org/release/SDL2-2.0.12.zip
-wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.4.tar.gz
-wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5.tar.gz
-wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.15.tar.gz
+The GUI manages the chess engine, as this allows you more flexibility on what engine you want to run, as well as letting you run the GUI on different platforms. For example, during development, I run the GUI on a Windows box, and it connects to the controller process running on my Raspberry PI. 
 
-**Installs to /usr/local/include/SDL2 and /usr/local/lib**
+# Building and running
+SDL is used for graphics layer. Download and install before building and running Chessbox. Installs to /usr/local/include/SDL2 and /usr/local/lib.
 
-cd SDL2-2.0.12
-./configure && make && sudo make install
+    sudo apt-get install libxext-dev
+    wget https://libsdl.org/release/SDL2-2.0.12.zip
+    wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.4.tar.gz
+    wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5.tar.gz
+    wget https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.15.tar.gz
+    
+    unzip SDL2-2.0.12.zip
+    tar xzf SDL2_image-2.0.5.tar.gz
+    cd SDL2-2.0.12
+    ./configure && make && sudo make install
 
-cd SDL2_mixer-2.0.4
-cd SDL2_image-2.0.5
+## Compile
 
+    $ mkdir build
+    $ build
+    $ cmake ..
+    $ make
+    $ cd ..
 
+## Run
 
-## TTF fonts
-if(TTF_Init()==-1) {
-    printf("TTF_Init: %s\n", TTF_GetError());
-    exit(2);
-}
+Run with the following command. ESCAPE key exists the program. Assumes that the stockfish executable is located in the GUI's folder. If it's somewhere else, point to that location instead.
 
-# On screen keyboard 
-Launch matchbox-keyboard from the command line to get the keyboard to display.
-
-    sudo apt-get install matchbox-keyboard
-
-# Display
-Notes about PI display rotation. [My article](https://8bitcoder.com/chesslr/9) which doesn't work with the xinput command any more. 
-
-First change was to add display_rotate=1 to the /boot/config.txt:
-
-# For more options and information see
-# http://www.raspberrypi.org/documentation/configuration/config-txt.md
-# Some settings may impact device functionality. See link above for details
-
-# screen rotation
-display_rotate=1
-
-# uncomment if you get no picture on HDMI for a default "safe" mode
-#hdmi_safe=1
-Other values for rotate are:
-
-0   no rotation
-1   rotate 90 degrees clockwise
-2   rotate 180 degrees clockwise
-3   rotate 270 degrees clockwise
-This only rotates the display. It doesn't effect the touch input. So you also need to run the following xinput commands. I put them into a shell script to make it easier to automate the process in the next step. I put the script in /home/pi/bin/rot.sh.
-
-**FT5406 memory based driver** isn't found on new image build. But I have seen reference to FB, and dmesg reports **bcm2708_fb**. 
-xinput set-prop 'FT5406 memory based driver' 'Evdev Axes Swap' 1
-xinput set-prop 'FT5406 memory based driver' 'Evdev Axis Inversion' 0 1
-
-
-bcm2708_fb
-```
-[    1.321280] bcm2708_fb soc:fb: FB found 1 display(s)
-[    1.337010] Console: switching to colour frame buffer device 60x50
-[    1.346517] bcm2708_fb soc:fb: Registered framebuffer for display 0, size 480x800
-[    1.354347] bcm2835-rng 3f104000.rng: hwrng registered
-[    1.354882] vc-mem: phys_addr:0x00000000 mem_base=0x3ec00000 mem_size:0x40000000(1024 MiB)
-[    1.355591] vc-sm: Videocore shared memory driver
-```
-# Pieces
-https://github.com/pychess/pychess/tree/master/pieces
-spatial
-
-# Stockfish
-
-## Download v8
-Using version 8, as it actually compiles on my RPI. 
-
-https://www.dropbox.com/sh/75gzfgu7qo94pvh/AACdQ6SKZYrwVY9Ufc8uLeN6a/Stockfish%208?dl=0&preview=stockfish-8-linux.zip&subfolder_nav_tracking=1
-
-## Process control
-You need to be able to launch and control the stockfish process. Sending commands and reading results is done by reading and writing to stdio and stdout.
-
-https://github.com/eidheim/tiny-process-library
-
-## UCI commands
-https://8bitcoder.com/uci
-
---> = send to engine
-
-    --> uci
-    id name Deep Shredder 13 x64
-    id author Stefan Meyer-Kahlen
-    option name Hash type spin min 1 max 65536 default 32
-    option name Ponder type check default false
-    option name MultiPV type spin min 1 max 20 default 1
-    option name UCI_EngineAbout type string default Shredder by Stefan Meyer-Kahlen, www.shredderchess.com
-    option name UCI_Chess960 type check default false
-    option name UCI_ShowCurrLine type check default false
-    option name UCI_LimitStrength type check default false
-    option name UCI_Elo type spin min 850 max 2800 default 1400
-    option name Keep Hash Tables type check default true
-    option name Clear Hash type button
-    option name Use Shredderbases type check default true
-    option name UCI_ShredderbasesPath type string default shredderbases/bases.ini
-    option name Use Syzygy Databases type check default true
-    option name Syzygy 50 Moves Rule type check default true
-    option name Syzygy Path type string default <empty>
-    option name Contempt type spin min -300 max 300 default 0
-    option name Time Buffer (sec) type spin min 0 max 60 default 1
-    option name Time Usage Percent type spin min 50 max 200 default 100
-    option name Threads type spin min 1 max 128 default 1
-    uciok
-    registration checking
-    registration ok
-
-    --> ucinewgame
-    <no output>
-    --> position startpos 
-    --> position fen 
-
-
-Note that Shredder sends registration lines, but Stockfish doesn't. 
-
-
-
-        sendCommand("setoption name Skill Level value "+skillLevel);
-        sendCommand("setoption name Slow Mover value "+slowMover);
-        sendCommand("position fen " + fen);
-            sendCommand("go");
-            sendCommand("go movetime " + moveTime);
-
-Interesting boiler plate code: http://talkchess.com/forum3/viewtopic.php?t=73806
-
+    $ build/cbgui -f -e ./stockfish
+    
+        -f = Full screen
+        -e = Location of the engine to use.

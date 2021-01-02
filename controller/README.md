@@ -12,15 +12,18 @@ You need to have
 - [ssobjects](https://github.com/abathur8bit/ssobjects) installed to compile chess controller, as it uses the network to allow remote connections.
 - [nlohmann json](https://github.com/nlohmann/json) for json parsing and creation.
 
-## Compile chesslrcontroller
+## Compile 
 
-    $ cmake -f CMakeLists.txt
-    $ make 
+  $ mkdir build
+  $ build
+  $ cmake ..
+  $ make 
+  $ cd ..
 
-## Running
-You might need to use **sudo** when m_running, since the wiringPI lib needs access to the i2c hardware.
+## Run
+You might need to use **sudo** when running, since the wiringPI lib needs access to the i2c hardware.
 
-    $ sudo ./chesslrcontroller
+    $ build/cbcontroller
     binding to port 9999
     construction
     Turning off led's...
