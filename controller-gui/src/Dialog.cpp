@@ -25,6 +25,7 @@ Dialog::Dialog(const char* title,const char* message,int type)
 {
     switch(type) {
         case DIALOG_TYPE_OK:
+            m_okayButton.setText("");
             m_cancelButton.setText("OK");
             break;
         case DIALOG_TYPE_OK_CANCEL:
