@@ -135,6 +135,9 @@ void ControllerGUI::startGame() {
     m_uci.setDebug(true);
     m_uci.start();
     m_uci.sendCommand("uci");
+#ifdef WIN32
+    m_uci.sendCommand("setoption name UCI_Elo value 850");
+#endif
     m_uci.newGame();
     show(m_renderer);
     m_uci.stop();
@@ -146,12 +149,20 @@ void ControllerGUI::startGame() {
 void ControllerGUI::update(long ticks) {
     Window::update(ticks);
     if(m_connector->isConnected()) {
-        char buffer[1024];
-        if(m_connector->readline(buffer, sizeof(buffer))) {
-            printf("Read from socket: %s\n",buffer);
-            if(buffer[0]=='{') {
-                processJson(buffer);
+        try {
+            char buffer[1024];
+            if(m_connector->readline(buffer, sizeof(buffer))) {
+                printf("Read from socket: %s\n", buffer);
+                if(buffer[0]=='{') {
+                    processJson(buffer);
+                }
             }
+        } catch(SocketInstanceException& e) {
+            Dialog dlg("Error","Error communicating with controller",DIALOG_TYPE_OK);
+            dlg.show(m_renderer);
+            m_connector->close();
+            Button* b=findButton("settingsbutton");
+            if(b) b->setChecked(false);
         }
     }
 }
@@ -172,6 +183,10 @@ void ControllerGUI::processButtonClicked(Button *c) {
         }
     } else if(!strcmp(c->id(),"newgamebutton")) {
         setupNewGame();
+    } else if(!strcmp(c->id(),"hintbutton")) {
+#ifndef WIN32
+        Process p("matchbox-keyboard", "", nullptr, nullptr, true);
+#endif
     }
 }
 

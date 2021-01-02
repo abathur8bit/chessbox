@@ -52,6 +52,7 @@ public:
     void Forsyth(const char* fen);
     void highlightSquare(int square,bool highlight);
     bool isHighlighted(int square) {return m_highlight[square];}
+    void clearHighlights();
     BoardRules* rules() {return &m_rules;}
     void playMove(const char* sanLong);
 

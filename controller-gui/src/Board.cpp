@@ -124,6 +124,12 @@ void Board::highlightSquare(int square, bool highlight) {
     m_highlight[square]=highlight;
 }
 
+void Board::clearHighlights() {
+    for(int i=0; i<NUM_SQUARES; i++) {
+        m_highlight[i]=false;
+    }
+}
+
 void Board::playMove(const char* sanLong) {
     Move mv;
     mv.TerseIn(rules(),sanLong);

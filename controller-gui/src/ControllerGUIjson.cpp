@@ -84,4 +84,5 @@ void ControllerGUI::setupNewGame() {
     j["action"]="setposition";
     j["fen"]=fen;
     m_connector->send(j.dump().c_str());
+    m_board->clearHighlights();
 }
