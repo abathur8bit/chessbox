@@ -41,8 +41,9 @@ void uciWait() {
 //grab first message on the queue and return it, or return an empty string if empty
 string uciPull() {
     unique_lock<std::mutex> lck(mtx);
-    if(queue.empty())
+    if(queue.empty()) {
         return "";
+    }
     string s=queue.front();
     queue.pop_front();
     if(queue.empty())
@@ -93,15 +94,23 @@ bool UCIClient::start() {
     m_pProcess = new Process(m_enginePath, "", [output](const char *bytes, size_t n) {
         char line[1024];
         *output += string(bytes, n);
+//        if(uciIsDebug()) {
+//            cout << "read bytes ["<<*output<<"]" << endl;
+//        }
+        bool keepParsing=true;
         do {
             uciParse(line, sizeof line, output);
+            if(uciIsDebug()) {
+                printf("read line [%s]\n", line);
+            }
             if(strlen(line)) {
                 uciPush(line);
-                if(uciIsDebug()) {
-                    printf("read line [%s]\n", line);
-                }
+            } else {
+                //make sure we are able to continue parsing after a blank line
+                if(output->length()==0)
+                    keepParsing=false;
             }
-        } while(strlen(line));
+        } while(keepParsing);
     }, nullptr, true);
     return true;
 }
@@ -187,3 +196,115 @@ string UCIClient::waitFor(string s) {
     } while(lineWanted.empty());
     return lineWanted;
 }
+
+OptionType UCIClient::stringToType(string stype) {
+    if(!stype.compare("spin")) {
+        return option_spin;
+    } else if(!stype.compare("string")) {
+        return option_string;
+    } else if(!stype.compare("button")) {
+        return option_button;
+    } else if(!stype.compare("check")) {
+        return option_check;
+    } else if(!stype.compare("combo")) {
+        return option_combo;
+    } else {
+        return option_unknown;
+    }
+}
+
+//string can be blank, or can be "<empty>", or can have a string
+EngineStringOption* UCIClient::parseStringOption(string name,OptionType type,string line) {
+    const int len=line.length();
+    int start=strlen(ENGINE_OPTION_DEFAULT)+1;
+    int end=(start>len ? start:len);    //end is either the length of the string, or if there is nothing after default then it's the same as start
+    if(start>len) {
+        start=end=0;
+    }
+    string sdefault=line.substr(start,end-start);
+    EngineStringOption* op=new EngineStringOption(name,sdefault,sdefault);
+    return op;
+}
+
+EngineSpinOption* UCIClient::parseSpinOption(string name,OptionType type,string line) {
+    int defaultStart=line.find(ENGINE_OPTION_DEFAULT)+strlen(ENGINE_OPTION_DEFAULT)+1;
+    int defaultEnd=defaultStart;
+    while(line[defaultEnd]!=' ' && defaultEnd<line.length()) {
+        defaultEnd++;
+    }
+    string sdefault=line.substr(defaultStart,defaultEnd-defaultStart);
+
+    int minStart=line.find(ENGINE_OPTION_MIN)+strlen(ENGINE_OPTION_MIN)+1;
+    int minEnd=minStart;
+    while(line[minEnd]!=' ' && minEnd<line.length()) {
+        minEnd++;
+    }
+    string smin=line.substr(minStart,minEnd-minStart);
+
+    int maxStart=minEnd+5;  //2 spaces and length of "max"
+    int maxEnd=maxStart;
+    while(line[maxEnd]!=' ' && maxEnd<line.length()) {
+        maxEnd++;
+    }
+    string smax=line.substr(maxStart,maxEnd-maxStart);
+
+    EngineSpinOption* op=new EngineSpinOption(name,atoi(smin.c_str()),atoi(smax.c_str()),atoi(sdefault.c_str()),atoi(sdefault.c_str()));
+    return op;
+}
+//option_string, option_spin, option_button, option_check
+
+EngineCheckOption* UCIClient::parseCheckOption(string name,OptionType type,string line) {
+    const int len=line.length();
+    int start=strlen(ENGINE_OPTION_DEFAULT)+1;
+    int end=(start>len ? start:len);    //end is either the length of the string, or if there is nothing after default then it's the same as start
+    if(start>len) {
+        start=end=0;
+    }
+    string sdefault=line.substr(start,end-start);
+    bool value=!sdefault.compare("false") ? false:true; //"false" is false, "true" or anything else is true
+    return new EngineCheckOption(name,value,value);
+}
+EngineComboOption* UCIClient::parseComboOption(string name,OptionType type,string line) {
+    const int len=line.length();
+    int start=strlen(ENGINE_OPTION_DEFAULT)+1;
+    int end=start;
+    while(line[end]!=' ' && end<len) {
+        end++;
+    }
+    string sdefault=line.substr(start,end-start);
+
+    EngineComboOption* op=new EngineComboOption(name,sdefault,sdefault);
+    start=end+5;    //start at value after ' var '
+    while(start<len) {
+        end=start;
+        while(line[end]!=' ' && end<len) {
+            end++;
+        }
+        string var=line.substr(start,end-start);
+        if(var.compare("var")) {
+            op->push_back(var); //only if token is not the 'var' tag
+        }
+        start=end+1;
+    }
+    return op;
+}
+EngineOption* UCIClient::parseOption(string line) {
+    int nameStart=strlen("option name ");
+    int itype=line.find("type");
+    int typeStart=itype+5;
+    int typeEnd=line.find(' ',typeStart);
+    string name=line.substr(nameStart,itype-nameStart-1);
+    string stype=line.substr(typeStart,typeEnd-typeStart);
+//    printf("name=[%s] type=[%s]\n",name.c_str(),stype.c_str());
+    OptionType type=stringToType(stype);
+    string toparse=line.substr(typeEnd+1);
+    switch(type) {
+        case option_string: return parseStringOption(name,type,toparse); break;
+        case option_spin: return parseSpinOption(name,type,toparse); break;
+//        case option_button: return "button"; break;
+        case option_check: return parseCheckOption(name,type,toparse); break;
+        case option_combo: return parseComboOption(name,type,toparse); break;
+    }
+    return nullptr;
+}
+

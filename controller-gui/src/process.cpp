@@ -48,7 +48,7 @@ int main(int argc,char* argv[]) {
     }
 
     UCIClient uci(engine);
-    uci.setDebug(false);
+    uci.setDebug(true);
     uci.start();
     uci.sendCommand("uci");
     uci.newGame();
