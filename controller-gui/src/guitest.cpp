@@ -21,6 +21,8 @@
 #include "UCIClient.h"
 #include <map>
 #include <typeinfo>
+#include <iostream>
+using namespace std;
 
 int main(int argc,char* argv[]) {
     printf("Hello World\n");
@@ -28,12 +30,29 @@ int main(int argc,char* argv[]) {
     uci.setDebug(false);
     uci.start();
     uci.sendCommand("uci");
+    list<string> options;
     string line="";
     do {
         uciWait();
         line=uciPull();
-        printf("Option=[%s]\n",line.c_str());
-    } while(true);
+        if(line.find("option") != string::npos) {
+            options.push_back(line);
+        }
+//        printf("Option=[%s]\n",line.c_str());
+    } while(line.compare("uciok"));
+
+    list<EngineOption*> engineOptions;
+    for(list<string>::iterator it=options.begin(); it!=options.end(); it++) {
+//        cout << "Option ["<<*it<<"]"<<endl;
+        EngineOption* op=uci.parseOption(*it);
+        if(op!=nullptr) {
+            engineOptions.push_back(op);
+//        cout << "Option ["<<*it<<"]"<<endl;
+        } else {
+            cout << "Ignoring option ["<<*it<<"]"<<endl;
+
+        }
+    }
 }
 
 

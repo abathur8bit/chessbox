@@ -135,8 +135,8 @@ void ControllerGUI::startGame() {
     m_uci.setDebug(true);
     m_uci.start();
     m_uci.sendCommand("uci");
+    m_uci.sendCommand("setoption name Skill Level value 1");
 #ifdef WIN32
-    m_uci.sendCommand("setoption name UCI_Elo value 850");
 #endif
     m_uci.newGame();
     show(m_renderer);
