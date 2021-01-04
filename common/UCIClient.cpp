@@ -114,6 +114,46 @@ bool UCIClient::start() {
     }, nullptr, true);
     return true;
 }
+/**
+ * Special set level method so we can decide what other tweaks to gameplay we want to make
+ * for a particular level.
+ * @param level The Skill Level, between 0-20 inclusive.
+ */
+void UCIClient::setLevel(int level) {
+    setSpinOption("Skill Level",level);
+}
+void UCIClient::setSpinOption(string key,int value) {
+    EngineSpinOption* op=static_cast<EngineSpinOption*>(m_options[key]);
+    if(op) {
+        if(value>=op->minValue() && value<=op->maxValue()) {
+            op->m_currentValue=value;
+            char buffer[1024];
+            snprintf(buffer,sizeof buffer,"setoption name %s value %d",op->name(),value);
+            sendCommand(buffer);
+        }
+    }
+}
+
+void UCIClient::discoverOptions() {
+    sendCommand("uci");
+    string line;
+    string idname="id name";
+    do {
+        uciWait();
+        line=uciPull();
+        if(line.find("option") != string::npos) {
+            EngineOption* op=parseOption(line);
+            if(op)
+                m_options[op->name()]=op;
+        } else if(line.find(idname) != string::npos) {
+            //create a string option for the engine name
+            string name=line.substr(idname.length()+1);
+            EngineStringOption* op=new EngineStringOption("name",name,name);
+            m_options[op->name()]=op;
+        }
+
+    } while(line.compare("uciok"));
+}
 /** Tells the engine to start a new game. */
 void UCIClient::newGame() {
     sendCommand("ucinewgame");

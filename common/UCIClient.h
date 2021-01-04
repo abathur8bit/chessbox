@@ -117,6 +117,10 @@ public:
     string bestMove(string fen,long time=1);
     void bestMove(string& move,string& ponder,string fen,long time=1);
     void sendCommand(string s);
+    void discoverOptions();
+    EngineOption* option(string key) {return m_options[key];}
+    void setSpinOption(string key,int value);
+    void setLevel(int level);
     string waitFor(string s);
     void setDebug(bool debug){uciSetDebug(debug);}
     bool isDebug(){return uciIsDebug();}
@@ -128,12 +132,12 @@ public:
     EngineCheckOption* parseCheckOption(string name,OptionType type,string line);
     EngineComboOption* parseComboOption(string name,OptionType type,string line);
     OptionType stringToType(string stype);
+
 protected:
     string m_enginePath;
     Process* m_pProcess;
     bool m_debug;
     map<string,EngineOption*> m_options;
-
 };
 
 

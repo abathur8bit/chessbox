@@ -29,30 +29,34 @@ int main(int argc,char* argv[]) {
     UCIClient uci("C:\\workspace\\chessbox\\stockfish_20090216_x64_avx2.exe");
     uci.setDebug(false);
     uci.start();
-    uci.sendCommand("uci");
-    list<string> options;
-    string line="";
-    do {
-        uciWait();
-        line=uciPull();
-        if(line.find("option") != string::npos) {
-            options.push_back(line);
-        }
+    uci.discoverOptions();
+    EngineOption* op=uci.option("name");
+    cout << "name: " << op->currentValue() << endl;
+    op=uci.option("Skill Level");
+    cout << "option " << op->name() << " value "<<op->currentValue()<<endl;
+//    list<string> options;
+//    string line="";
+//    do {
+//        uciWait();
+//        line=uciPull();
+//        if(line.find("option") != string::npos) {
+//            options.push_back(line);
+//        }
 //        printf("Option=[%s]\n",line.c_str());
-    } while(line.compare("uciok"));
-
-    list<EngineOption*> engineOptions;
-    for(list<string>::iterator it=options.begin(); it!=options.end(); it++) {
+//    } while(line.compare("uciok"));
+//
+//    list<EngineOption*> engineOptions;
+//    for(list<string>::iterator it=options.begin(); it!=options.end(); it++) {
 //        cout << "Option ["<<*it<<"]"<<endl;
-        EngineOption* op=uci.parseOption(*it);
-        if(op!=nullptr) {
-            engineOptions.push_back(op);
+//        EngineOption* op=uci.parseOption(*it);
+//        if(op!=nullptr) {
+//            engineOptions.push_back(op);
 //        cout << "Option ["<<*it<<"]"<<endl;
-        } else {
-            cout << "Ignoring option ["<<*it<<"]"<<endl;
-
-        }
-    }
+//        } else {
+//            cout << "Ignoring option ["<<*it<<"]"<<endl;
+//
+//        }
+//    }
 }
 
 
