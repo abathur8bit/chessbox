@@ -60,7 +60,7 @@ list<Component*> uistuff;
 UIGroup buttonGroup("buttons",0,670,280,130);
 //UIGroup movesGroup("moves",480-200,480,200,800-320);
 
-char host[80]="192.168.1.54";
+char host[80]="127.0.0.1";
 unsigned short port=9999;
 Connector connector;
 bool attemptConnect=true;
