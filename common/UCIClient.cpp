@@ -122,9 +122,32 @@ bool UCIClient::start() {
 void UCIClient::setLevel(int level) {
     setSpinOption("Skill Level",level);
 }
+void UCIClient::setDepth(int depth) {
+    EngineSpinOption* op;
+    if(m_options.count(ENGINE_OPTION_DEPTH)) {
+        //set options new value
+        op=static_cast<EngineSpinOption *>(m_options[ENGINE_OPTION_DEPTH]);
+        op->m_currentValue=depth;
+    } else {
+        //create the option
+        op=new EngineSpinOption(ENGINE_OPTION_DEPTH,0,100,0,depth);
+        m_options[ENGINE_OPTION_DEPTH]=op;
+    }
+}
+void UCIClient::setMovetime(int ms) {
+    EngineSpinOption* op;
+    if(m_options.count(ENGINE_OPTION_MOVETIME)) {
+        op=static_cast<EngineSpinOption *>(m_options[ENGINE_OPTION_MOVETIME]);
+        op->m_currentValue=ms;
+    } else {
+        op=new EngineSpinOption(ENGINE_OPTION_MOVETIME,0,10000,0,ms);
+        m_options[ENGINE_OPTION_MOVETIME]=op;
+    }
+}
+
 void UCIClient::setSpinOption(string key,int value) {
-    EngineSpinOption* op=static_cast<EngineSpinOption*>(m_options[key]);
-    if(op) {
+    if(m_options.count(key)) {
+        EngineSpinOption* op=static_cast<EngineSpinOption*>(m_options[key]);
         if(value>=op->minValue() && value<=op->maxValue()) {
             op->m_currentValue=value;
             char buffer[1024];
@@ -177,27 +200,33 @@ void UCIClient::setPosition(string fen) {
  * @param time Time in milliseconds to evaluate.
  * @return The move in LAN format, ie: "b8c6".
  */
-string UCIClient::bestMove(string fen, long time) {
-    setPosition(fen);
-    char buffer[1024];
-    snprintf(buffer,sizeof(buffer),"go movetime %d",time);
-    sendCommand(buffer);
-    string move=waitFor("bestmove");
-    std::istringstream buf(move);
-    std::istream_iterator<std::string> beg(buf), end;
-    std::vector<std::string> tokens(beg, end); // done!
-    if(uciIsDebug()) {
-        for(auto &s: tokens)
-            std::cout << '"' << s << '"' << '\n';
-    }
-    return tokens[1];
+string UCIClient::bestMove(string fen) {
+    string move,ponder;
+    bestMove(move,ponder,fen);
+    return move;
 }
 
-void UCIClient::bestMove(string& move, string& ponder, string fen, long time) {
-    setPosition(fen);
+void UCIClient::bestMove(string& move, string& ponder, string fen) {
     char buffer[1024];
-    snprintf(buffer,sizeof(buffer),"go movetime %d",time);
-    sendCommand(buffer);
+    string command="go";
+    if(m_options.count(ENGINE_OPTION_DEPTH)) {
+        EngineSpinOption* op=static_cast<EngineSpinOption*>(m_options[ENGINE_OPTION_DEPTH]);
+        int depth=op->m_currentValue;
+        if(depth>0) {
+            snprintf(buffer, sizeof(buffer), " %s %d",ENGINE_OPTION_DEPTH,depth);
+            command+=buffer;
+        }
+    }
+    if(m_options.count(ENGINE_OPTION_MOVETIME)) {
+        EngineSpinOption* op=static_cast<EngineSpinOption*>(m_options[ENGINE_OPTION_MOVETIME]);
+        int movetime=op->m_currentValue;
+        if(movetime>0) {
+            snprintf(buffer, sizeof(buffer), " movetime %d", movetime);
+            command+=buffer;
+        }
+    }
+    setPosition(fen);
+    sendCommand(command);
     string best=waitFor("bestmove");
     std::istringstream buf(best);
     std::istream_iterator<std::string> beg(buf), end;
@@ -269,21 +298,21 @@ EngineStringOption* UCIClient::parseStringOption(string name,OptionType type,str
 EngineSpinOption* UCIClient::parseSpinOption(string name,OptionType type,string line) {
     int defaultStart=line.find(ENGINE_OPTION_DEFAULT)+strlen(ENGINE_OPTION_DEFAULT)+1;
     int defaultEnd=defaultStart;
-    while(line[defaultEnd]!=' ' && defaultEnd<line.length()) {
+    while(line[defaultEnd]!=' ' && defaultEnd<(int)line.length()) {
         defaultEnd++;
     }
     string sdefault=line.substr(defaultStart,defaultEnd-defaultStart);
 
     int minStart=line.find(ENGINE_OPTION_MIN)+strlen(ENGINE_OPTION_MIN)+1;
     int minEnd=minStart;
-    while(line[minEnd]!=' ' && minEnd<line.length()) {
+    while(line[minEnd]!=' ' && minEnd<(int)line.length()) {
         minEnd++;
     }
     string smin=line.substr(minStart,minEnd-minStart);
 
     int maxStart=minEnd+5;  //2 spaces and length of "max"
     int maxEnd=maxStart;
-    while(line[maxEnd]!=' ' && maxEnd<line.length()) {
+    while(line[maxEnd]!=' ' && maxEnd<(int)line.length()) {
         maxEnd++;
     }
     string smax=line.substr(maxStart,maxEnd-maxStart);

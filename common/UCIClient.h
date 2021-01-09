@@ -28,6 +28,9 @@ enum OptionType {option_unknown,option_string, option_spin, option_button, optio
 #define ENGINE_OPTION_MIN "min"
 #define ENGINE_OPTION_MAX "max"
 #define ENGINE_OPTION_VAR "var"
+#define ENGINE_OPTION_DEPTH "depth"
+#define ENGINE_OPTION_MOVETIME "movetime"
+#define ENGINE_OPTION_SKILL_LEVEL "Skill Level"
 
 class EngineOption {
 public:
@@ -114,13 +117,15 @@ public:
     void stop();
     void newGame();
     void setPosition(string fen);
-    string bestMove(string fen,long time=1);
-    void bestMove(string& move,string& ponder,string fen,long time=1);
+    string bestMove(string fen);
+    void bestMove(string& move,string& ponder,string fen);
     void sendCommand(string s);
     void discoverOptions();
     EngineOption* option(string key) {return m_options[key];}
     void setSpinOption(string key,int value);
-    void setLevel(int level);
+    void setLevel(int level);   ///< Sets the skill level, movetime and depth. Skill levels from 0-8.
+    void setDepth(int depth);
+    void setMovetime(int movetime);
     string waitFor(string s);
     void setDebug(bool debug){uciSetDebug(debug);}
     bool isDebug(){return uciIsDebug();}

@@ -1,4 +1,5 @@
 //
+//
 // Created by patte on 12/24/2020.
 //
 
@@ -68,14 +69,18 @@ void ControllerGUI::initComponents() {
     Label* label=new Label("playersettingslabel",0,510,SCREEN_WIDTH/2,290);
     y+=gap+gap;
     label->setText("One Player Settings");
-    TextButton* level=new TextButton("levelbutton","Level: 7",x,y,w,h);
+    snprintf(m_buffer,sizeof m_buffer,"Skill: %d",m_skillLevel);
+    TextButton* skill=new TextButton("skillbutton",m_buffer,x,y,w,h);
     x+=w+gap;
-    TextButton* skill=new TextButton("skillbutton","Skill: 20",x,y,w,h);
     x=0;
     y+=h+gap;
-    TextButton* time=new TextButton("timebutton","Time: 1000",x,y,w,h);
+    snprintf(m_buffer,sizeof m_buffer,"Depth: %d",m_depth);
+    TextButton* depth=new TextButton("depthbutton",m_buffer,x,y,w,h);
     x+=w+gap;
-    TextButton* depth=new TextButton("depthbutton","Depth: 22",x,y,w,h);
+    snprintf(m_buffer,sizeof m_buffer,"Time: %d",m_movetime);
+    TextButton* time=new TextButton("timebutton",m_buffer,x,y,w,h);
+    x+=w+gap;
+    TextButton* level=new TextButton("levelbutton","Level: 7",x,y,w,h);
 
     x=0;
     y=800-130;
@@ -100,7 +105,7 @@ void ControllerGUI::initComponents() {
     Button* fastFwd=new AnimButton("fastfwdbutton",m_renderer,"assets/button-fastfwd.png",1,x,y);
     x+=w+gap;
 
-    addButton(level);
+//    addButton(level);
     addButton(skill);
     addButton(time);
     addButton(depth);
@@ -114,7 +119,7 @@ void ControllerGUI::initComponents() {
     addButton(fastFwd);
 
     addComponent(label);
-    addComponent(level);
+//    addComponent(level);
     addComponent(skill);
     addComponent(time);
     addComponent(depth);
@@ -134,8 +139,8 @@ void ControllerGUI::startGame() {
     initComponents();
     m_uci.setDebug(true);
     m_uci.start();
-    m_uci.sendCommand("uci");
-    m_uci.setLevel(0);
+    m_uci.discoverOptions();
+    m_uci.setSpinOption(ENGINE_OPTION_SKILL_LEVEL,m_skillLevel);
 #ifdef WIN32
 #endif
     m_uci.newGame();
@@ -187,6 +192,36 @@ void ControllerGUI::processButtonClicked(Button *c) {
 #ifndef WIN32
         Process p("matchbox-keyboard", "", nullptr, nullptr, true);
 #endif
+    } else if(!strcmp(c->id(),"depthbutton")) {
+        if(++m_depth>22)
+            m_depth=0;
+        m_uci.setDepth(m_depth);
+        TextButton* t=static_cast<TextButton*>(c);
+        snprintf(m_buffer,sizeof m_buffer,"Depth: %d",m_depth);
+        t->setText(m_buffer);
+    } else if(!strcmp(c->id(),"timebutton")) {
+        if(m_movetime<10)
+            m_movetime+=1;
+        else if(m_movetime<100)
+            m_movetime+=10;
+        else
+            m_movetime+=100;
+
+        if(m_movetime>1000)
+            m_movetime=0;
+        m_uci.setMovetime(m_movetime);
+        TextButton* t=static_cast<TextButton*>(c);
+        snprintf(m_buffer,sizeof m_buffer,"Time: %d",m_movetime);
+        t->setText(m_buffer);
+    } else if(!strcmp(c->id(),"skillbutton")) {
+        EngineSpinOption* op=static_cast<EngineSpinOption*>(m_uci.option(ENGINE_OPTION_SKILL_LEVEL));
+        int skill=op->m_currentValue+1;
+        if(skill > op->maxValue())
+            skill=op->minValue();
+        m_uci.setSpinOption(ENGINE_OPTION_SKILL_LEVEL,skill);
+        TextButton *t=static_cast<TextButton *>(c);
+        snprintf(m_buffer, sizeof m_buffer, "Skill: %d", skill);
+        t->setText(m_buffer);
     }
 }
 

@@ -1,3 +1,8 @@
+- Engine Options, methods to set/get combos, strings, and checks
+- Set level, do I need to also set the movetime? 
+- Do I need to set the depth?
+
+
 - Setup position screen
 - Support multiple games in the pgn autosave file. When ever the **new** button is pressed, it will start a new game, and game is added to file.
 - Settings screen

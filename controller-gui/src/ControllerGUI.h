@@ -40,6 +40,9 @@ protected:
     char m_buffer[1024];
     UCIClient m_uci;
     string m_pgnFile;
+    int m_depth=0;
+    int m_movetime=0;
+    int m_skillLevel=0;
 };
 
 
