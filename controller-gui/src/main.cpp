@@ -674,7 +674,7 @@ int main(int argc, char* argv[]) {
     string engine="C:/Program Files (x86)/ShredderChess/Deep Shredder 13/EngineDeepShredder13UCIx64.exe";
 #else
     string pgn="/home/pi/game.pgn";
-    string engine="/home/pi/workspace/chessengine/stockfish-8-linux/src/stockfish";
+    string engine="engine/stockfish8";
 #endif
     for(int i=1; i<argc; i++) {
         if(!strcmp("-f",argv[i])) {
