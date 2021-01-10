@@ -17,7 +17,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ******************************************************************************/
-
+//-e "C:\Program Files\tarrasch-v3.12b-g\Engines\stockfish_8_x64.exe" -h 192.168.1.54
+//-e "C:/Program Files (x86)/ShredderChess/Deep Shredder 13/EngineDeepShredder13UCIx64.exe" -h 192.168.1.54
 #include <stdio.h>
 #include <string.h>
 
@@ -546,76 +547,6 @@ void scrolltest() {
 
 int main(int argc, char* argv[]) {
     printf("You may need to run 'export SDL_VIDEODRIVER=rpi'\n");
-#if 0
-    B b;
-    b.foo();
-    A* a = &b;
-    a->foo();
-    a->bar();
-
-    Greet lee("Lee");
-    Greet pauline("Pauline");
-    Greet frank("Frank");
-    
-    lee.foo();
-    a=&lee;
-    a->foo();
-    a->bar();
-
-    printf("---\n");
-    list<A*> ass;
-    ass.push_back(&lee);
-    ass.push_back(&pauline);
-    ass.push_back(&frank);
-
-    for (list<A *>::iterator it = ass.begin(); it != ass.end(); it++) {
-        B* b = static_cast<B*>(*it);
-        b->foo();
-        b->cat();
-    }
-
-    return 1;
-#endif
-
-#if 0
-    BoardRules rules;
-    printf("history index=%d\n",rules.historyIndex());
-    thc::Move mv;
-    mv.NaturalIn(&rules,"d4");  //    mv.TerseIn(&rules, buffer);
-    rules.PlayMove(mv);
-    mv.NaturalIn(&rules,"d5");
-    rules.PlayMove(mv);
-    rules.display_position();
-    mv = rules.historyAt(1);
-    printf("move %s %s\n",mv.NaturalOut(&rules).c_str(),mv.TerseOut().c_str());
-    mv = rules.historyAt(2);
-    printf("move %s %s\n",mv.NaturalOut(&rules).c_str(),mv.TerseOut().c_str());
-    printf("history index=%d\n",rules.historyIndex());
-#endif
-
-#if 0
-    printf("Connecting\n");
-    Connector c;
-    c.connect("192.168.1.54",9999);
-    char buf[]="123456789012345678901234567890123456789012345678901234567890";
-    int n=0;
-    while((n=c.readline(buf,10))==0)
-        printf("waiting for data %lu\n",time(NULL));
-    memset(buf,'z',sizeof(buf));
-    n=c.readline(buf,10);
-    memset(buf,'z',sizeof(buf));
-    n=c.readline(buf,10);
-    memset(buf,'z',sizeof(buf));
-    n=c.readline(buf,10);
-    memset(buf,'z',sizeof(buf));
-    n=c.readline(buf,10);
-    memset(buf,'z',sizeof(buf));
-    n=c.readline(buf,10);
-    memset(buf,'z',sizeof(buf));
-
-
-    printf("Done\n");
-#endif
 #if 1
     int numdrivers, i, working;
     const char* drivername;
@@ -644,25 +575,6 @@ int main(int argc, char* argv[]) {
 
     printf("\n%d video drivers total (%d work)\n", numdrivers, working);
 
-#endif
-#if 0
-    BoardRules rules;
-    //1.d4 Nc6 2.Nf3 d5 3.Bf4 Bg4 4.h3 Bh5 5.Nbd2
-    rules.playMove("d4");
-    rules.playMove("Nc6");
-    rules.playMove("Nf3");
-    rules.playMove("d5");
-    rules.playMove("Bf4");
-    rules.playMove("Bg4");
-    rules.playMove("h3");
-    rules.playMove("Bh5");
-    rules.playMove("Nbd2");
-    rules.display_position();
-
-    for(int i=1; i<rules.historyIndex(); i++) {
-        Move mv=rules.historyAt(i);
-        printf("%s %s\n",mv.TerseOut().c_str(),mv.NaturalOut(&rules).c_str());
-    }
 #endif
 #if 1
 
