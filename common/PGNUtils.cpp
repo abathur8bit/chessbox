@@ -52,41 +52,39 @@ bool PGNUtils::save(const char* pathname,BoardRules* rules,string result,string 
         fprintf(fp,"[SetUp \"1\"]\n");
         fprintf(fp,"[FEN \"%s\"]\n",fen.c_str());
     }
-    fprintf(fp,"\n");
 
     if(rules->historyIndex()>1) {
         int i=1;
         int moveNum=1;
+        BoardRules pgnRules;
         while(i<rules->historyIndex()) {
             if(i+1<rules->historyIndex()) {
-                //we have a white and black move
-                Move mvwhite = rules->historyAt(i);
-                bool whiteCheck=rules->isCheck(mvwhite);
-                Move mvblack = rules->historyAt(++i);
-                bool blackCheck=rules->isCheck(mvblack);
-                fprintf(fp,"%d. %s %s",moveNum++,mvwhite.TerseOut().c_str(),mvblack.TerseOut().c_str());
-                if(i+1==rules->historyIndex() && rules->isMate())
-                    fprintf(fp,"# ");
-                else
-                    fprintf(fp,"\n");
+                //white
+                Move historyMove = rules->historyAt(i);
+                Move pgnMove;
+                pgnMove.TerseIn(&pgnRules,historyMove.TerseOut().c_str());
+                fprintf(fp,"\n%d. %s ",moveNum++,pgnMove.NaturalOut(&pgnRules).c_str());
+                pgnRules.PlayMove(pgnMove);
+                //black
+                historyMove = rules->historyAt(++i);
+                pgnMove.TerseIn(&pgnRules,historyMove.TerseOut().c_str());
+                fprintf(fp,"%s",pgnMove.NaturalOut(&pgnRules).c_str());
+                pgnRules.PlayMove(pgnMove);
             } else {
                 //we have just a white move
-                Move mv = rules->historyAt(i);
-                bool whiteCheck=rules->isCheck(mv);
-                mv.NaturalIn(rules,"e8=Q+");
-                string san=mv.NaturalOut(rules);
-                printf("san=%s\n",san.c_str());
-                fprintf(fp,"%d. %s",moveNum++,mv.TerseOut().c_str());
-                if(i+1==rules->historyIndex() && rules->isMate())
-                    fprintf(fp,"# ");
-                else
-                    fprintf(fp," ");
+                Move historyMove = rules->historyAt(i);
+                Move pgnMove;
+                pgnMove.TerseIn(&pgnRules,historyMove.TerseOut().c_str());
+                fprintf(fp,"\n%d. %s",moveNum++,pgnMove.NaturalOut(&pgnRules).c_str());
+                pgnRules.PlayMove(pgnMove);
+                if(i+1==rules->historyIndex() && !rules->isMate())
+                    fprintf(fp,"");
             }
             ++i;
         }
     }
 
-    fprintf(fp,"%s\n\n",result.c_str());
+    fprintf(fp," %s\n\n",result.c_str());
 
     fclose(fp);
     return true;

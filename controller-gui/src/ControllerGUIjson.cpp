@@ -31,8 +31,12 @@ void ControllerGUI::processJson(const char* buffer) {
             m_board->playMove(m.lan());
             printf("board is now [%s]\n",m_board->rules()->ForsythPublish().c_str());
             if(m_board->rules()->isMate()) {
-                string result=m_board->rules()->isWhiteMate() ? PGN_RESULT_WHITE_WIN:PGN_RESULT_BLACK_WIN;
-                pgn.save(m_pgnFile.c_str(),m_board->rules(),result,"Human","Chessbox");
+                string result=PGN_RESULT_NO_WIN;
+                if(m_board->rules()->isWhiteMate()) result=PGN_RESULT_WHITE_WIN;
+                if(m_board->rules()->isBlackMate()) result=PGN_RESULT_BLACK_WIN;
+                string computerName="Chessbox ";
+                computerName+=m_uci.engineName();
+                pgn.save(m_pgnFile.c_str(),m_board->rules(),result,"Human",computerName);
                 string buffer=m.lan();
                 buffer+="#";
                 m_movesPanel->add(buffer.c_str());
@@ -57,11 +61,11 @@ void ControllerGUI::processJson(const char* buffer) {
                 buffer+=" ";
                 buffer+=bestMove;
                 string result=PGN_RESULT_NO_WIN;
-                if(m_board->rules()->isMate()) {
-                    buffer+="#";
-                    result=m_board->rules()->isWhiteMate() ? PGN_RESULT_WHITE_WIN:PGN_RESULT_BLACK_WIN;
-                }
-                pgn.save(m_pgnFile.c_str(),m_board->rules(),result,"Human","Chessbox");
+                if(m_board->rules()->isWhiteMate()) result=PGN_RESULT_WHITE_WIN;
+                if(m_board->rules()->isBlackMate()) result=PGN_RESULT_BLACK_WIN;
+                string computerName="Chessbox ";
+                computerName+=m_uci.engineName();
+                pgn.save(m_pgnFile.c_str(),m_board->rules(),result,"Human",computerName);
                 m_movesPanel->add(buffer.c_str());
 
 //            invalidate();

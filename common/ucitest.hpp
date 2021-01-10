@@ -36,6 +36,20 @@
  */
 #include <cxxtest/TestSuite.h>
 #include "UCIClient.h"
+#include "BoardRules.h"
+
+class TestPGN : public CxxTest::TestSuite
+{
+public:
+    void testMove() {
+        BoardRules rules;
+        rules.playMove("a4");
+        rules.display_position();
+        cout << "terse  : " << rules.historyAt(0).TerseOut() << endl;
+        cout << "natural: " << rules.historyAt(0).NaturalOut(&rules) << endl;
+
+    }
+};
 
 class TestUCIParsing : public CxxTest::TestSuite
 {
@@ -126,25 +140,25 @@ public:
     }
 };
 
-class TestUCIOptionsWithEngine : public CxxTest::TestSuite {
-public:
-    void testThing() {
-        UCIClient uci("./engine/stockfish-8-linux/src/stockfish");
-        uci.setDebug(true);
-        uci.start();
-        uciWait();
-        uciPull();  //ignoring first line
-
-        uci.sendCommand("uci");
-        list<string> options;
-        string line;
-        while(line.compare("uciok")) {
-            line=uci.waitFor("option");
-        }
-        for(list<string>::iterator it=options.begin(); it!=options.end(); it++) {
-            TS_TRACE(*it);
-        }
-
-        uci.stop();
-    }
-};
+//class TestUCIOptionsWithEngine : public CxxTest::TestSuite {
+//public:
+//    void testThing() {
+//        UCIClient uci("./engine/stockfish-8-linux/src/stockfish");
+//        uci.setDebug(true);
+//        uci.start();
+//        uciWait();
+//        uciPull();  //ignoring first line
+//
+//        uci.sendCommand("uci");
+//        list<string> options;
+//        string line;
+//        while(line.compare("uciok")) {
+//            line=uci.waitFor("option");
+//        }
+//        for(list<string>::iterator it=options.begin(); it!=options.end(); it++) {
+//            TS_TRACE(*it);
+//        }
+//
+//        uci.stop();
+//    }
+//};

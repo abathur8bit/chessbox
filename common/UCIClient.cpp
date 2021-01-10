@@ -157,6 +157,10 @@ void UCIClient::setSpinOption(string key,int value) {
     }
 }
 
+const char* UCIClient::engineName() {
+    return option("name")->currentValue();
+}
+
 void UCIClient::discoverOptions() {
     sendCommand("uci");
     string line;

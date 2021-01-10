@@ -22,41 +22,117 @@
 #include <map>
 #include <typeinfo>
 #include <iostream>
+#include <BoardRules.h>
+#include <PGNUtils.h>
+
+using namespace thc;
 using namespace std;
 
+void replay(BoardRules& rules) {
+    rules.playMove("d4");
+    rules.playMove("d5");
+    rules.playMove("c4");
+    rules.playMove("Nc6");
+    rules.playMove("Nc3");
+    rules.playMove("Nf6");
+    rules.playMove("Bg5");
+    rules.playMove("e6");
+    rules.playMove("Bxf6");
+    rules.playMove("Qxf6");
+    rules.playMove("e4");
+    rules.playMove("Bb4");
+    rules.playMove("cxd5");
+    rules.playMove("Qxd4");
+    rules.playMove("Qxd4");
+    rules.playMove("Nxd4");
+    rules.playMove("Bd3");
+    rules.playMove("O-O");
+    rules.playMove("a3");
+    rules.playMove("Bd6");
+    rules.playMove("Nge2");
+    rules.playMove("Nb3");
+    rules.playMove("Rd1");
+    rules.playMove("Bd7");
+    rules.playMove("O-O");
+    rules.playMove("c5");
+    rules.playMove("Bc4");
+    rules.playMove("Na5");
+    rules.playMove("b3");
+    rules.playMove("Rad8");
+    rules.playMove("f4");
+    rules.playMove("e5");
+    rules.playMove("f5");
+    rules.playMove("f6");
+    rules.playMove("Bb5");
+    rules.playMove("Bxb5");
+    rules.playMove("Nxb5");
+    rules.playMove("c4");
+    rules.playMove("b4");
+    rules.playMove("Be7");
+    rules.playMove("d6");
+    rules.playMove("Kf7");
+    rules.playMove("dxe7");
+    rules.playMove("Rxd1");
+    rules.playMove("Rxd1");
+    rules.playMove("Ra8");
+    rules.playMove("Rd7");
+    rules.playMove("Ke8");
+    rules.playMove("Rc7");
+    rules.playMove("Kf7");
+    rules.playMove("Nd6+");
+    rules.playMove("Kg8");
+    rules.playMove("e8=Q+");
+    rules.playMove("Rxe8");
+    rules.playMove("Nxe8");
+    rules.playMove("Kf8");
+    rules.playMove("Nxg7");
+    rules.playMove("Nb3");
+    rules.playMove("Ne6+");
+    rules.playMove("Ke8");
+    rules.playMove("Rxb7");
+    rules.playMove("a5");
+    rules.playMove("b5");
+    rules.playMove("Nd2");
+    rules.playMove("Nc3");
+    rules.playMove("Nb1");
+    rules.playMove("Nxb1");
+    rules.playMove("c3");
+    rules.playMove("Nxc3");
+    rules.playMove("a4");
+    rules.playMove("b6");
+    rules.playMove("h5");
+    rules.playMove("Ra7");
+    rules.playMove("h4");
+    rules.playMove("b7");
+    rules.playMove("Ke7");
+    rules.playMove("b8=Q");
+}
+
+void replayShortGame(BoardRules& rules) {
+    rules.playMove("d3");
+    rules.playMove("Nf6");
+    rules.playMove("e4");
+    rules.playMove("e5");
+}
 int main(int argc,char* argv[]) {
-    printf("Hello World\n");
-    UCIClient uci("C:\\workspace\\chessbox\\stockfish_20090216_x64_avx2.exe");
-    uci.setDebug(false);
-    uci.start();
-    uci.discoverOptions();
-    EngineOption* op=uci.option("name");
-    cout << "name: " << op->currentValue() << endl;
-    op=uci.option("Skill Level");
-    cout << "option " << op->name() << " value "<<op->currentValue()<<endl;
-//    list<string> options;
-//    string line="";
-//    do {
-//        uciWait();
-//        line=uciPull();
-//        if(line.find("option") != string::npos) {
-//            options.push_back(line);
-//        }
-//        printf("Option=[%s]\n",line.c_str());
-//    } while(line.compare("uciok"));
-//
-//    list<EngineOption*> engineOptions;
-//    for(list<string>::iterator it=options.begin(); it!=options.end(); it++) {
-//        cout << "Option ["<<*it<<"]"<<endl;
-//        EngineOption* op=uci.parseOption(*it);
-//        if(op!=nullptr) {
-//            engineOptions.push_back(op);
-//        cout << "Option ["<<*it<<"]"<<endl;
-//        } else {
-//            cout << "Ignoring option ["<<*it<<"]"<<endl;
-//
-//        }
-//    }
+    const char* lan="b1c3";
+    BoardRules rules;
+    BoardRules pgnRules;
+    replay(rules);
+//    replayShortGame(rules);
+    for(unsigned char i=1; i<rules.historyIndex(); i++) {
+        Move historyMove = rules.historyAt(i);
+        Move pgnMove;
+        pgnMove.TerseIn(&pgnRules, historyMove.TerseOut().c_str());
+        cout << "history " << historyMove.TerseOut() << " pgn move: " << pgnMove.NaturalOut(&pgnRules) << endl;
+        pgnRules.playMove(historyMove.TerseOut().c_str());
+    }
+
+    PGNUtils pgn;
+    string result=PGN_RESULT_NO_WIN;
+    if(rules.isWhiteMate()) result=PGN_RESULT_WHITE_WIN;
+    if(rules.isBlackMate()) result=PGN_RESULT_BLACK_WIN;
+    pgn.save("testgame.pgn",&rules,result);
 }
 
 

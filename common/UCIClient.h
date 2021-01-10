@@ -121,6 +121,7 @@ public:
     void bestMove(string& move,string& ponder,string fen);
     void sendCommand(string s);
     void discoverOptions();
+    const char* engineName();
     EngineOption* option(string key) {return m_options[key];}
     void setSpinOption(string key,int value);
     void setLevel(int level);   ///< Sets the skill level, movetime and depth. Skill levels from 0-8.
