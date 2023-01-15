@@ -1,6 +1,6 @@
 # Chessbox
 
-![](img/chessbox-box.svg)
+![](img/logo-sm.png)
 
 Chessbox is the sum of three parts. The controller,  the GUI, and the hardware.
 
@@ -15,15 +15,27 @@ Chessbox is the sum of three parts. The controller,  the GUI, and the hardware.
 ![](img/gui.png)
 
 
+# Building
+- Use CLion, and open project at `/workspace/chessbox`. 
+- Ensure that sdl is in workspace folder. /workspace/sdl/SDL2
+- Select the **Controller GUI** run configuration to run.
+
+
 # Running
 You will need to start the controller in one terminal, then the GUI in another. You can run the GUI on the PI or if you can build and run in on your desktop.
 
-**Controller** 
+## Controller 
 
     $ cd ~/workspace/chessbox/controller
     $ ./cbcontroller
 
-**GUI**
+## GUI
+
+### Windows
+From IDE, select the **Controller GUI** run configuration to run. It builds to 
+
+
+### Linux
 
 If you want the GUI to be full screen, use **-f**. **-e ./stockfish** points to the engine you want to use. 
 

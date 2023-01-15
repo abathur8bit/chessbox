@@ -37,6 +37,7 @@ class PGNUtils {
 public:
     PGNUtils(){}
     bool save(const char* pathname,BoardRules* rules,string result=PGN_RESULT_NO_WIN,string white=PGN_EMPTY,string black=PGN_EMPTY,long round=-1,string date=PGN_EMPTY,string event=PGN_EMPTY,string site=PGN_EMPTY,string fen=PGN_EMPTY);
+    bool save(ostream& out,BoardRules* rules,string result=PGN_RESULT_NO_WIN,string white=PGN_EMPTY,string black=PGN_EMPTY,long round=-1,string date=PGN_EMPTY,string event=PGN_EMPTY,string site=PGN_EMPTY,string fen=PGN_EMPTY);
 
 protected:
     char m_buffer[1024];

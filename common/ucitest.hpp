@@ -37,22 +37,45 @@
 #include <cxxtest/TestSuite.h>
 #include "UCIClient.h"
 #include "BoardRules.h"
+#include "PGNUtils.h"
 
-class TestPGN : public CxxTest::TestSuite
-{
+class TestPGNUtils : public CxxTest::TestSuite {
 public:
-    void testMove() {
+    void testSavePgn() {
+        const char* output = "[Event \"?\"]\n"
+                             "[Site \"?\"]\n"
+                             "[Date \"2020.01.01\"]\n"
+                             "[Round \"?\"]\n"
+                             "[White \"?\"]\n"
+                             "[Black \"?\"]\n"
+                             "[Result \"*\"]\n"
+                             "\n"
+                             "1. a4 a5 *";
         BoardRules rules;
         rules.playMove("a4");
-        rules.display_position();
-        cout << "terse  : " << rules.historyAt(0).TerseOut() << endl;
-        cout << "natural: " << rules.historyAt(0).NaturalOut(&rules) << endl;
-
+        rules.playMove("a5");
+        PGNUtils pgn;
+        ostringstream game;
+        pgn.save(game,&rules,"*","?","?",-1,"2020.01.01");
+        TS_ASSERT(game.str()==output);
+        TS_TRACE(game.str());
     }
 };
 
-class TestUCIParsing : public CxxTest::TestSuite
-{
+class TestPGN : public CxxTest::TestSuite {
+public:
+    void testRulesHistory() {
+        BoardRules rules;
+        rules.playMove("Nc3");
+        rules.playMove("Nc6");
+        TS_ASSERT(rules.historyLanAt(1)=="b1c3");
+        TS_ASSERT(rules.historySanAt(1)=="Nc3");
+        TS_ASSERT(rules.historyLanAt(2)=="b8c6");
+        TS_ASSERT(rules.historySanAt(2)=="Nc6");
+    }
+};
+
+class TestUCIParsing : public CxxTest::TestSuite {
 public:
     void testInvalidTypeIsNull() {
         UCIClient uci;

@@ -33,6 +33,7 @@
 
 #define NUM_LINES 16
 
+/** Fits 25 characters per line, 16 lines in normal view. */
 class MovesPanel : public Component {
 public:
     MovesPanel(const char* id,int x,int y,int w,int h,BoardRules* rules);

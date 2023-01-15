@@ -5,7 +5,7 @@ pscp -r -p src README.md CMakeLists.txt pi@millipede:workspace/chessbox/controll
 cd ..\controller-gui
 pscp -r -p src CMakeLists.txt README.md pi@millipede:workspace/chessbox/controller-gui
 cd ..
-echo Running tests
+echo Launching test script
 plink -batch pi@millipede "cd workspace/chessbox/ && ./tests.sh"
 
 :done

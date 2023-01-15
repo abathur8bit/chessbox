@@ -18,10 +18,40 @@
  * limitations under the License.
  * ******************************************************************************/
 
+#include <iostream>     // std::cout, std::ios
+#include <sstream>
+#include <fstream>
+
 #include <time.h>
 #include "PGNUtils.h"
 
+/**
+ * Save a PGN notated file.
+ *
+ * @param pathname  File path where to save the game to.
+ * @param rules     Board rules for the game to be saved.
+ * @param result    One of "1-0,0-1,1/2-1/2,*"
+ * @param white     Name of the white player.
+ * @param black     Name of the black player.
+ * @param round     Round or -1.
+ * @param date      Date in YYYY.MM.DD format.
+ * @param event     Name of the event or "?".
+ * @param site      Site of the game or "?".
+ * @param fen       Position of the game, like "7k/5P2/8/5K2/8/7p/8/8 w - - 0 1"
+ * @return          true if saved okay, false otherwise.
+ */
 bool PGNUtils::save(const char* pathname,BoardRules* rules,string result,string white,string black,long round,string date,string event,string site,string fen) {
+    filebuf fb;
+    fb.open(pathname,std::ios::out);
+    std::ostream os(&fb);
+    save(os,rules,result,white,black,round,date,event,site,fen);
+    fb.close();
+
+    return true;
+}
+
+/** Save a PGN notated file to the output stream. Stream can be a file stream, or string stream. */
+bool PGNUtils::save(ostream& out,BoardRules* rules,string result,string white,string black,long round,string date,string event,string site,string fen) {
     string sround="?";
     if(-1!=round) {
         snprintf(m_buffer,sizeof(m_buffer),"%d",round);
@@ -36,21 +66,16 @@ bool PGNUtils::save(const char* pathname,BoardRules* rules,string result,string 
         date=m_buffer;
     }
 
-    FILE* fp;
-    fp=fopen(pathname,"w");
-    if(!fp)
-        return false;
-
-    fprintf(fp,"[Event \"%s\"]\n",event.c_str());
-    fprintf(fp,"[Site \"%s\"]\n",site.c_str());
-    fprintf(fp,"[Date \"%s\"]\n",date.c_str());
-    fprintf(fp,"[Round \"%s\"]\n",sround.c_str());
-    fprintf(fp,"[White \"%s\"]\n",white.c_str());
-    fprintf(fp,"[Black \"%s\"]\n",black.c_str());
-    fprintf(fp,"[Result \"%s\"]\n",result.c_str());
+    out << "[Event \""<< event << "\"]" << endl;
+    out << "[Site \""<< site << "\"]" << endl;
+    out << "[Date \""<< date << "\"]" << endl;
+    out << "[Round \""<< sround << "\"]" << endl;
+    out << "[White \""<< white << "\"]" << endl;
+    out << "[Black \""<< black << "\"]" << endl;
+    out << "[Result \""<< result << "\"]" << endl;
     if(fen.compare(PGN_EMPTY)!=0) {
-        fprintf(fp,"[SetUp \"1\"]\n");
-        fprintf(fp,"[FEN \"%s\"]\n",fen.c_str());
+        out << "[SetUp \"1\"]" << endl;
+        out << "[FEN \"" << fen << "\"]" << endl;
     }
 
     if(rules->historyIndex()>1) {
@@ -60,32 +85,17 @@ bool PGNUtils::save(const char* pathname,BoardRules* rules,string result,string 
         while(i<rules->historyIndex()) {
             if(i+1<rules->historyIndex()) {
                 //white
-                Move historyMove = rules->historyAt(i);
-                Move pgnMove;
-                pgnMove.TerseIn(&pgnRules,historyMove.TerseOut().c_str());
-                fprintf(fp,"\n%d. %s ",moveNum++,pgnMove.NaturalOut(&pgnRules).c_str());
-                pgnRules.PlayMove(pgnMove);
+                out << endl << moveNum++ << ". " << rules->historySanAt(i) << " ";
                 //black
-                historyMove = rules->historyAt(++i);
-                pgnMove.TerseIn(&pgnRules,historyMove.TerseOut().c_str());
-                fprintf(fp,"%s",pgnMove.NaturalOut(&pgnRules).c_str());
-                pgnRules.PlayMove(pgnMove);
+                out << rules->historySanAt(++i);
             } else {
                 //we have just a white move
-                Move historyMove = rules->historyAt(i);
-                Move pgnMove;
-                pgnMove.TerseIn(&pgnRules,historyMove.TerseOut().c_str());
-                fprintf(fp,"\n%d. %s",moveNum++,pgnMove.NaturalOut(&pgnRules).c_str());
-                pgnRules.PlayMove(pgnMove);
-                if(i+1==rules->historyIndex() && !rules->isMate())
-                    fprintf(fp,"");
+                out << endl << moveNum++ << ". " << rules->historySanAt(i) << " ";
             }
             ++i;
         }
     }
 
-    fprintf(fp," %s\n\n",result.c_str());
-
-    fclose(fp);
+    out << " " << result;
     return true;
 }

@@ -1,5 +1,8 @@
 #include <string>
 #include <array>
+#include <iostream>     // std::cout, std::ios
+#include <sstream>
+#include <fstream>
 
 #include <stdio.h>
 #include <ctype.h>
@@ -152,6 +155,37 @@ void pgnmate() {
     printf("done exporting to %s history index=%d\n",pgnfile,rules.historyIndex());
 }
 
+void sendToStream(ostream& out) {
+    out << "test the foobar" << endl;
+}
+void fileStream() {
+    filebuf fb;
+    fb.open ("test.txt",std::ios::out);
+    std::ostream os(&fb);
+    sendToStream(os);
+    fb.close();
+}
+
+void stringStream() {
+    ostringstream foo;
+    sendToStream(foo);
+    cout << "foo contains " << foo.str() << endl;
+}
+void streams() {
+    fileStream();
+    stringStream();
+}
+
+void savePgn() {
+    BoardRules rules;
+    rules.playMove("a4");
+    rules.playMove("a5");
+    PGNUtils pgn;
+    pgn.save("test.pgn",&rules,"*","?","?",-1,"");
+    ostringstream game;
+    pgn.save(game,&rules,"*","?","?",-1,"2020.01.01");
+    cout << game.str() << endl;
+}
 int main(int argc,char* argv[]) {
     printf("Hello World\n");
 
@@ -161,6 +195,10 @@ int main(int argc,char* argv[]) {
 
 //    pgntest();
 //    pgnmate();
-    pgnfenmatewhite();
+//    pgnfenmatewhite();
+
+    streams();
+    savePgn();
     return 0;
+
 }

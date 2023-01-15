@@ -31,10 +31,28 @@ void MovesPanel::init() {
     int xx=m_rect.x;
     int yy=m_rect.y;
     char buffer[255];
+    int lineNum=0;
+    const char* lines[] = {
+            "1. d4 d5",
+            "2. c4 dxc4",
+            "  (2... e5",
+            "   3. Nc3 Nc6",
+            "     (3... Bb4",
+            "      4. O-O-O  O-O-O)",
+            "   4. Nf3 e4)",
+            "3. e3 b5",
+            "4. a4 a6",
+            "5. axb5",
+
+    };
     for(int i=0; i<NUM_LINES+1; i++) {
         snprintf(buffer,sizeof(buffer),"moveline%02d",i);
         m_moveLabels[i] = new Label(buffer,xx,yy,ww,12);
-//        m_moveLabels[i]->setText(buffer);
+        if(lineNum<9) {
+            snprintf(buffer, sizeof(buffer), "%s", lines[lineNum]);
+            m_moveLabels[i]->setText(buffer);
+            lineNum++;
+        }
         yy+=hh;
     }
 }

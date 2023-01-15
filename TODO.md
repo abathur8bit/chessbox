@@ -1,3 +1,5 @@
+- Be able to make moves on the board and records them
+
 - Engine Options, methods to set/get combos, strings, and checks
 - Set level, do I need to also set the movetime? 
 - Do I need to set the depth?

@@ -157,7 +157,7 @@ bool isInvalidated() {
 void processMouseEvent(SDL_Event* event) {
     Component* result = buttonGroup.mouseEvent(event);
     if(result) {
-//        printf("Event for %s\n",result->id());
+        printf("Event for %s\n",result->id());
         if(event->type == SDL_MOUSEBUTTONUP) {
             if (!strcmp(result->id(), "power")) {
                 printf("Connecting to controller at %s:%d\n", host, port);
@@ -578,7 +578,6 @@ int main(int argc, char* argv[]) {
 #endif
 #if 1
 
-    [](){}();   //cool lambda that does nothing, but is valid and C++ compiles
 
     bool fullscreen=false;
 #ifdef WIN32

@@ -11,7 +11,10 @@
 using namespace std;
 using namespace thc;
 
-/** Rules of chess. Add moves, and inspect history here. */
+/**
+ * Rules of chess. Add moves, and inspect history here. Extending thc::ChessRules to add some
+ * convenience methods.
+ */
 class BoardRules : public thc::ChessRules {
 public:
     /** Move in simple algebraic notation, like "d4", "Nc6" or "Nxd4". */
@@ -21,12 +24,40 @@ public:
         PlayMove(mv);
     }
 
+    /** Move in long algebraic notation, like "a2a4", "a7a8Q". */
+    void playLanMove(string lan) {
+        Move mv;
+        mv.TerseIn(this,lan.c_str());
+        PlayMove(mv);
+    }
+
+    /** Returns a character representing the piece, "KQRNBP kqrnbp", or a space for an empty square. */
     char pieceAt(int i) {
         return squares[i];
     }
 
     thc::Move historyAt(unsigned char index) {
         return history[index];
+    }
+
+    /** Returns a string move in lan notation like "a2a4", "b1c3". */
+    string historyLanAt(unsigned char index) {
+        return history[index].TerseOut();
+    }
+
+    /** Returns a string move in san notation, like "a4", "Nc6". */
+    string historySanAt(unsigned char index) {
+        if(index<1)
+            return "--";
+
+        BoardRules pgnRules;
+        for(int i=1; i<index; i++) {
+            pgnRules.playLanMove(historyAt(i).TerseOut());
+        }
+        Move historyMove = historyAt(index);
+        Move pgnMove;
+        pgnMove.TerseIn(&pgnRules,historyMove.TerseOut().c_str());
+        return pgnMove.NaturalOut(&pgnRules);
     }
 
     unsigned char historyIndex() {return history_idx;}
