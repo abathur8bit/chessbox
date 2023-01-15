@@ -7,9 +7,12 @@
 #include "FontManager.h"
 #include "Label.h"
 #include "Dialog.h"
+#include "json.hpp"
 
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
+
+using namespace nlohmann;   //json
 
 ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short port,const char* engine,const char* pgnPathname)
     : Window("controllergui",0,0,SCREEN_WIDTH,SCREEN_HEIGHT),
@@ -48,6 +51,7 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
         printf("m_renderer error %s\n",SDL_GetError());
     }
 }
+
 ControllerGUI::~ControllerGUI() {
     for (list<Component *>::iterator it = m_components.begin(); it != m_components.end(); it++) {
         delete *it;
@@ -180,25 +184,27 @@ void ControllerGUI::processButtonClicked(Button *c) {
             connectController();
         }
     } else if(!strcmp(c->id(),"inspectbutton")) {
-        if(c->isChecked()) {
-            m_connector->inspect(false);
-            c->setChecked(false);
+        if(!m_connector->isConnected()) {
+            notConnectedMessage();
         } else {
-            m_connector->inspect(true);
-            c->setChecked(true);
+            if(c->isChecked()) {
+                m_connector->inspect(false);
+                c->setChecked(false);
+            } else {
+                m_connector->inspect(true);
+                c->setChecked(true);
+            }
         }
     } else if(!strcmp(c->id(),"newgamebutton")) {
         setupNewGame();
     } else if(!strcmp(c->id(),"hintbutton")) {
-#ifndef WIN32
-        Process p("matchbox-keyboard", "", nullptr, nullptr, true);
-#endif
+        notImplemented();
     } else if(!strcmp(c->id(),"depthbutton")) {
         if(++m_depth>22)
             m_depth=0;
         m_uci.setDepth(m_depth);
-        TextButton* t=static_cast<TextButton*>(c);
-        snprintf(m_buffer,sizeof m_buffer,"Depth: %d",m_depth);
+        TextButton *t=static_cast<TextButton *>(c);
+        snprintf(m_buffer, sizeof m_buffer, "Depth: %d", m_depth);
         t->setText(m_buffer);
     } else if(!strcmp(c->id(),"timebutton")) {
         if(m_movetime<10)
@@ -211,15 +217,15 @@ void ControllerGUI::processButtonClicked(Button *c) {
         if(m_movetime>1000)
             m_movetime=0;
         m_uci.setMovetime(m_movetime);
-        TextButton* t=static_cast<TextButton*>(c);
-        snprintf(m_buffer,sizeof m_buffer,"Time: %d",m_movetime);
+        TextButton *t=static_cast<TextButton *>(c);
+        snprintf(m_buffer, sizeof m_buffer, "Time: %d", m_movetime);
         t->setText(m_buffer);
     } else if(!strcmp(c->id(),"skillbutton")) {
-        EngineSpinOption* op=static_cast<EngineSpinOption*>(m_uci.option(ENGINE_OPTION_SKILL_LEVEL));
-        int skill=op->m_currentValue+1;
-        if(skill > op->maxValue())
+        EngineSpinOption *op=static_cast<EngineSpinOption *>(m_uci.option(ENGINE_OPTION_SKILL_LEVEL));
+        int skill=op->m_currentValue + 1;
+        if(skill>op->maxValue())
             skill=op->minValue();
-        m_uci.setSpinOption(ENGINE_OPTION_SKILL_LEVEL,skill);
+        m_uci.setSpinOption(ENGINE_OPTION_SKILL_LEVEL, skill);
         TextButton *t=static_cast<TextButton *>(c);
         snprintf(m_buffer, sizeof m_buffer, "Skill: %d", skill);
         t->setText(m_buffer);
@@ -262,3 +268,29 @@ void ControllerGUI::disconnectController() {
     }
 }
 
+/** Show message that you must be connected. */
+void ControllerGUI::notConnectedMessage() {
+    Dialog msg("Chessbox","You must be connected to the controller",DIALOG_TYPE_OK);
+    msg.show(m_renderer);
+}
+
+/** Show message that you must be connected. */
+void ControllerGUI::notImplemented() {
+    Dialog msg("Chessbox","Not yet implemented",DIALOG_TYPE_OK);
+    msg.show(m_renderer);
+}
+
+void ControllerGUI::setupNewGame() {
+    if(!m_connector->isConnected()) {
+        notConnectedMessage();
+    } else {
+        const char *fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        m_board->Forsyth(fen);
+        m_uci.newGame();
+        json j;
+        j["action"]="setposition";
+        j["fen"]=fen;
+        m_connector->send(j.dump().c_str());
+        m_board->clearHighlights();
+    }
+}

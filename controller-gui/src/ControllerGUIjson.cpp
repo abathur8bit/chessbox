@@ -7,9 +7,10 @@
 #include "ControllerGUI.h"
 #include "PGNUtils.h"
 #include "json.hpp"
+#include "Dialog.h"
 
 using namespace std;
-using namespace nlohmann;   //trying this
+using namespace nlohmann;   //json
 
 void ControllerGUI::processJson(const char* buffer) {
     json j = json::parse(buffer);
@@ -83,13 +84,3 @@ void ControllerGUI::saveGame() {
     pgn.save(m_pgnFile.c_str(),m_board->rules(),result,"Human",computerName);
 }
 
-void ControllerGUI::setupNewGame() {
-    const char* fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    m_board->Forsyth(fen);
-    m_uci.newGame();
-    json j;
-    j["action"]="setposition";
-    j["fen"]=fen;
-    m_connector->send(j.dump().c_str());
-    m_board->clearHighlights();
-}

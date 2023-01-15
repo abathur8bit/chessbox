@@ -12,10 +12,8 @@
 #define DIALOG_BUTTON_W 100
 #define DIALOG_BUTTON_H 40
 
-
-
 Dialog::Dialog(const char* title,const char* message,int type)
-    : Component(title,60,120,480-120,60*4),
+    : Component(title,DIALOG_X,DIALOG_Y,DIALOG_W,DIALOG_H),
       m_title(title), m_message(message), m_type(type),
       m_invalidated(true), m_showing(true),
       m_okayButton("ok","ok",DIALOG_X+DIALOG_W-DIALOG_BUTTON_W*2-15,DIALOG_Y+DIALOG_H-10-DIALOG_BUTTON_H,DIALOG_BUTTON_W,DIALOG_BUTTON_H),
@@ -37,21 +35,22 @@ Dialog::Dialog(const char* title,const char* message,int type)
             m_cancelButton.setText("No");
             break;
         case DIALOG_TYPE_CANCEL:
+            m_okayButton.setText("");
             m_cancelButton.setText("Cancel");
             break;
-
     }
+
     if (!m_message.empty()) {
         m_font = TTF_OpenFont("assets/fonts/Inconsolata-Medium.ttf", 16);
-//        m_font = TTF_OpenFont("assets/fonts/FiraSans-Book.otf", 16);
         if (!m_font) {
             printf("TTF_OpenFont: %s\n", TTF_GetError());
-            // handle error
         }
     }
 }
 
 void Dialog::draw(SDL_Renderer *renderer) {
+    if(!m_font) return; //make sure we had loaded a font
+
     SDL_Color dialogColor={191, 37, 0};
     SDL_Color borderColor={101, 37, 0};
 

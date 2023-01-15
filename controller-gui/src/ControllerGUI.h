@@ -27,6 +27,8 @@ public:
     void disconnectController();
     void processJson(const char* buffer);
     void setupNewGame();
+    void notConnectedMessage();
+    void notImplemented();
 protected:
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
