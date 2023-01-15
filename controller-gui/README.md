@@ -3,6 +3,8 @@ The Controller GUI runs on the Chessbox PI and is the layer between the user and
 
 The GUI manages the chess engine, as this allows you more flexibility on what engine you want to run, as well as letting you run the GUI on different platforms. For example, during development, I run the GUI on a Windows box, and it connects to the controller process running on my Raspberry PI. 
 
+![](img/gui.png)
+
 # Building and running
 SDL is used for graphics layer. Download and install before building and running Chessbox. Installs to /usr/local/include/SDL2 and /usr/local/lib.
 

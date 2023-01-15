@@ -28,128 +28,19 @@
 
 #include <SDL.h>
 #include <time.h>
-#include <SDL_image.h>
 
 #include "Sprite.h"
 #include "Button.h"
 #include "Board.h"
-#include "UIGroup.h"
 #include "thc.h"
 #include "Label.h"
 #include "MovesPanel.h"
 #include "Connector.h"
-#include "chessaction.hpp"
 #include "json.hpp"
 #include "ControllerGUI.h"
-#include "Dialog.h"
-#include "TextField.h"
-#include "FontManager.h"
 
 using namespace std;
 using namespace nlohmann;   //trying this
-
-char buffer[1024];
-const int SCREEN_WIDTH = 480;
-const int SCREEN_HEIGHT = 800;
-int counter=0;
-//#define NUM_MOVES 16
-
-SDL_Window* window=NULL;
-SDL_Renderer* renderer=NULL;
-bool invalidated = true;
-//list<Component*> uistuff;
-//UIGroup buttonGroup("buttons",0,670,280,130);
-//UIGroup movesGroup("moves",480-200,480,200,800-320);
-
-//Connector connector;
-bool attemptConnect=true;
-bool running=false;
-//Board board(0,0,480,480);
-//MovesPanel* movesPanel;
-//Sprite logo("logo");
-//Sprite movesBG("moves-bg1");
-//Label* blackClockText;
-//Label* whiteClockText;
-//int gameMovesIndex=0;
-//const char* gameMoves[] = {
-//        "d4","d5",
-//        "c4","c6",
-//        "Nf3","Nf6",
-//        "Nc3","e6",
-//        "Bg5","h6",
-//        "Bxf6","Qxf6",
-//        "e3","Nd7",
-//        "Rc1","g6",
-//        "Be2","Bg7",
-//        "cxd5","exd5",
-//        "b4","a6",
-//        "a4","O-O",
-//        "b5","axb5",
-//        "axb5","Qd6",
-//        "O-O","Nb6",
-//        "Qb3","Rb8",
-//        "Nd1","Bf5",
-//        "Nb2","Rfc8",
-//        "Nd3","Bxd3",
-//        "Qxd3","c5",
-//        "dxc5","Rxc5",
-//        "h4","Na4",
-//        "h5","Rbc8",
-//        "Rxc5","Nxc5",
-//        "Qc2","gxh5",
-//        "Nd4","Qg6",
-//        "Nf5","Bf8",
-//        "Rd1","Qe6",
-//        "Rc1","Nb3",
-//        "Qxc8","Nxc1",
-//        "Qxc1","Qxf5",
-//        "Qc7","Qb1+",
-//        "Bf1","d4",
-//        "exd4","Qd1",
-//        "Qe5","Bg7",
-//        "Qe8+","Bf8",
-//        "Qd8","Kg7",
-//        "Qd5","b6",
-//        "Qe5+","Kg8",
-//        "Qf6","Bg7",
-//        "Qxb6","Bxd4",
-//        "Qxh6","Qg4",
-//        "Qd6","Qd1",
-//        "Qd8+","Kh7",
-//        "Qc7","Kg7",
-//        "b6","Qg4",
-//        "b7","Qh4",
-//        "g3","Qf6",
-//        "Qc2","Qe5",
-//        "Qd3","Ba7",
-//        "Qf3","Qf6",
-//        "Qe2","Qc3",
-//        "Kh2","Qd4",
-//        "Qf3","Bb8",
-//        "Kh3","Bc7",
-//        "Be2","Bb8",
-//        "Bd1","f5",
-//        "Be2","f4",
-//        "Qxh5","Qxf2",
-//        "Qg5+","Kf7"
-//};
-
-
-//void validate() {
-//    invalidated=false;
-//}
-//
-//void invalidate() {
-//    invalidated=true;
-//}
-//
-//bool isInvalidated() {
-//    return invalidated;
-//}
-//
-//
-//
-//
 
 int main(int argc, char* argv[]) {
     printf("You may need to run 'export SDL_VIDEODRIVER=rpi'\n");

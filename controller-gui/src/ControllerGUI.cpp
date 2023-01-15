@@ -1,5 +1,4 @@
 //
-//
 // Created by patte on 12/24/2020.
 //
 
@@ -135,6 +134,7 @@ void ControllerGUI::initComponents() {
     addComponent(m_movesPanel);
     m_board->loadPieces(m_renderer,"merida_new");
 }
+
 void ControllerGUI::startGame() {
     initComponents();
     m_uci.setDebug(true);
@@ -144,7 +144,7 @@ void ControllerGUI::startGame() {
 #ifdef WIN32
 #endif
     m_uci.newGame();
-    show(m_renderer);
+    show(m_renderer);   //main loop, returns when user exits
     m_uci.stop();
     SDL_DestroyWindow(m_window);
     SDL_DestroyRenderer(m_renderer);
@@ -171,6 +171,7 @@ void ControllerGUI::update(long ticks) {
         }
     }
 }
+
 void ControllerGUI::processButtonClicked(Button *c) {
     if(!strcmp(c->id(),"settingsbutton")) {
         if(m_connector && m_connector->isConnected()) {
