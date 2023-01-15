@@ -231,6 +231,7 @@ void ControllerGUI::connectController() {
     if(DIALOG_SELECTED_YES==selection) {
         if(!m_connector->isConnected()) {
             try {
+                printf("connecting to %s:%d\n",m_host.c_str(),m_port);
                 m_connector->connect(m_host.c_str(), m_port);
                 m_connector->waitline(m_buffer,sizeof(m_buffer));
                 printf("read %s\n",m_buffer);
@@ -241,6 +242,9 @@ void ControllerGUI::connectController() {
                 Dialog dlg("Error", "Unable to connect to chessbox controller", DIALOG_TYPE_OK);
                 dlg.show(m_renderer);
             }
+        } else {
+            Dialog msg("Message","Already connected",DIALOG_TYPE_OK);
+            msg.show(m_renderer);
         }
     }
 }
