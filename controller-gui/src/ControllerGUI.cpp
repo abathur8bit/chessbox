@@ -27,7 +27,7 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
       m_uci(engine),
       m_pgnFile(pgnPathname)
 {
-    printf("using chess engine [%s]\n",engine);
+    printf("using chess engine [%s] host=[%s]\n",engine,m_host.c_str());
     m_board=new Board(0,0,SCREEN_WIDTH,SCREEN_WIDTH);
     m_movesPanel=new MovesPanel("moves",SCREEN_WIDTH-200,480,200,320,m_board->rules());
     m_connector=new Connector();
@@ -68,72 +68,112 @@ void ControllerGUI::initComponents() {
 
     m_movesPanel->init();
 
-    int x=0,y=510,w=110,h=40,gap=10;
-    Label* label=new Label("playersettingslabel",0,510,SCREEN_WIDTH/2,290);
-    y+=gap+gap;
-    label->setText("One Player Settings");
-    snprintf(m_buffer,sizeof m_buffer,"Skill: %d",m_skillLevel);
+    int x=0,y=480,w=60,h=60,gap=5;
+    snprintf(m_buffer,sizeof m_buffer,"L:%d",m_skillLevel);
+    TextButton* level=new TextButton("levelbutton",m_buffer,x,y,w,h);
+
+    x+=w+gap;
+    snprintf(m_buffer,sizeof m_buffer,"S:%d",m_skillLevel);
     TextButton* skill=new TextButton("skillbutton",m_buffer,x,y,w,h);
+
     x+=w+gap;
-    x=0;
-    y+=h+gap;
-    snprintf(m_buffer,sizeof m_buffer,"Depth: %d",m_depth);
+    snprintf(m_buffer,sizeof m_buffer,"D:%d",m_depth);
     TextButton* depth=new TextButton("depthbutton",m_buffer,x,y,w,h);
-    x+=w+gap;
-    snprintf(m_buffer,sizeof m_buffer,"Time: %d",m_movetime);
-    TextButton* time=new TextButton("timebutton",m_buffer,x,y,w,h);
-    x+=w+gap;
-    TextButton* level=new TextButton("levelbutton","Level: 7",x,y,w,h);
 
-    x=0;
-    y=800-130;
-    w=h=60;
-//    Button* settings=new AnimButton("settingsbutton",m_renderer,"assets/button-gear.png",1,x,y);
-    Button* settings=new TextButton("settingsbutton","Connect",x,y,w,h);
     x+=w+gap;
-    Button* hint=new TextButton("hintbutton","Hint",x,y,w,h);
-    x+=w+gap;
-    Button* inspect=new TextButton("inspectbutton","Inspect",x,y,w,h);
-    x+=w+gap;
-    Button* newGame=new TextButton("newgamebutton","New",x,y,w,h);
+    snprintf(m_buffer,sizeof m_buffer,"T:%d",m_movetime);
+    TextButton* time=new TextButton("timebutton",m_buffer,x,y,w,h);
 
     x=0;
     y+=h+gap;
+    Button* connectButton=new TextButton("connectbutton", "Connect", x, y, w, h);
+    x+=w+gap;
+    Button* loadButton=new TextButton("loadbutton", "Load", x, y, w, h);
+    x+=w+gap;
+    Button* exportButton=new TextButton("exportbutton", "Export", x, y, w, h);
+    x+=w+gap;
+    Button* dbButton=new TextButton("dbbutton", "DB", x, y, w, h);
+
+    x=0;
+    y+=h+gap;
+    Button* hintButton=new TextButton("hintbutton", "Hint", x, y, w, h);
+    x+=w+gap;
+    Button* inspectButton=new TextButton("inspectbutton", "Inspect", x, y, w, h);
+    x+=w+gap;
+    Button* markButton=new TextButton("markbutton", "Mark", x, y, w, h);
+    x+=w+gap;
+    Button* flipButton=new TextButton("flipbutton", "Flip", x, y, w, h);
+
+    x=0;
+    y+=h+gap;
+    Button* newGameWhite=new AnimButton("newgamewhite",m_renderer,"assets/button-player-white.png",1,x,y);
+    x+=w+gap;
+    Button* newGameBlack=new AnimButton("newgameblack",m_renderer,"assets/button-player-black.png",1,x,y);
+    x+=w+gap;
+    Button* newGameWhiteVsBlack=new AnimButton("newgamewhitevsblack",m_renderer,"assets/button-twoplayer-whiteblack.png",1,x,y);
+    x+=w+gap;
+    Button* newGameBlackVsWhite=new AnimButton("newgameblackvswhite",m_renderer,"assets/button-twoplayer-blackwhite.png",1,x,y);
+
+    x=0;
+    y+=h+gap;
+    Button* menuButton=new TextButton("menubutton", "Menu", x, y, w, h);
+    x+=w+gap;
     Button* fastBack=new AnimButton("fastbackbutton",m_renderer,"assets/button-fastback.png",1,x,y);
     x+=w+gap;
     Button* back=new AnimButton("backbutton",m_renderer,"assets/button-back.png",1,x,y);
     x+=w+gap;
     Button* fwd=new AnimButton("fwdbutton",m_renderer,"assets/button-fwd.png",1,x,y);
-    x+=w+gap;
-    Button* fastFwd=new AnimButton("fastfwdbutton",m_renderer,"assets/button-fastfwd.png",1,x,y);
-    x+=w+gap;
 
-//    addButton(level);
+    addButton(level);
     addButton(skill);
     addButton(time);
     addButton(depth);
-    addButton(settings);
-    addButton(hint);
-    addButton(inspect);
-    addButton(newGame);
+
+    addButton(connectButton);
+    addButton(loadButton);
+    addButton(exportButton);
+    addButton(dbButton);
+
+    addButton(hintButton);
+    addButton(inspectButton);
+    addButton(markButton);
+    addButton(flipButton);
+
+    addButton(newGameWhite);
+    addButton(newGameBlack);
+    addButton(newGameWhiteVsBlack);
+    addButton(newGameBlackVsWhite);
+
+    addButton(menuButton);
     addButton(fastBack);
     addButton(back);
     addButton(fwd);
-    addButton(fastFwd);
 
-    addComponent(label);
-//    addComponent(level);
+    addComponent(level);
     addComponent(skill);
     addComponent(time);
     addComponent(depth);
-    addComponent(settings);
-    addComponent(hint);
-    addComponent(inspect);
-    addComponent(newGame);
+
+    addComponent(connectButton);
+    addComponent(loadButton);
+    addComponent(exportButton);
+    addComponent(dbButton);
+
+    addComponent(hintButton);
+    addComponent(inspectButton);
+    addComponent(markButton);
+    addComponent(flipButton);
+
+    addComponent(newGameWhite);
+    addComponent(newGameBlack);
+    addComponent(newGameWhiteVsBlack);
+    addComponent(newGameBlackVsWhite);
+
+    addComponent(menuButton);
     addComponent(fastBack);
     addComponent(back);
     addComponent(fwd);
-    addComponent(fastFwd);
+
     addComponent(m_board);
     addComponent(m_movesPanel);
     m_board->loadPieces(m_renderer,"merida_new");
@@ -170,41 +210,47 @@ void ControllerGUI::update(long ticks) {
             Dialog dlg("Error","Error communicating with controller",DIALOG_TYPE_OK);
             dlg.show(m_renderer);
             m_connector->close();
-            Button* b=findButton("settingsbutton");
+            Button* b=findButton("connectbutton");
             if(b) b->setChecked(false);
         }
     }
 }
 
 void ControllerGUI::processButtonClicked(Button *c) {
-    if(!strcmp(c->id(),"settingsbutton")) {
+    if(!strcmp(c->id(),"connectbutton")) {
         if(m_connector && m_connector->isConnected()) {
             disconnectController();
         } else {
             connectController();
         }
-    } else if(!strcmp(c->id(),"inspectbutton")) {
-        if(!m_connector->isConnected()) {
-            notConnectedMessage();
-        } else {
-            if(c->isChecked()) {
-                m_connector->inspect(false);
-                c->setChecked(false);
-            } else {
-                m_connector->inspect(true);
-                c->setChecked(true);
-            }
-        }
-    } else if(!strcmp(c->id(),"newgamebutton")) {
-        setupNewGame();
-    } else if(!strcmp(c->id(),"hintbutton")) {
+    } else if(!strcmp(c->id(),"loadbutton")) {
         notImplemented();
+    } else if(!strcmp(c->id(),"exportbutton")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"dbbutton")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"levelbutton")) {
+        if(++m_skillLevel>22)
+            m_skillLevel=0;
+        m_uci.setLevel(m_skillLevel);
+        TextButton *t=static_cast<TextButton *>(c);
+        snprintf(m_buffer, sizeof m_buffer, "L:%d", m_depth);
+        t->setText(m_buffer);
+    } else if(!strcmp(c->id(),"skillbutton")) {
+        EngineSpinOption *op=static_cast<EngineSpinOption *>(m_uci.option(ENGINE_OPTION_SKILL_LEVEL));
+        int skill=op->m_currentValue + 1;
+        if(skill>op->maxValue())
+            skill=op->minValue();
+        m_uci.setSpinOption(ENGINE_OPTION_SKILL_LEVEL, skill);
+        TextButton *t=static_cast<TextButton *>(c);
+        snprintf(m_buffer, sizeof m_buffer, "S:%d", skill);
+        t->setText(m_buffer);
     } else if(!strcmp(c->id(),"depthbutton")) {
         if(++m_depth>22)
             m_depth=0;
         m_uci.setDepth(m_depth);
         TextButton *t=static_cast<TextButton *>(c);
-        snprintf(m_buffer, sizeof m_buffer, "Depth: %d", m_depth);
+        snprintf(m_buffer, sizeof m_buffer, "D:%d", m_depth);
         t->setText(m_buffer);
     } else if(!strcmp(c->id(),"timebutton")) {
         if(m_movetime<10)
@@ -218,17 +264,42 @@ void ControllerGUI::processButtonClicked(Button *c) {
             m_movetime=0;
         m_uci.setMovetime(m_movetime);
         TextButton *t=static_cast<TextButton *>(c);
-        snprintf(m_buffer, sizeof m_buffer, "Time: %d", m_movetime);
+        snprintf(m_buffer, sizeof m_buffer, "T:%d", m_movetime);
         t->setText(m_buffer);
-    } else if(!strcmp(c->id(),"skillbutton")) {
-        EngineSpinOption *op=static_cast<EngineSpinOption *>(m_uci.option(ENGINE_OPTION_SKILL_LEVEL));
-        int skill=op->m_currentValue + 1;
-        if(skill>op->maxValue())
-            skill=op->minValue();
-        m_uci.setSpinOption(ENGINE_OPTION_SKILL_LEVEL, skill);
-        TextButton *t=static_cast<TextButton *>(c);
-        snprintf(m_buffer, sizeof m_buffer, "Skill: %d", skill);
-        t->setText(m_buffer);
+    } else if(!strcmp(c->id(),"hintbutton")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"inspectbutton")) {
+        if(!m_connector->isConnected()) {
+            notConnectedMessage();
+        } else {
+            if(c->isChecked()) {
+                m_connector->inspect(false);
+                c->setChecked(false);
+            } else {
+                m_connector->inspect(true);
+                c->setChecked(true);
+            }
+        }
+    } else if(!strcmp(c->id(),"markbutton")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"flipbutton")) {
+        setupNewGame();
+    } else if(!strcmp(c->id(),"newgamewhite")) {
+        setupNewGame();
+    } else if(!strcmp(c->id(),"newgameblack")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"newgamewhitevsblack")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"newgameblackvswhite")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"menubutton")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"fastbackbutton")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"backbutton")) {
+        notImplemented();
+    } else if(!strcmp(c->id(),"fwdbutton")) {
+        notImplemented();
     }
 }
 
@@ -242,7 +313,7 @@ void ControllerGUI::connectController() {
                 m_connector->connect(m_host.c_str(), m_port);
                 m_connector->waitline(m_buffer,sizeof(m_buffer));
                 printf("read %s\n",m_buffer);
-                Button* b=findButton("settingsbutton");
+                Button* b=findButton("connectbutton");
                 b->setChecked(true);
                 m_connector->send("{\"action\":\"fen\"}");  //get initial board position
             } catch(GeneralException e) {
@@ -262,7 +333,7 @@ void ControllerGUI::disconnectController() {
         int selection=confirm.show(m_renderer);
         if(DIALOG_SELECTED_YES==selection) {
             m_connector->close();
-            Button *b=findButton("settingsbutton");
+            Button *b=findButton("connectbutton");
             b->setChecked(false);
         }
     }

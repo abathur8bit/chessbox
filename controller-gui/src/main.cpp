@@ -38,14 +38,18 @@
 #include "Connector.h"
 #include "json.hpp"
 #include "ControllerGUI.h"
+#include "prefs.h"
 
 using namespace std;
 using namespace nlohmann;   //trying this
 
+#include <algorithm>
+#include <cctype>
+#include <locale>
+
 int main(int argc, char* argv[]) {
     printf("You may need to run 'export SDL_VIDEODRIVER=rpi'\n");
-    char host[80]="chessbox";
-    unsigned short port=9999;
+    Prefs prefs("cbgui.json");
     int numdrivers, i, working;
     const char* drivername;
 
@@ -73,27 +77,9 @@ int main(int argc, char* argv[]) {
 
     printf("\n%d video drivers total (%d work)\n", numdrivers, working);
 
-    bool fullscreen=false;
-#ifdef WIN32
-    string pgn="/t/game.pgn";
-    string engine="C:/Program Files (x86)/ShredderChess/Deep Shredder 13/EngineDeepShredder13UCIx64.exe";
-#else
-    string pgn="/home/pi/game.pgn";
-    string engine="engine/stockfish8";
-#endif
-    for(int i=1; i<argc; i++) {
-        if(!strcmp("-f",argv[i])) {
-            fullscreen=true;
-        } else if(!strcmp("-h",argv[i]) && i+1 <= argc) {
-            strncpy(host,argv[++i],sizeof(host));
-            NULL_TERMINATE(host, sizeof(host));
-        } else if(!strcmp(argv[i],"-e")) {
-            engine=argv[++i];
-        } else if(!strcmp("-p",argv[i])) {
-            pgn=argv[++i];
-        }
-    }
-    ControllerGUI gui(fullscreen,host,port,engine.c_str(),pgn.c_str());
+    prefs.read();
+    printf("prefs host=%s, port=%d, fullscreen=%d\n",prefs.host(),prefs.port(),prefs.isFullscreen());
+    ControllerGUI gui(prefs.isFullscreen(),prefs.host(),prefs.port(),prefs.engine(),prefs.currentGame());
     gui.startGame();
     return 0;
 }

@@ -1,0 +1,6 @@
+{
+  "engine": "Engines/stockfish_8_x64.exe",
+  "fullscreen": false,
+  "controller": "chessbox:9999",
+  "currentgame": "game.png"
+}

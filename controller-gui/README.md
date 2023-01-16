@@ -40,6 +40,8 @@ Once that is built, you can move onto building controller-gui.
 
 ## Run
 
+Copy **cbgui-sample.json** to **cbgui.json** and update the  controller, engine, and where the current game should be saved to. 
+
 Run with the following command. ESCAPE key exists the program. Assumes that the stockfish executable is located in the GUI's folder. If it's somewhere else, point to that location instead.
 
     $ build/cbgui -f -e ../engine/stockfish-8-linux/src/stockfish
