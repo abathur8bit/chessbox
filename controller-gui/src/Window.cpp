@@ -63,8 +63,10 @@ void Window::show(SDL_Renderer* renderer) {
 void Window::processMouseEvent(SDL_Event *event) {
     for (list<Button *>::iterator it = m_buttons.begin(); it != m_buttons.end(); it++) {
         Button* result=static_cast<Button*>((*it)->mouseEvent(event));
-        if(result && SDL_MOUSEBUTTONUP==event->type)
+        if(result && SDL_MOUSEBUTTONUP==event->type) {
+            printf("mouse click on %s\n",result->id());
             processButtonClicked(result);
+        }
     }
 }
 

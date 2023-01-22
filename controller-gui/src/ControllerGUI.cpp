@@ -230,12 +230,7 @@ void ControllerGUI::processButtonClicked(Button *c) {
     } else if(!strcmp(c->id(),"dbbutton")) {
         notImplemented();
     } else if(!strcmp(c->id(),"levelbutton")) {
-        if(++m_skillLevel>22)
-            m_skillLevel=0;
-        m_uci.setLevel(m_skillLevel);
-        TextButton *t=static_cast<TextButton *>(c);
-        snprintf(m_buffer, sizeof m_buffer, "L:%d", m_depth);
-        t->setText(m_buffer);
+        notImplemented();
     } else if(!strcmp(c->id(),"skillbutton")) {
         EngineSpinOption *op=static_cast<EngineSpinOption *>(m_uci.option(ENGINE_OPTION_SKILL_LEVEL));
         int skill=op->m_currentValue + 1;
@@ -341,7 +336,7 @@ void ControllerGUI::disconnectController() {
 
 /** Show message that you must be connected. */
 void ControllerGUI::notConnectedMessage() {
-    Dialog msg("Chessbox","You must be connected to the controller",DIALOG_TYPE_OK);
+    Dialog msg("Chessbox","Must be connected to the board controller",DIALOG_TYPE_OK);
     msg.show(m_renderer);
 }
 
