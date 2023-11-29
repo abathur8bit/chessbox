@@ -29,6 +29,7 @@ public:
     void setupNewGame();
     void notConnectedMessage();
     void notImplemented();
+    void loadGame(const char* pathname);
 protected:
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;

@@ -48,11 +48,11 @@ void MovesPanel::init() {
     for(int i=0; i<NUM_LINES+1; i++) {
         snprintf(buffer,sizeof(buffer),"moveline%02d",i);
         m_moveLabels[i] = new Label(buffer,xx,yy,ww,12);
-        if(lineNum<9) {
-            snprintf(buffer, sizeof(buffer), "%s", lines[lineNum]);
-            m_moveLabels[i]->setText(buffer);
-            lineNum++;
-        }
+//        if(lineNum<9) {
+//            snprintf(buffer, sizeof(buffer), "%s", lines[lineNum]);
+//            m_moveLabels[i]->setText(buffer);
+//            lineNum++;
+//        }
         yy+=hh;
     }
 }
@@ -67,28 +67,22 @@ void MovesPanel::add(const char* s) {
 }
 
 void MovesPanel::add(thc::Move mv) {
-    m_rules->PlayMove(mv);
+    string san = mv.NaturalOut(m_rules);
     char buffer[80];
-    string output;
-    int lineNum = 0;
-    int index = 1;
-    while(index<m_rules->historyIndex() && lineNum<NUM_LINES) {
-        snprintf(buffer,sizeof(buffer),"%d.",(lineNum+1));
-        output += buffer;
-        snprintf(buffer,sizeof(buffer),"%-5s",m_rules->historyAt(index).TerseOut().c_str());
-        output += buffer;
-        index++;
-        if(index<m_rules->historyIndex()) {
-            //add second half of move
-            output += "  ";
-            snprintf(buffer,sizeof(buffer),"%-5s",m_rules->historyAt(index).TerseOut().c_str());
-            output += buffer;
-            index++;
-        }
-        m_moveLabels[lineNum]->setText(output.c_str());
-        lineNum++;
-        output.clear();
+    int historyIndex = m_rules->historyIndex();
+    int moveNum = (historyIndex-1)/2+1;
+    if(m_rules->WhiteToPlay()) {
+        //white moving, display whites move
+        snprintf(buffer,sizeof(buffer)," %d. %s",moveNum,san.c_str());
+        add(buffer);
+    } else {
+        //black moving, display blacks move
+//        snprintf(buffer,sizeof(buffer),"%d. %s %s",moveNum,m_rules->historySanAt(historyIndex-1).c_str(),san.c_str());
+        //grab the previous text and append blacks move as we can format it better
+        snprintf(buffer,sizeof(buffer)," %-10s   %s",m_moveLabels[m_currentLine-1]->getText(),san.c_str());
+        m_moveLabels[m_currentLine-1]->setText(buffer);
     }
+    m_rules->PlayMove(mv);
 }
 
 void MovesPanel::draw(SDL_Renderer *renderer) {

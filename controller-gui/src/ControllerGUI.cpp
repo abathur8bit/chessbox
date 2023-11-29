@@ -39,7 +39,7 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
     m_window = SDL_CreateWindow(
             "Chessbox",
 //            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
-            300,100,
+            50,50,
             SCREEN_WIDTH, SCREEN_HEIGHT,
             fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_RESIZABLE);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -225,12 +225,65 @@ void ControllerGUI::processButtonClicked(Button *c) {
         }
     } else if(!strcmp(c->id(),"loadbutton")) {
         notImplemented();
+//        loadGame("/t/sample.pgn"); //todo placeholder
     } else if(!strcmp(c->id(),"exportbutton")) {
         notImplemented();
     } else if(!strcmp(c->id(),"dbbutton")) {
         notImplemented();
     } else if(!strcmp(c->id(),"levelbutton")) {
-        notImplemented();
+        const int numMoves =  44;
+        const char* moves[numMoves] = {
+                "d4",
+                "d5",
+                "c4",
+                "c6",
+                "e3",
+                "Bf5", 
+                "Nc3",
+                "e6",
+                "Nf3",
+                "Nd7",
+                "a3",
+                "Bd6",
+                "c5",
+                "Bc7",
+                "b4",
+                "e5",
+                "Be2",
+                "Ngf6",
+                "Bb2",
+                "e4",
+                "Nd2",
+                "h5",
+                "h3",
+                "Nf8",
+                "a4",
+                "Ng6",
+                "b5",
+                "Nh4",
+                "g3",
+                "Ng2+",
+                "Kf1",
+                "Nxe3+",
+                "fxe3",
+                "Bxg3",
+                "Kg2",
+                "Bc7",
+                "Qg1",
+                "Rh6",
+                "Kf1",
+                "Rg6",
+                "Qf2",
+                "Qd7",
+                "bxc6",
+                "bxc6"
+        };
+
+        for(int i=0; i<43; i++) {
+            Move m;
+            m.NaturalIn(m_board->rules(), moves[i]);
+            m_movesPanel->add(m);
+        }
     } else if(!strcmp(c->id(),"skillbutton")) {
         EngineSpinOption *op=static_cast<EngineSpinOption *>(m_uci.option(ENGINE_OPTION_SKILL_LEVEL));
         int skill=op->m_currentValue + 1;
@@ -358,5 +411,13 @@ void ControllerGUI::setupNewGame() {
         j["fen"]=fen;
         m_connector->send(j.dump().c_str());
         m_board->clearHighlights();
+    }
+}
+
+void ControllerGUI::loadGame(const char* pathname) {
+    FILE* fp=fopen(pathname,"r");
+    if(fp) {
+
+        fclose(fp);
     }
 }
