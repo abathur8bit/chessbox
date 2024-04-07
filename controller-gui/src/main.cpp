@@ -39,6 +39,7 @@
 #include "json.hpp"
 #include "ControllerGUI.h"
 #include "prefs.h"
+#include <time.h>
 
 using namespace std;
 using namespace nlohmann;   //trying this
@@ -46,6 +47,11 @@ using namespace nlohmann;   //trying this
 #include <algorithm>
 #include <cctype>
 #include <locale>
+
+long prevT=0;
+float eprev=0;
+float eintegral=0;
+int pos=0;
 
 int main(int argc, char* argv[]) {
     printf("You may need to run 'export SDL_VIDEODRIVER=rpi'\n");

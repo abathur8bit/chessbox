@@ -231,59 +231,7 @@ void ControllerGUI::processButtonClicked(Button *c) {
     } else if(!strcmp(c->id(),"dbbutton")) {
         notImplemented();
     } else if(!strcmp(c->id(),"levelbutton")) {
-        const int numMoves =  44;
-        const char* moves[numMoves] = {
-                "d4",
-                "d5",
-                "c4",
-                "c6",
-                "e3",
-                "Bf5", 
-                "Nc3",
-                "e6",
-                "Nf3",
-                "Nd7",
-                "a3",
-                "Bd6",
-                "c5",
-                "Bc7",
-                "b4",
-                "e5",
-                "Be2",
-                "Ngf6",
-                "Bb2",
-                "e4",
-                "Nd2",
-                "h5",
-                "h3",
-                "Nf8",
-                "a4",
-                "Ng6",
-                "b5",
-                "Nh4",
-                "g3",
-                "Ng2+",
-                "Kf1",
-                "Nxe3+",
-                "fxe3",
-                "Bxg3",
-                "Kg2",
-                "Bc7",
-                "Qg1",
-                "Rh6",
-                "Kf1",
-                "Rg6",
-                "Qf2",
-                "Qd7",
-                "bxc6",
-                "bxc6"
-        };
-
-        for(int i=0; i<43; i++) {
-            Move m;
-            m.NaturalIn(m_board->rules(), moves[i]);
-            m_movesPanel->add(m);
-        }
+        notImplemented();
     } else if(!strcmp(c->id(),"skillbutton")) {
         EngineSpinOption *op=static_cast<EngineSpinOption *>(m_uci.option(ENGINE_OPTION_SKILL_LEVEL));
         int skill=op->m_currentValue + 1;
@@ -331,17 +279,79 @@ void ControllerGUI::processButtonClicked(Button *c) {
     } else if(!strcmp(c->id(),"markbutton")) {
         notImplemented();
     } else if(!strcmp(c->id(),"flipbutton")) {
-        setupNewGame();
+        printf("flipped=%d\n",m_board->isFlipped());
+        m_board->flip(!m_board->isFlipped());
+        json j;
+        j["action"]="flip";
+        j["flipped"]=m_board->isFlipped();
+        printf("cleared json=%s\n",j.dump().c_str());
+        m_connector->send(j.dump().c_str());
     } else if(!strcmp(c->id(),"newgamewhite")) {
+        //single player, user is white
         setupNewGame();
     } else if(!strcmp(c->id(),"newgameblack")) {
+        //single player, user is black (board is flipped)
         notImplemented();
     } else if(!strcmp(c->id(),"newgamewhitevsblack")) {
+        //2 player game, white is buttom, black is top
         notImplemented();
     } else if(!strcmp(c->id(),"newgameblackvswhite")) {
+        //2 player game, black is bottom, white is top, (board is flipped)
         notImplemented();
     } else if(!strcmp(c->id(),"menubutton")) {
-        notImplemented();
+        const int numMoves =  44;
+        const char* moves[numMoves] = {
+                "d4",
+                "d5",
+                "c4",
+                "c6",
+                "e3",
+                "Bf5",
+                "Nc3",
+                "e6",
+                "Nf3",
+                "Nd7",
+                "a3",
+                "Bd6",
+                "c5",
+                "Bc7",
+                "b4",
+                "e5",
+                "Be2",
+                "Ngf6",
+                "Bb2",
+                "e4",
+                "Nd2",
+                "h5",
+                "h3",
+                "Nf8",
+                "a4",
+                "Ng6",
+                "b5",
+                "Nh4",
+                "g3",
+                "Ng2+",
+                "Kf1",
+                "Nxe3+",
+                "fxe3",
+                "Bxg3",
+                "Kg2",
+                "Bc7",
+                "Qg1",
+                "Rh6",
+                "Kf1",
+                "Rg6",
+                "Qf2",
+                "Qd7",
+                "bxc6",
+                "bxc6"
+        };
+
+        for(int i=0; i<43; i++) {
+            Move m;
+            m.NaturalIn(m_board->rules(), moves[i]);
+            m_movesPanel->add(m);
+        }
     } else if(!strcmp(c->id(),"fastbackbutton")) {
         notImplemented();
     } else if(!strcmp(c->id(),"backbutton")) {
@@ -406,9 +416,15 @@ void ControllerGUI::setupNewGame() {
         const char *fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         m_board->Forsyth(fen);
         m_uci.newGame();
+        printf("LBP sending set position\n");
         json j;
         j["action"]="setposition";
         j["fen"]=fen;
+        m_connector->send(j.dump().c_str());
+        j.clear();
+        j["action"]="flip";
+        j["flipped"]=m_board->isFlipped();
+        printf("cleared json=%s\n",j.dump().c_str());
         m_connector->send(j.dump().c_str());
         m_board->clearHighlights();
     }

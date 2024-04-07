@@ -4,7 +4,7 @@
 
 Chessbox is the sum of three parts. The controller,  the GUI, and the hardware.
 
-**The hardware** is the chess board with the LEDs, reed switches, MCPs and all the wires. You can read about building that on the [ChessLR blog](https://8bitcoder.com/chesslr).
+**The hardware** is the chess board with the LEDs, reed switches, MCPs and all the wires. You can read about building that on the [Chessbox blog](https://8bitcoder.com/chessbox).
 
 > Note that Chessbox is the new name for ChessLR.
 
@@ -16,7 +16,7 @@ Chessbox is the sum of three parts. The controller,  the GUI, and the hardware.
 
 
 # Building
-- Use CLion, and open project at `/workspace/chessbox`. 
+- Use CLion, and open project at `~/workspace/chessbox`. 
 - Ensure that sdl is in workspace folder. /workspace/sdl/SDL2
 - Select the **Controller GUI** run configuration to run.
 

@@ -4,7 +4,7 @@
 
 #include "Board.h"
 
-Board::Board(int x, int y, int w, int h) : Component("board",x,y,w,h),m_rules() {
+Board::Board(int x, int y, int w, int h) : Component("board",x,y,w,h),m_rules(),m_flipped(false) {
     m_rectSquare = {x, y, w / 8, h / 8};
     m_whiteColor = {0x4B,0x99,0xC5,0xFF};
     m_blackColor = {0x00,0x6A,0xA6,0xFF};
@@ -63,10 +63,68 @@ void Board::drawSquares(SDL_Renderer *renderer) {
 }
 
 void Board::drawPieces(SDL_Renderer *renderer) {
+    if(isFlipped()) {
+        drawPiecesFlipped(renderer);
+    } else {
+        int i=0;
+        SDL_Rect dest={0, 0, m_rectSquare.w, m_rectSquare.h};
+        for(int y=0; y<8; y++) {
+            for(int x=0; x<8; x++) {
+                Sprite *piece=nullptr;
+                char p=m_rules.pieceAt(i++);
+                switch(p) {
+                    case 'k':
+                        piece=m_pieces[0];
+                        break;
+                    case 'q':
+                        piece=m_pieces[1];
+                        break;
+                    case 'r':
+                        piece=m_pieces[2];
+                        break;
+                    case 'b':
+                        piece=m_pieces[3];
+                        break;
+                    case 'n':
+                        piece=m_pieces[4];
+                        break;
+                    case 'p':
+                        piece=m_pieces[5];
+                        break;
+                    case 'K':
+                        piece=m_pieces[6];
+                        break;
+                    case 'Q':
+                        piece=m_pieces[7];
+                        break;
+                    case 'R':
+                        piece=m_pieces[8];
+                        break;
+                    case 'B':
+                        piece=m_pieces[9];
+                        break;
+                    case 'N':
+                        piece=m_pieces[10];
+                        break;
+                    case 'P':
+                        piece=m_pieces[11];
+                        break;
+                }
+                if(piece) {
+                    dest.x=x * dest.w;
+                    dest.y=y * dest.h;
+                    piece->draw(renderer, &dest);
+                }
+            }
+        }
+    }
+}
+
+void Board::drawPiecesFlipped(SDL_Renderer *renderer) {
     int i=0;
     SDL_Rect dest = {0,0,m_rectSquare.w,m_rectSquare.h};
-    for(int y=0; y<8; y++) {
-        for (int x = 0; x < 8; x++) {
+    for(int y=7; y>=0; y--) {
+        for (int x=7; x>=0; x--) {
             Sprite *piece = nullptr;
             char p = m_rules.pieceAt(i++);
             switch (p) {
@@ -141,4 +199,13 @@ void Board::playMove(const char* sanLong) {
     }
     highlightSquare(toIndex(from),true);    //then turn on the ones we just moved from&to
     highlightSquare(toIndex(to),true);
+}
+
+/**
+ * If flip is true, white is on top and black is on bottom. Normally white is bottom, black is top.
+ *
+ * @param flip false is normal, true is flipped.
+ */
+void Board::flip(bool flip) {
+    m_flipped=flip;
 }

@@ -43,6 +43,19 @@ using namespace thc;
 
 /** Draws the checker pattern of a chess board, and has coordinate conversions. */
 class Board : public Component {
+protected:
+    void drawSquares(SDL_Renderer* r);
+    void drawPieces(SDL_Renderer* r);
+    void drawPiecesFlipped(SDL_Renderer *renderer);
+
+    Sprite* m_pieces[NUM_PIECES];
+    bool m_highlight[NUM_SQUARES];
+    SDL_Rect m_rectSquare;
+    SDL_Color m_blackColor;
+    SDL_Color m_whiteColor;
+    BoardRules m_rules;
+    bool m_flipped;
+
 public:
     const char* rowNames="87654321";
     const char* colNames="abcdefgh";
@@ -55,6 +68,8 @@ public:
     void clearHighlights();
     BoardRules* rules() {return &m_rules;}
     void playMove(const char* sanLong);
+    void flip(bool flip);
+    bool isFlipped() {return m_flipped;}
 
     /** Returns a string like "a1" give a col='a' and row='1'. */
     char* toMove(char* buffer, size_t n, char col, char row) {
@@ -102,17 +117,6 @@ public:
         to[1]=sanLong[3];
         to[2]='\0';
     }
-
-protected:
-    void drawSquares(SDL_Renderer* r);
-    void drawPieces(SDL_Renderer* r);
-
-    Sprite* m_pieces[NUM_PIECES];
-    bool m_highlight[NUM_SQUARES];
-    SDL_Rect m_rectSquare;
-    SDL_Color m_blackColor;
-    SDL_Color m_whiteColor;
-    BoardRules m_rules;
 };
 
 

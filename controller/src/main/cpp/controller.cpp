@@ -213,6 +213,7 @@ public:
                     psocket->println(jresult.dump().c_str());
                 } else if (!action.compare("ping")) {
                     psocket->println("pong");
+                    jresult["success"]=true;
                     psocket->println(jresult.dump().c_str());
                 } else if (!action.compare("setmode")) {
                     setMode(j, jresult);
@@ -225,6 +226,8 @@ public:
                     psocket->println(jresult.dump().c_str());
                 } else if(!action.compare("fen")) {
                     requestFen(psocket);
+                } else if(!action.compare("flip")) {
+
                 }
             }
 
