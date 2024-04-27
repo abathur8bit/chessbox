@@ -1,28 +1,54 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "telnetserver.h"
+#include "json.hpp"
 
 #ifdef WIN32
 WSADATA m_wsd;              ///< WSA startup information (Windows only)
 #endif
 
+using namespace nlohmann;   //json
+
 class Sim : public TelnetServer {
+protected:
+    char m_buffer[1024];
 public:
     Sim(const SockAddr& saBind) : TelnetServer(saBind) {}
     virtual void connected(SocketInstance sock,SockAddr& sa) {
-        printf("Got connectin from %s\n",sa.dottedDecimal());
-        sockPrint(sock,"Hello good citizen\r\n");
+        printf("Connection from %s opened\n",sa.dottedDecimal());
+        json j;
+        j["message"] = "Hello";
+        println(sock, j.dump().c_str());
+    }
+    virtual void closed(SocketInstance sock,SockAddr& sa) {
+        printf("Connection from %s closed\n",sa.dottedDecimal());
     }
     virtual void processLine(SocketInstance sock,SockAddr& sa,char* line) {
         printf("Got [%s] from client\n",line);
-        char buff[1024];
-        snprintf(buff,sizeof buff,"OK [%s]\r\n",line);
-        sockPrint(sock,buff);
+        try {
+            json j=json::parse(line);
+            if(j.contains("action")) {
+                string action=j["action"];
+                snprintf(m_buffer, sizeof m_buffer, "OK [%s]", action.c_str());
+                println(sock, m_buffer);
 
-        if(strcmp(line,"quit")==0) {
-            sockPrint(sock,"Good bye\r\n");
+                if(action.compare("quit")==0) {
+                    println(sock, "Good bye");
+                    sock.close();
+                }
+            } else {
+                json j;
+                j["error"] = "missing action";
+                println(sock,j.dump().c_str());
+            }
+        } catch (json::exception& ex) {
+            printf("parse error at byte %s\n",ex.what());
+            json j;
+            j["error"] = "invalid json";
+            println(sock,j.dump().c_str());
             sock.close();
         }
+
     }
     virtual void idle() {
 
@@ -31,49 +57,8 @@ public:
 
 int main(int argc,char* argv[]) {
     int port=9999;
-#ifdef WIN32
-    int err=WSAStartup(0x0101, &m_wsd);
-    if(err != 0) {
-        printf("unable to start windows socket layer error=%d\n", err);
-        exit(1);
-    }
-#endif
-
-    const char* msg = "Hello World\r\n";
-    bool running=true;
     SockAddr saBind((ULONG)INADDR_ANY,port);
     Sim server(saBind);
-
-    //test alnumOnly
-//    char buff[1024] = "\nabc\r\n";
-//    printf("Buffer:\n");
-//    server.hex(buff,6);
-//    server.alnumOnly(buff);
-//    printf("Buffer now:\n");
-//    server.hex(buff,6);
-
-    //test extrat line
-//    char buff[1024] = "abcd\r";
-//    server.hex(buff,6);
-//    strcpy(server.m_buffer,"bleh\rxyz\r\n1234\r");
-//    server.m_buffSize = strlen(server.m_buffer);
-//    server.hex(server.m_buffer,server.m_buffSize);
-//
-//    printf("extracting line\n");
-//    int n = server.extractLine(buff,sizeof buff);
-//    printf("we extracted %d bytes:\n",n);
-//    server.hex(buff,strlen(buff));
-//
-//    printf("extracting line 2\n");
-//    n = server.extractLine(buff,sizeof buff);
-//    printf("we extracted %d bytes:\n",n);
-//    server.hex(buff,strlen(buff));
-//
-//    printf("extracting no line\n");
-//    n = server.extractLine(buff,sizeof buff);
-//    printf("we extracted %d bytes:\n",n);
-//    server.hex(buff,strlen(buff));
-
-    server.startServer();
+    server.runServer();
     printf("Done\n");
 }

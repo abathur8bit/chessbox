@@ -31,62 +31,66 @@ void TelnetServer::closed(SocketInstance sock,SockAddr& sa) {
 
 void TelnetServer::idle() {}
 
-void TelnetServer::startServer() {
+void TelnetServer::runServer() {
     m_sListen.create();
     m_sListen.bind(m_saServer);
     m_sListen.listen();
     SocketInstance conn;
-    m_sListen.accept(conn,m_saClient);
-    connected(conn,m_saClient);
-    conn.setExceptionOnReadClose(false);
 
     m_bRunning = true;
     m_buffSize=0;
     while(m_bRunning) {
-        struct timeval tv;
-        memset(&tv,0,sizeof(tv));
-        tv.tv_usec = 100*1000; //millisecond to microsecond
-        FD_ZERO(&m_wset);
-        FD_ZERO(&m_rset);
-        FD_SET(m_sListen,&m_rset);      //select on listening socket
-        FD_SET(conn,&m_rset);
-        const int n = select(0, &m_rset, NULL, NULL, &tv);
-//            printf("select returned %d\n",n);
-        if(n == SOCKET_ERROR) {
-            int err = WSAGetLastError();
-            if(err == WSAENOTSOCK) {
-                closed(conn,m_saClient);
-            } else {
-                printf("Socket error %d\n", err);
-            }
-            m_bRunning = false;
-        } else if(n > 0) {
-//                printf("%d sockets ready\n", n);
-            char buff[1024];
-            memset(buff,0,sizeof(buff));
-            int bytes = conn.recv(buff, sizeof(buff));
-            if(bytes > 0) {
-//                hex(buff, bytes);
-                memcpy(m_buffer + m_buffSize, buff, bytes);
-                m_buffSize+=bytes;
-                int count=extractLine(buff, sizeof buff);
-                if(count>0) {
-                    alnumOnly(buff);
-                    processLine(conn,m_saClient,buff);
-                }
-            } else if(bytes == 0) {
-                //socket closed
-                printf("Socket was closed on client side %s\n",m_saClient.dottedDecimal());
-                conn.cleanup();
-                closed(conn,m_saClient);
-                m_bRunning = false;
-            }
-        } else {
-            idle();
-        }
-    }
+        //wait for a connection
+//        printf("waiting for connection\n");
+        m_sListen.accept(conn,m_saClient);
+        connected(conn,m_saClient);
+        conn.setExceptionOnReadClose(false);
 
-    conn.cleanup();
+//        printf("processing data\n");
+        //process incoming data
+        while(m_bRunning) {
+            idle();
+            struct timeval tv;
+            memset(&tv, 0, sizeof(tv));
+            tv.tv_usec=100 * 1000; //100 milliseconds (millisecond to microsecond)
+            FD_ZERO(&m_wset);
+            FD_ZERO(&m_rset);
+            FD_SET(m_sListen, &m_rset);      //select on listening socket
+            FD_SET(conn, &m_rset);
+            const int n=select(0, &m_rset, NULL, NULL, &tv);
+//            printf("select returned %d\n",n);
+            if(n==SOCKET_ERROR) {
+                int err=WSAGetLastError();
+//                printf("Socket error %d\n", err);
+                conn.cleanup();
+                if(err==WSAENOTSOCK) {
+                    closed(conn, m_saClient);
+                    break;
+                }
+            } else if(n>0) {
+//                printf("%d sockets ready\n", n);
+                char buff[1024];
+                memset(buff, 0, sizeof(buff));
+                int bytes=conn.recv(buff, sizeof(buff));
+                if(bytes>0) {
+//                hex(buff, bytes);
+                    memcpy(m_buffer + m_buffSize, buff, bytes);
+                    m_buffSize+=bytes;
+                    int count=extractLine(buff, sizeof buff);
+                    if(count>0) {
+                        processLine(conn, m_saClient, buff);
+                    }
+                } else if(bytes==0) {
+                    //socket closed
+                    printf("Socket was closed on client side %s\n", m_saClient.dottedDecimal());
+                    conn.cleanup();
+                    closed(conn, m_saClient);
+                    break;
+                }
+            }
+        }
+        conn.cleanup();
+    }
 }
 
 //clears the string s of any non alpha numeric characters. Copy's over s with the new string.
@@ -133,8 +137,9 @@ void TelnetServer::hex(const char* pch,int size) {
     }
 }
 
-void TelnetServer::sockPrint(SocketInstance sock,char* s) {
+void TelnetServer::println(SocketInstance sock, const char* s) {
     sock.write(s,strlen(s));
+    sock.write("\r\n",2);
 }
 
 

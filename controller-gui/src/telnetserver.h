@@ -21,11 +21,11 @@ public:
     virtual void closed(SocketInstance sock,SockAddr& sa);
     virtual void idle();
 
-    void startServer();
+    void runServer();
     void alnumOnly(char* s);    //clears the string s of any non alpha numeric characters. Copy's over s with the new string.
     int extractLine(char *dest,int size);   //return dest or NULL if there isn't a line to read
     void hex(const char* pch,int size);
-    void sockPrint(SocketInstance sock,char* s);
+    void println(SocketInstance sock, const char* s);
 
 public:
     SocketInstance          m_sListen;
