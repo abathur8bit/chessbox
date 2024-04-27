@@ -33,3 +33,6 @@
 
 # misc
 .obsidian/
+java_version/
+cmake-build-debug/
+martin/
