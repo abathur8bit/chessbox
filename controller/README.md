@@ -7,6 +7,7 @@ The other reason was to allow for being able to connect from a desktop computer,
 
 **Status:** In progress. Currently prototyping.
 
+
 # Compiling and Running
 You need to have
 - [ssobjects](https://github.com/abathur8bit/ssobjects) installed to compile chess controller, as it uses the network to allow remote connections.
@@ -153,6 +154,35 @@ Multiline:
   ]
 }
 ```
+
+
+```json
+action:flash,x:1,y:1,speed:fast/slow
+action:led,x:1,y:1,on:true/false
+action:ledall,on:true/false
+action:queryleds
+action:querystate
+
+{"acion":"quit"}
+{"action":"quit"}
+{"action":"led","squares":[1,2,3],"on":false}
+{"action":"flash","squares":[1,2,3],"on":false}
+{"action":"led_all","on":true}
+{"action":"led_all","on":false}
+{"action":"query_leds"}
+response: {"leds_on":[1,2,3],"success":true}
+{"action":"query_pieces"}
+response: {"has_piece":[0,1,2],"success":true}
+
+{"action":"piece_down","san":"b8","square":1,"success":true}
+{"action":"piece_up","san":"b8","square":1,"success":true}
+```
+
+## Query LEDs
+Gets the current state of all the leds. true is on, false is off. 
+## Query state
+Gets the state of all the piece switches. true is occupied, false is empty.
+
 
 # TODO
 - Modes

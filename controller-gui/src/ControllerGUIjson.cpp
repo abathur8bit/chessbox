@@ -16,11 +16,11 @@ void ControllerGUI::processJson(const char* buffer) {
     json j = json::parse(buffer);
     if(j.contains("action")) {
         string action = j["action"];
-        if(!action.compare("pieceUp")) {
+        if(!action.compare("piece_up")) {
             string square=j["square"];
             m_board->highlightSquare(m_board->toIndex(square.c_str()),true);
 //            invalidate();
-        } else if(!action.compare("pieceDown")) {
+        } else if(!action.compare("piece_down")) {
             string square=j["square"];
             m_board->highlightSquare(m_board->toIndex(square.c_str()),false);
 //            invalidate();

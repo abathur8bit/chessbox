@@ -2,7 +2,7 @@
 //g++ -o controller -std=c++11 -I../ssobjects -I src/main/cpp -lwiringPi -lssobjects src/main/cpp/controller.cpp
 //pin numbers are BCM
 
-/** LEDs are on bank B, reed switches are on bank A.
+/** LEDs are on bank B, piece switches are on bank A.
  *
  * Pin layout:
  *
