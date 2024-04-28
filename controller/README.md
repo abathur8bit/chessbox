@@ -165,8 +165,8 @@ action:querystate
 
 {"acion":"quit"}
 {"action":"quit"}
-{"action":"led","squares":[1,2,3],"on":false}
-{"action":"flash","squares":[1,2,3],"on":false}
+{"action":"led","squares":[1,2,3],"on":true}
+{"action":"flash","squares":[0,1,2,3],"on":true}
 {"action":"led_all","on":true}
 {"action":"led_all","on":false}
 {"action":"query_leds"}
@@ -174,8 +174,22 @@ response: {"leds_on":[1,2,3],"success":true}
 {"action":"query_pieces"}
 response: {"has_piece":[0,1,2],"success":true}
 
-{"action":"piece_down","san":"b8","square":1,"success":true}
-{"action":"piece_up","san":"b8","square":1,"success":true}
+{"action":"piece_down","lan":"b8","square":1,"success":true}
+{"action":"piece_up","lan":"b8","square":1,"success":true}
+```
+
+## Move
+Start sequence to show player what piece to move, and where to move it. Move is described in long algebraic notation (LAN). Will send piece up and piece down.
+
+Request
+```json
+{"action":"move","lan":"a7a6"}
+{"action":"move","lan":"A7A6"}
+```
+
+Response
+```json
+{"success":true}
 ```
 
 ## Query LEDs
@@ -215,8 +229,8 @@ modified board
 echo '{"action":"setposition","fen":"rnbqkbnr/pppppppp/8/8/8/PPPPPPPP/RNBQKBNR/8 w kq - 0 1"}' | nc -C -N chessbox 9999
 normal board:
 echo '{"action":"setposition","fen":"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kq - 0 1"}' | nc -C -N chessbox 9999
-echo '{"action":"move","description":null,"moves":[{"from":"b3","long":"b3b4","san":"b4","to":"b4","type":"move"}]}' | nc -C -N chessbox 9999
-echo '{"action":"move","description":null,"moves":[{"from":"a2","long":"a2a3","san":"a3","to":"a3","type":"move"}]}' | nc -C -N chessbox 9999
+echo '{"action":"move","description":null,"moves":[{"from":"b3","long":"b3b4","lan":"b4","to":"b4","type":"move"}]}' | nc -C -N chessbox 9999
+echo '{"action":"move","description":null,"moves":[{"from":"a2","long":"a2a3","lan":"a3","to":"a3","type":"move"}]}' | nc -C -N chessbox 9999
 echo '{"action":"setmode","mode":"inspect"}' | nc -C -N chessbox 9999
 rn1qk2r/pp2ppbp/2p1bnp1/8/2pPP3/2N2N2/PP2BPPP/R1BQK2R w KQkq -
 {"action":"setposition","fen":"rn1qk2r/pp2ppbp/2p1bnp1/8/2pPP3/2N2N2/PP2BPPP/R1BQK2R w KQkq - 2 8"}
