@@ -14,6 +14,7 @@ WSADATA m_wsd;              ///< WSA startup information (Windows only)
 using namespace nlohmann;   //json
 using namespace std;
 
+#define FLASH_SPEED 100
 #define BUTTON_WIDTH    60
 #define BUTTON_HEIGHT   40
 #define SCREEN_WIDTH    400
@@ -105,14 +106,14 @@ public:
     bool led(int x, int y) {
         return led(y * 8 + x);
     }
-    void setFlash(int n,bool state) {
+    void setFlashing(int n, bool state) {
         m_flash[n] = state;
     }
-    bool flash(int n) {
+    bool isFlashing(int n) {
         return m_flash[n];
     }
-    bool flash(int x,int y) {
-        return flash(y*8+x);
+    bool isFlashing(int x, int y) {
+        return isFlashing(y * 8 + x);
     }
 
     void queryPieces(bool *dest) {
@@ -295,7 +296,7 @@ public:
                     auto squares=j["squares"];
                     for(int i=0; i<squares.size(); i++) {
                         int sq=squares.at(i);
-                        m_board.setFlash(sq,on);
+                        m_board.setFlashing(sq, on);
                     }
                     jresult["success"]=true;
                 } else if(action.compare("query_leds")==0) {
@@ -337,88 +338,111 @@ public:
                 println(sock,jresult.dump().c_str());
             } else {
                 json j;
-                j["error"] = "missing action";
+                j["success"] = false;
+                j["errors"] = {"missing action"};
                 println(sock,j.dump().c_str());
             }
         } catch (json::exception& ex) {
             printf("parse error at byte %s\n",ex.what());
             json j;
-            j["error"] = "invalid json";
+            j["success"] = false;
+            j["errors"] = {"invalid json"};
             println(sock,j.dump().c_str());
-            sock.close();
         }
 
     }
     void processPieceUp(int pos) {
         m_board.setPiece(pos,false);
 
-        if(m_sClient != 0) {
-            json j;
-            j["success"]=true;
-            j["action"]=PIECE_UP;
-            j["square"]=pos;
-            j["lan"]=m_board.lan(pos);
-            println(m_sClient, j.dump().c_str());
-        }
+        if(m_board.isFlashing(pos)) {
+            m_board.setFlashing(pos,false);
+        } else if(m_gameMode == GAME_MODE_MOVE && pos != m_moveLocations[m_moveIndex]) {
+            m_board.setFlashing(pos, true);
+        } else {
+            if(m_sClient!=0) {
+                json j;
+                j["success"]=true;
+                j["action"]=PIECE_UP;
+                j["square"]=pos;
+                j["lan"]=m_board.lan(pos);
+                println(m_sClient, j.dump().c_str());
+            }
 
-        if(m_gameMode == GAME_MODE_MOVE) {
-            if(m_moveActions[m_moveIndex] == MOVE_UP && pos == m_moveLocations[m_moveIndex]) {
-                printf("got move up %d %c\n",m_moveIndex,m_moveActions[m_moveIndex]);
-                m_board.setLed(pos,false);
-                m_moveIndex++;
+            if(m_gameMode==GAME_MODE_MOVE) {
+                if(m_moveActions[m_moveIndex]==MOVE_UP && pos==m_moveLocations[m_moveIndex]) {
+                    printf("got move up %d %c\n", m_moveIndex, m_moveActions[m_moveIndex]);
+                    m_board.setLed(pos, false);
+                    m_moveIndex++;
+                }
+            }
+        }
+    }
+    void processPieceDown(int pos) {
+        m_board.setPiece(pos,true);
+
+        if(m_board.isFlashing(pos)) {
+            m_board.setFlashing(pos, false);
+        } else {
+            if(m_sClient!=0) {
+                json j;
+                j["success"]=true;
+                j["action"]=PIECE_DOWN;
+                j["square"]=pos;
+                j["lan"]=m_board.lan(pos);
+                println(m_sClient, j.dump().c_str());
+            }
+
+            if(m_gameMode==GAME_MODE_MOVE) {
+                if(m_moveActions[m_moveIndex]==MOVE_DOWN && pos==m_moveLocations[m_moveIndex]) {
+                    printf("got move down %d %c\n", m_moveIndex, m_moveActions[m_moveIndex]);
+                    m_board.setLed(pos, false);
+                    m_moveIndex++;
+                    if(m_moveIndex==m_movesNeeded) {
+                        m_gameMode=GAME_MODE_PLAYING;
+                        printf("game mode playing\n");
+                        json j;
+                        j["success"]=true;
+                        j["action"]="move";
+                        j["from"]=m_moveLocations[0];
+                        j["to"]=m_moveLocations[m_moveIndex - 1];
+                        println(m_sClient, j.dump().c_str());
+                    }
+                } else {
+                    m_board.setFlashing(pos, true);
+                }
             }
         }
     }
 
-    void processPieceDown(int pos) {
-        m_board.setPiece(pos,true);
-
-        if(m_sClient != 0) {
-            json j;
-            j["success"]=true;
-            j["action"]=PIECE_DOWN;
-            j["square"]=pos;
-            j["lan"]=m_board.lan(pos);
-            println(m_sClient, j.dump().c_str());
+    //turn off all pieces and leds
+    void clearAllPiecesLeds() {
+        for(int i=0; i<64; i++) {
+            m_board.setPiece(i, false);
+            m_board.setLed(i, false);
+            m_board.setFlashing(i,false);
         }
+    }
 
-        if(m_gameMode == GAME_MODE_MOVE) {
-            if(m_moveActions[m_moveIndex] == MOVE_DOWN && pos == m_moveLocations[m_moveIndex]) {
-                printf("got move down %d %c\n",m_moveIndex,m_moveActions[m_moveIndex]);
-                m_board.setLed(pos,false);
-                m_moveIndex++;
-                if(m_moveIndex == m_movesNeeded) {
-                    m_gameMode = GAME_MODE_PLAYING;
-                    printf("game mode playing\n");
-                    json j;
-                    j["success"]=true;
-                    j["action"]="move";
-                    j["from"]=m_moveLocations[0];
-                    j["to"]=m_moveLocations[m_moveIndex-1];
-                    println(m_sClient, j.dump().c_str());
-                }
-            }
+    //turn on pieces where new game would be
+    void setupDefaultChessPosition() {
+        //put pieces on A8 thru H7
+        for(int i=0; i<16; i++) {
+            m_board.setPiece(i, true);
+        }
+        //put pieces on A2 thru H1
+        for(int i=48; i<64; i++) {
+            m_board.setPiece(i, true);
         }
     }
 
     virtual void processButtonClicked(Button* b) {
         printf("process mouse\n");
         if(!strcmp(b->id(), SETUP_BUTTON_ID)) {
-            //put pieces on A8 thru H7
-            for(int i=0; i<16; i++) {
-                m_board.setPiece(i, true);
-            }
-            //put pieces on A2 thru H1
-            for(int i=48; i<64; i++) {
-                m_board.setPiece(i, true);
-            }
+            clearAllPiecesLeds();
+            setupDefaultChessPosition();
             m_gameMode = GAME_MODE_PLAYING;
         } else if(!strcmp(b->id(), CLEAR_BUTTON_ID)) {
-            //clear all pieces from board
-            for(int i=0; i<64; i++) {
-                m_board.setPiece(i, false);
-                m_board.setLed(i, false);
-            }
+            clearAllPiecesLeds();
         }
     }
 
@@ -436,41 +460,8 @@ public:
                 processPieceDown(pos);
             }
         }
-
-
-
-
-//        if(m_sClient != 0) {
-//            int w=SCREEN_WIDTH / 8;
-//            int h=SCREEN_WIDTH / 8;
-//            int x=event->button.x / w;
-//            int y=event->button.y / h;
-//            int pos=toPos(x,y);
-//            if(m_board.piece(pos)) {
-//                processPieceUp(pos);
-//            } else {
-//                processPieceDown(pos);
-//            }
-//            m_board.setPiece(x, y, !m_board.piece(x, y));
-//            string pieceState = m_board.piece(x, y) ? "piece_down" : "piece_up";
-//            json j;
-//            j["success"]=true;
-//            j["action"]=pieceState;
-//            j["square"]=pos;
-//            j["lan"] =m_board.lan(x, y);
-//            println(m_sClient, j.dump().c_str());
-//
-//            if(m_gameMode == GAME_MODE_MOVE) {
-//                if(m_moveActions[m_moveIndex] == MOVE_UP && m_board.piece(pos)) {
-//                    m_board.setFlash(pos,true);
-//                } else if(m_moveActions[m_moveIndex] == MOVE_UP && !m_board.piece(pos) && m_moveLocations[m_moveIndex] != pos) {
-//                    m_board.setFlash(pos,true);
-//                } else if(m_moveActions[m_moveIndex] == MOVE_UP && !m_board.piece(pos) && m_moveLocations[m_moveIndex] == pos) {
-//                    m_board.setLed(pos,false);
-//                }
-//            }
-//        }
     }
+
     virtual void idle() {
         SDL_Event event;
         if (SDL_PollEvent(&event))
@@ -504,7 +495,7 @@ public:
     virtual void update(long ticks) {
         Window::update(ticks);
         long delta = ticks-m_lastTicks;
-        if(delta>=200) {
+        if(delta>=FLASH_SPEED) {
             m_board.toggleFlash();
             m_lastTicks = ticks;
         }

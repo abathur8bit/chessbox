@@ -194,6 +194,9 @@ Response
 {"success":true}
 ```
 
+Pick up wrong piece
+Pick up right piece, put in wrong square
+Put a piece on the board
 ## Query LEDs
 Gets the current state of all the leds. true is on, false is off. 
 ## Query state
