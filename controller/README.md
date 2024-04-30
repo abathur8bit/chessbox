@@ -1,3 +1,5 @@
+1.17.30 
+
 # Chessbox Controller
 Board controller for Chessbox e-board. This is the new low level controller that handles the i2c interface. Moving the controller logic from Chessbox project to here also allows me to be able to connect to the controller remotely, from a desktop for instance. 
 

@@ -25,8 +25,13 @@ using namespace std;
 #define GAME_MODE_MOVE  2
 #define GAME_MODE_END   3
 #define GAME_MODE_DEMO  4
+#define GAME_MODE_PLAYING  5
 #define MOVE_UP 'U'
 #define MOVE_DOWN 'D'
+#define PIECE_DOWN "piece_down"
+#define PIECE_UP "piece_up"
+#define SETUP_BUTTON_ID "setupbuttonid"
+#define CLEAR_BUTTON_ID "clearbuttonid"
 
 class SimBoard : public Component {
 protected:
@@ -37,7 +42,7 @@ protected:
     bool m_led[NUM_SQUARES];
     bool m_pieces[NUM_SQUARES];
     bool m_flash[NUM_SQUARES];
-    const char m_san[NUM_SQUARES][3] = {
+    const char m_lan[NUM_SQUARES][3] = {
             "a8","b8","c8","d8","e8","f8","g8","h8",
             "a7","b7","c7","d7","e7","f7","g7","h7",
             "a6","b6","c6","d6","e6","f6","g6","h6",
@@ -65,8 +70,11 @@ public:
         m_flashState = !m_flashState;
     }
 
+    const char* lan(int pos) {
+        return m_lan[pos];
+    }
     const char* lan(int x, int y) {
-        return m_san[y * 8 + x];
+        return lan(y * 8 + x);
     }
     void setPiece(int n,bool state) {
         m_pieces[n] = state;
@@ -228,9 +236,12 @@ public:
         println(sock, j.dump().c_str());
         addComponent(&m_board);
         int x=0,y=SCREEN_HEIGHT,w=BUTTON_WIDTH,h=BUTTON_HEIGHT,gap=5;
-        TextButton* level=new TextButton("setupbutton","Setup",x,y,w,h);
+        TextButton* level=new TextButton(SETUP_BUTTON_ID,"Setup",x,y,w,h);
         addButton(level);
         addComponent(level);
+        TextButton* clearbn=new TextButton(CLEAR_BUTTON_ID,"Clear",x+w+1,y,w,h);
+        addButton(clearbn);
+        addComponent(clearbn);
 
         draw(m_renderer);
         SDL_RenderPresent(m_renderer);
@@ -338,33 +349,127 @@ public:
         }
 
     }
-    void mouse(SDL_Event* event) {
-        printf("button x=%d y=%d\n",event->button.x,event->button.y);
+    void processPieceUp(int pos) {
+        m_board.setPiece(pos,false);
+
         if(m_sClient != 0) {
-            int w=SCREEN_WIDTH / 8;
-            int h=SCREEN_WIDTH / 8;
-            int x=event->button.x / w;
-            int y=event->button.y / h;
-            int pos=toPos(x,y);
-            m_board.setPiece(x, y, !m_board.piece(x, y));
-            string pieceState = m_board.piece(x, y) ? "piece_down" : "piece_up";
             json j;
             j["success"]=true;
-            j["action"]=pieceState;
-            j["square"]=y * 8 + x;
-            j["lan"] =m_board.lan(x, y);
+            j["action"]=PIECE_UP;
+            j["square"]=pos;
+            j["lan"]=m_board.lan(pos);
             println(m_sClient, j.dump().c_str());
+        }
 
-            if(m_gameMode == GAME_MODE_MOVE) {
-                if(m_moveActions[m_moveIndex] == MOVE_UP && m_board.piece(pos)) {
-                    m_board.setFlash(pos,true);
-                } else if(m_moveActions[m_moveIndex] == MOVE_UP && !m_board.piece(pos) && m_moveLocations[m_moveIndex] != pos) {
-                    m_board.setFlash(pos,true);
-                } else if(m_moveActions[m_moveIndex] == MOVE_UP && !m_board.piece(pos) && m_moveLocations[m_moveIndex] == pos) {
-                    m_board.setLed(pos,false);
+        if(m_gameMode == GAME_MODE_MOVE) {
+            if(m_moveActions[m_moveIndex] == MOVE_UP && pos == m_moveLocations[m_moveIndex]) {
+                printf("got move up %d %c\n",m_moveIndex,m_moveActions[m_moveIndex]);
+                m_board.setLed(pos,false);
+                m_moveIndex++;
+            }
+        }
+    }
+
+    void processPieceDown(int pos) {
+        m_board.setPiece(pos,true);
+
+        if(m_sClient != 0) {
+            json j;
+            j["success"]=true;
+            j["action"]=PIECE_DOWN;
+            j["square"]=pos;
+            j["lan"]=m_board.lan(pos);
+            println(m_sClient, j.dump().c_str());
+        }
+
+        if(m_gameMode == GAME_MODE_MOVE) {
+            if(m_moveActions[m_moveIndex] == MOVE_DOWN && pos == m_moveLocations[m_moveIndex]) {
+                printf("got move down %d %c\n",m_moveIndex,m_moveActions[m_moveIndex]);
+                m_board.setLed(pos,false);
+                m_moveIndex++;
+                if(m_moveIndex == m_movesNeeded) {
+                    m_gameMode = GAME_MODE_PLAYING;
+                    printf("game mode playing\n");
+                    json j;
+                    j["success"]=true;
+                    j["action"]="move";
+                    j["from"]=m_moveLocations[0];
+                    j["to"]=m_moveLocations[m_moveIndex-1];
+                    println(m_sClient, j.dump().c_str());
                 }
             }
         }
+    }
+
+    virtual void processButtonClicked(Button* b) {
+        printf("process mouse\n");
+        if(!strcmp(b->id(), SETUP_BUTTON_ID)) {
+            //put pieces on A8 thru H7
+            for(int i=0; i<16; i++) {
+                m_board.setPiece(i, true);
+            }
+            //put pieces on A2 thru H1
+            for(int i=48; i<64; i++) {
+                m_board.setPiece(i, true);
+            }
+            m_gameMode = GAME_MODE_PLAYING;
+        } else if(!strcmp(b->id(), CLEAR_BUTTON_ID)) {
+            //clear all pieces from board
+            for(int i=0; i<64; i++) {
+                m_board.setPiece(i, false);
+                m_board.setLed(i, false);
+            }
+        }
+    }
+
+    void mouse(SDL_Event* event) {
+        printf("button x=%d y=%d\n",event->button.x,event->button.y);
+        int w=SCREEN_WIDTH / 8;
+        int h=SCREEN_WIDTH / 8;
+        int x=event->button.x / w;
+        int y=event->button.y / h;
+        if(event->button.y<SCREEN_WIDTH) {    //yup width, since the board is square
+            int pos=toPos(x, y);
+            if(m_board.piece(pos)) {
+                processPieceUp(pos);
+            } else {
+                processPieceDown(pos);
+            }
+        }
+
+
+
+
+//        if(m_sClient != 0) {
+//            int w=SCREEN_WIDTH / 8;
+//            int h=SCREEN_WIDTH / 8;
+//            int x=event->button.x / w;
+//            int y=event->button.y / h;
+//            int pos=toPos(x,y);
+//            if(m_board.piece(pos)) {
+//                processPieceUp(pos);
+//            } else {
+//                processPieceDown(pos);
+//            }
+//            m_board.setPiece(x, y, !m_board.piece(x, y));
+//            string pieceState = m_board.piece(x, y) ? "piece_down" : "piece_up";
+//            json j;
+//            j["success"]=true;
+//            j["action"]=pieceState;
+//            j["square"]=pos;
+//            j["lan"] =m_board.lan(x, y);
+//            println(m_sClient, j.dump().c_str());
+//
+//            if(m_gameMode == GAME_MODE_MOVE) {
+//                if(m_moveActions[m_moveIndex] == MOVE_UP && m_board.piece(pos)) {
+//                    m_board.setFlash(pos,true);
+//                } else if(m_moveActions[m_moveIndex] == MOVE_UP && !m_board.piece(pos) && m_moveLocations[m_moveIndex] != pos) {
+//                    m_board.setFlash(pos,true);
+//                } else if(m_moveActions[m_moveIndex] == MOVE_UP && !m_board.piece(pos) && m_moveLocations[m_moveIndex] == pos) {
+//                    m_board.setLed(pos,false);
+//                }
+//            }
+//        }
     }
     virtual void idle() {
         SDL_Event event;
@@ -374,6 +479,9 @@ public:
             {
                 case SDL_MOUSEBUTTONDOWN:
                     mouse(&event);
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    processMouseEvent(&event);
                     break;
                 case SDL_QUIT:
                     m_showing=false;
