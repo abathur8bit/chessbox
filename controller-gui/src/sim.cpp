@@ -1,11 +1,12 @@
 #include <SDL.h>
-#include <stdio.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cctype>
 #include <vector>
 #include "telnetserver.h"
 #include "json.hpp"
 #include "Window.h"
 #include "FontManager.h"
+#include "Label.h"
 
 #ifdef WIN32
 WSADATA m_wsd;              ///< WSA startup information (Windows only)
@@ -184,6 +185,7 @@ protected:
     int m_moveLocations[4];
     int m_movesNeeded=0;
     int m_moveIndex=0;
+    Label* m_pstatusLabel;
 public:
     SimServer(const SockAddr& saBind) :
             TelnetServer(saBind),
@@ -191,7 +193,9 @@ public:
             m_window(nullptr),
             m_renderer(nullptr),
             m_board(0, 0, SCREEN_WIDTH, SCREEN_WIDTH),
-            m_lastTicks(0)
+            m_lastTicks(0),
+            m_pstatusLabel(nullptr)
+//            m_pstatusLabel(nullptr)
     {
         memset(m_moveActions,0,sizeof m_moveActions);
         memset(m_moveLocations,0,sizeof m_moveLocations);
@@ -220,6 +224,13 @@ public:
         logo->load(m_renderer, "assets/logo-sm.png", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
         addComponent(logo);
 
+        char buff[100];
+        snprintf(buff,sizeof(buff),"Waiting for connection on port %u",saBind.port());
+        m_pstatusLabel = new Label("status", 10, 10, SCREEN_WIDTH, SCREEN_WIDTH);
+        m_pstatusLabel->setText(buff);
+        addComponent(m_pstatusLabel);
+//m_pstatusLabel.update(0);
+//m_pstatusLabel.draw(m_renderer);
         draw(m_renderer);
         SDL_RenderPresent(m_renderer);
     }
@@ -229,7 +240,9 @@ public:
         SDL_Quit();
     }
     virtual void connected(SocketInstance sock,SockAddr& sa) {
-        printf("Connection from %s opened\n",sa.dottedDecimal());
+        char buff[80];
+        snprintf(buff,sizeof(buff),"Connection from %s opened\n",sa.dottedDecimal());
+        m_pstatusLabel->setText(buff);
         json j;
         j["message"] = "Chessbox controller says hello";
         j["version"] = "1.00.00";
@@ -282,7 +295,7 @@ public:
                 } else if(action.compare("led")==0) {
                     bool on=j["on"];
                     auto squares = j["squares"];
-                    for(int i=0; i<squares.size(); i++) {
+                    for(unsigned i=0; i<squares.size(); i++) {
                         int sq=squares.at(i);
                         m_board.setLed(sq, on);
                     }
@@ -294,7 +307,7 @@ public:
                 } else if(action.compare("flash")==0) {
                     bool on=j["on"];
                     auto squares=j["squares"];
-                    for(int i=0; i<squares.size(); i++) {
+                    for(unsigned i=0; i<squares.size(); i++) {
                         int sq=squares.at(i);
                         m_board.setFlashing(sq, on);
                     }
@@ -539,6 +552,7 @@ int main(int argc,char* argv[]) {
     int port=9999;
     SockAddr saBind((ULONG)INADDR_ANY,port);
     SimServer server(saBind);
+    printf("Server running on port %d\n",port);
     server.runServer();
     printf("Done\n");
     return 0;
