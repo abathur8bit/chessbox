@@ -179,6 +179,7 @@ protected:
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
     SimBoard m_board;
+    int m_expectedPosition[64];
     long m_lastTicks;
     int m_gameMode = GAME_MODE_IDLE;
     int m_moveActions[4];
@@ -195,8 +196,8 @@ public:
             m_board(0, 0, SCREEN_WIDTH, SCREEN_WIDTH),
             m_lastTicks(0),
             m_pstatusLabel(nullptr)
-//            m_pstatusLabel(nullptr)
     {
+        memset(m_expectedPosition,0,sizeof m_expectedPosition);
         memset(m_moveActions,0,sizeof m_moveActions);
         memset(m_moveLocations,0,sizeof m_moveLocations);
         m_movesNeeded = 0;
@@ -213,31 +214,44 @@ public:
                 SCREEN_WIDTH, SCREEN_HEIGHT+BUTTON_HEIGHT,
                 SDL_WINDOW_RESIZABLE);
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-        FontManager::instance()->add("small","Inconsolata-Medium.ttf",10);
-        FontManager::instance()->add("normal","Inconsolata-Medium.ttf",16);
-        FontManager::instance()->add("large","Inconsolata-Medium.ttf",26);
+        setupFonts();
         m_renderer = SDL_CreateRenderer(m_window, -1, 0);
         if(!m_renderer) {
             printf("m_renderer error %s\n",SDL_GetError());
         }
-        Sprite* logo=new Sprite("logo");
-        logo->load(m_renderer, "assets/logo-sm.png", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-        addComponent(logo);
+        addLogo();
+        addStatusLabel(saBind);
 
-        char buff[100];
-        snprintf(buff,sizeof(buff),"Waiting for connection on port %u",saBind.port());
-        m_pstatusLabel = new Label("status", 10, 10, SCREEN_WIDTH, SCREEN_WIDTH);
-        m_pstatusLabel->setText(buff);
-        addComponent(m_pstatusLabel);
-//m_pstatusLabel.update(0);
-//m_pstatusLabel.draw(m_renderer);
+        setupDefaultChessPosition();
         draw(m_renderer);
         SDL_RenderPresent(m_renderer);
     }
     ~SimServer() {
         SDL_DestroyWindow(m_window);
         SDL_DestroyRenderer(m_renderer);
+        if(m_pstatusLabel) {
+            delete m_pstatusLabel;
+            m_pstatusLabel = nullptr;
+        }
         SDL_Quit();
+    }
+    void setupFonts() {
+        FontManager::instance()->add("small","Inconsolata-Medium.ttf",10);
+        FontManager::instance()->add("normal","Inconsolata-Medium.ttf",16);
+        FontManager::instance()->add("large","Inconsolata-Medium.ttf",26);
+    }
+    void addLogo() {
+        Sprite* logo=new Sprite("logo");
+        logo->load(m_renderer, "assets/logo-sm.png", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+        addComponent(logo);
+    }
+    void addStatusLabel(const SockAddr& saBind) {
+        //status label to show what port sim is waiting on
+        char buff[100];
+        snprintf(buff,sizeof(buff),"Sim waiting for connection on port %u",saBind.port());
+        m_pstatusLabel = new Label("status", 10, 10, SCREEN_WIDTH, SCREEN_WIDTH);
+        m_pstatusLabel->setText(buff);
+        addComponent(m_pstatusLabel);
     }
     virtual void connected(SocketInstance sock,SockAddr& sa) {
         char buff[80];
@@ -279,81 +293,28 @@ public:
     virtual void processLine(SocketInstance sock,SockAddr& sa,char* line) {
         printf("Got [%s] from client\n",line);
         try {
-            json j=json::parse(line);
-            if(j.contains("action")) {
-                json jresult;
-                jresult["success"]=false;
-                string action=j["action"];
+            json src=json::parse(line);
+            json result;
+            result["success"]=false;
+            if(src.contains("action")) {
+                string action=src["action"];
                 if(action.compare("quit")==0) {
-                    jresult["success"]=true;
-                    jresult["message"]="Good bye";
-                    println(sock, jresult.dump().c_str());
-                    sock.close();
-                } else if(action.compare("ping")==0) {
-                    jresult["success"] = true;
-                    jresult["action"] = "pong";
-                } else if(action.compare("led")==0) {
-                    bool on=j["on"];
-                    auto squares = j["squares"];
-                    for(unsigned i=0; i<squares.size(); i++) {
-                        int sq=squares.at(i);
-                        m_board.setLed(sq, on);
-                    }
-                    jresult["success"]=true;
-                } else if(action.compare("led_all")==0) {
-                    bool on=j["on"];
-                    m_board.setLedAll(on);
-                    jresult["success"]=true;
-                } else if(action.compare("flash")==0) {
-                    bool on=j["on"];
-                    auto squares=j["squares"];
-                    for(unsigned i=0; i<squares.size(); i++) {
-                        int sq=squares.at(i);
-                        m_board.setFlashing(sq, on);
-                    }
-                    jresult["success"]=true;
-                } else if(action.compare("query_leds")==0) {
-                    json leds = json::array({});
-                    for(int i=0; i<NUM_SQUARES; i++) {
-                        if(m_board.led(i)) {
-                            leds.push_back(i);
-                        }
-                    }
-                    jresult["leds_on"] = leds;
-                    jresult["success"] = true;
-                } else if(action.compare("query_pieces")==0) {
-                    json switches = json::array({});
-                    for(int i=0; i<NUM_SQUARES; i++) {
-                        if(m_board.piece(i)) {
-                            switches.push_back(i);
-                        }
-                    }
-                    jresult["has_piece"] = switches;
-                    jresult["success"] = true;
-                } else if(action.compare("move")==0) {
-                    string lan=j["lan"];
-                    int from=parseFrom(lan.c_str());
-                    int to=parseTo(lan.c_str());
-                    if(m_board.piece(from)==true && m_board.piece(to)==false) {
-                        printf("move from=%d,to=%d\n", from, to);
-                        m_gameMode=GAME_MODE_MOVE;
-                        m_moveActions[0]=MOVE_UP;
-                        m_moveActions[1]=MOVE_DOWN;
-                        m_moveIndex=0;
-                        m_movesNeeded=2;
-                        m_moveLocations[0]=from;
-                        m_moveLocations[1]=to;
-                        m_board.setLed(from, true);
-                        m_board.setLed(to, true);
-                        jresult["success"]=true;
-                    }
+                    //if we quit, the socket gets closed
+                    quit(sock, src, result);
+                } else {
+                    if(action.compare("ping")==0) ping(sock, src, result);
+                    else if(action.compare("setup_pieces")==0) setupPieces(sock, src, result);
+                    else if(action.compare("flash")==0) flash(sock, src, result);
+                    else if(action.compare("led")==0) led(sock, src, result);
+                    else if(action.compare("led_all")==0) ledAll(sock, src, result);
+                    else if(action.compare("move")==0) move(sock, src, result);
+                    else if(action.compare("query_leds")==0) queryLeds(sock, src, result);
+                    else if(action.compare("query_pieces")==0) queryPieces(sock, src, result);
+                    println(sock, result.dump().c_str());
                 }
-                println(sock,jresult.dump().c_str());
             } else {
-                json j;
-                j["success"] = false;
-                j["errors"] = {"missing action"};
-                println(sock,j.dump().c_str());
+                result["errors"] = {"missing action"};
+                println(sock,result.dump().c_str());
             }
         } catch (json::exception& ex) {
             printf("parse error at byte %s\n",ex.what());
@@ -362,7 +323,100 @@ public:
             j["errors"] = {"invalid json"};
             println(sock,j.dump().c_str());
         }
+    }
 
+    void quit(SocketInstance sock,json& src,json& result) {
+        result["success"]=true;
+        result["message"]="Good bye";
+        println(sock,result.dump().c_str());
+        sock.close();
+    }
+    void ping(SocketInstance sock,json& src,json& result) {
+        result["success"]=true;
+        result["action"]="pong";
+    }
+    void flash(SocketInstance sock,json& src,json& result) {
+        bool on=src["on"];
+        auto squares=src["squares"];
+        for(unsigned i=0; i<squares.size(); i++) {
+            int sq=squares.at(i);
+            m_board.setFlashing(sq, on);
+        }
+        result["success"]=true;
+    }
+    void led(SocketInstance sock,json& src,json& result) {
+        bool on=src["on"];
+        auto squares = src["squares"];
+        for(unsigned i=0; i<squares.size(); i++) {
+            int sq=squares.at(i);
+            m_board.setLed(sq, on);
+        }
+        result["success"]=true;
+    }
+    void ledAll(SocketInstance sock,json& src,json& result) {
+        bool on=src["on"];
+        m_board.setLedAll(on);
+        result["success"]=true;
+    }
+    void move(SocketInstance sock,json& src,json& result) {
+        string lan=src["lan"];
+        int from=parseFrom(lan.c_str());
+        int to=parseTo(lan.c_str());
+        if(m_board.piece(from)==true && m_board.piece(to)==false) {
+            printf("move from=%d,to=%d\n", from, to);
+            m_gameMode=GAME_MODE_MOVE;
+            m_moveActions[0]=MOVE_UP;
+            m_moveActions[1]=MOVE_DOWN;
+            m_moveIndex=0;
+            m_movesNeeded=2;
+            m_moveLocations[0]=from;
+            m_moveLocations[1]=to;
+            m_board.setLed(from, true);
+            m_board.setLed(to, true);
+            result["success"]=true;
+        }
+    }
+    void queryLeds(SocketInstance sock,json& src,json& result) {
+        json leds = json::array({});
+        for(int i=0; i<NUM_SQUARES; i++) {
+            if(m_board.led(i)) {
+                leds.push_back(i);
+            }
+        }
+        result["leds_on"] = leds;
+        result["success"] = true;
+    }
+    void queryPieces(SocketInstance sock,json& src,json& result) {
+        json switches = json::array({});
+        for(int i=0; i<NUM_SQUARES; i++) {
+            if(m_board.piece(i)) {
+                switches.push_back(i);
+            }
+        }
+        result["has_piece"] = switches;
+        result["success"] = true;
+    }
+    void setupPieces(SocketInstance sock,json& src,json& result) {
+            vector<int> squares = src["squares"];
+            m_board.setLedAll(false);
+            m_gameMode = GAME_MODE_IDLE;                //assume the board is setup correctly
+            memset(m_expectedPosition,0,sizeof m_expectedPosition);
+            for(int i=0; i<NUM_SQUARES; i++) {
+                //check if this square should be set
+                if(containsSquare(i,squares)) {
+                    m_expectedPosition[i] = 1;
+                    if(!m_board.piece(i)) {
+                        m_board.setLed(i,true);
+                        m_gameMode = GAME_MODE_SETUP;   //user has to manipulate the board, go into setup mode.
+                    }
+                } else {
+                    if(m_board.piece(i)) {
+                        m_board.setFlashing(i,true);
+                        m_gameMode = GAME_MODE_SETUP;   //user has to manipulate the board, go into setup mode.
+                    }
+                }
+            }
+            result["success"]=true;
     }
     void processPieceUp(int pos) {
         m_board.setPiece(pos,false);
@@ -393,6 +447,9 @@ public:
     void processPieceDown(int pos) {
         m_board.setPiece(pos,true);
 
+        if(m_gameMode==GAME_MODE_SETUP) {
+
+        }
         if(m_board.isFlashing(pos)) {
             m_board.setFlashing(pos, false);
         } else {
@@ -515,6 +572,13 @@ public:
     }
     void idleMove() {
 
+    }
+
+    bool containsSquare(int sq,vector<int> squares) {
+        for (vector<int>::iterator it = squares.begin() ; it != squares.end(); ++it) {
+            if(sq == *it) return true;
+        }
+        return false;
     }
 };
 

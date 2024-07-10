@@ -48,3 +48,12 @@ Run with the following command. ESCAPE key exists the program. Assumes that the 
     
         -f = Full screen
         -e = Location of the engine to use.
+
+### Sim
+sim.cpp builds to `c:\workspace\chessbox\cmake-build-debug\controller-gui` on Windows.
+
+Run: 
+
+```
+\workspace\chessbox\cmake-build-debug\controller-gui\sim.exe
+```
