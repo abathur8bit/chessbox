@@ -5,7 +5,7 @@ The GUI manages the chess engine, as this allows you more flexibility on what en
 
 ![](img/gui.png)
 
-# Building and running
+## Build and run
 SDL is used for graphics layer. Download and install before building and running Chessbox. Installs to /usr/local/include/SDL2 and /usr/local/lib.
 
     sudo apt-get install libxext-dev
@@ -19,7 +19,7 @@ SDL is used for graphics layer. Download and install before building and running
     cd SDL2-2.0.12
     ./configure && make && sudo make install
 
-## Compile
+### Build
 You will need the tiny-process-library to compile the GUI. It provides the ability to launch and control processes, cross platform. This is required to launch and control chess engines. 
 
     $ cd chessbox
@@ -38,7 +38,7 @@ Once that is built, you can move onto building controller-gui.
     $ make
     $ cd ..
 
-## Run
+### Run
 
 Copy **cbgui-sample.json** to **cbgui.json** and update the  controller, engine, and where the current game should be saved to. 
 
@@ -49,11 +49,14 @@ Run with the following command. ESCAPE key exists the program. Assumes that the 
         -f = Full screen
         -e = Location of the engine to use.
 
-### Sim
+# Sim
+
+## Build
 sim.cpp builds to `c:\workspace\chessbox\cmake-build-debug\controller-gui` on Windows.
 
-Run: 
+## Run
 
 ```
+cd C:\workspace\chessbox\controller-gui
 \workspace\chessbox\cmake-build-debug\controller-gui\sim.exe
 ```
