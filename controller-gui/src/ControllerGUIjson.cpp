@@ -10,14 +10,13 @@
 #include "Dialog.h"
 
 using namespace std;
-using namespace nlohmann;   //json
 
 void ControllerGUI::processJson(const char* buffer) {
-    json j = json::parse(buffer);
+    json j = json::parse(buffer);       //todo surrond with try/catch(json::exception& ex)
     if(j.contains("action")) {
         string action = j["action"];
         if(!action.compare("piece_up")) {
-            string square=j["square"];
+            string square=j["lan"];
             m_board->highlightSquare(m_board->toIndex(square.c_str()),true);
 //            invalidate();
         } else if(!action.compare("piece_down")) {
@@ -84,3 +83,22 @@ void ControllerGUI::saveGame() {
     pgn.save(m_pgnFile.c_str(),m_board->rules(),result,"Human",computerName);
 }
 
+bool ControllerGUI::checkBoardPosition(json j) {
+    int initialPosition[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63};
+    int index=0;
+    int okayCounter = 0;
+    auto squares = j["has_piece"];
+    for(unsigned i=0; i<squares.size(); i++) {
+        int sq=squares.at(i);
+        if(sq == initialPosition[index]) {
+            okayCounter++;
+        }
+        index++;
+    }
+    return okayCounter == (sizeof(initialPosition)/sizeof(initialPosition[0]));
+}
+
+bool ControllerGUI::isSuccess(json j) {
+    bool success = j["success"];
+    return success;
+}

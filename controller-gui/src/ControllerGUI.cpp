@@ -7,7 +7,6 @@
 #include "FontManager.h"
 #include "Label.h"
 #include "Dialog.h"
-#include "json.hpp"
 
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 800;
@@ -39,7 +38,7 @@ ControllerGUI::ControllerGUI(bool fullscreen,const char* host,unsigned short por
     m_window = SDL_CreateWindow(
             "Chessbox",
 //            SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,
-            50,50,
+            460,50,
             SCREEN_WIDTH, SCREEN_HEIGHT,
             fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_RESIZABLE);
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -373,9 +372,20 @@ void ControllerGUI::connectController() {
                 printf("read %s\n",m_buffer);
                 Button* b=findButton("connectbutton");
                 b->setChecked(true);
-                m_connector->send("{\"action\":\"fen\"}");  //get initial board position
+
+                m_connector->send("{\"action\":\"query_pieces\"}");  //get initial board position
+                m_connector->waitline(m_buffer,sizeof(m_buffer));
+                if(!checkBoardPosition(json::parse(m_buffer))) {
+                    m_connector->send("{\"action\":\"setup_pieces\",\"squares\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63]}");
+                    m_connector->waitline(m_buffer,sizeof(m_buffer));
+
+                }
             } catch(GeneralException e) {
                 Dialog dlg("Error", "Unable to connect to chessbox controller", DIALOG_TYPE_OK);
+                dlg.show(m_renderer);
+            } catch(json::exception& e) {
+                printf("json parse error %s",e.what());
+                Dialog dlg("Error", "Unable to parse response", DIALOG_TYPE_OK);
                 dlg.show(m_renderer);
             }
         } else {

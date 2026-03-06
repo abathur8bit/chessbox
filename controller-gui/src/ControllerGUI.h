@@ -13,6 +13,9 @@
 #include "MovesPanel.h"
 #include "Connector.h"
 #include "UCIClient.h"
+#include "json.hpp"
+
+using namespace nlohmann;   //json
 
 class ControllerGUI : Window {
 public:
@@ -30,6 +33,9 @@ public:
     void notConnectedMessage();
     void notImplemented();
     void loadGame(const char* pathname);
+    bool checkBoardPosition(json j);
+    bool isSuccess(json j);
+
 protected:
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;

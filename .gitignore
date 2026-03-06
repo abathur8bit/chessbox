@@ -36,3 +36,13 @@
 java_version/
 cmake-build-debug/
 martin/
+/controller-gui/build.bat
+/controller-gui/.vs/
+/controller-gui/.idea/
+/controller-gui/chessbox-sdl.vcxproj.filters
+/controller-gui/cmake-build-release/
+/controller-gui/chessbox-sdl.vcxproj
+/controller-gui/Debug/
+/controller-gui/chessbox-sdl.vcxproj.user
+/controller-gui/chessbox-sdl.sln
+/controller-gui/x64/
