@@ -1,12 +1,49 @@
 # Controller GUI
+
+![](../img./gui.png)
+
 The Controller GUI runs on the Chessbox PI and is the layer between the user and the controller. The user interacts with the GUI, and it will tell the controller what to do, and display the controllers results.
 
 The GUI manages the chess engine, as this allows you more flexibility on what engine you want to run, as well as letting you run the GUI on different platforms. For example, during development, I run the GUI on a Windows box, and it connects to the controller process running on my Raspberry PI. 
 
-![](img/gui.png)
-
 ## Build and run
-SDL is used for graphics layer. Download and install before building and running Chessbox. Installs to /usr/local/include/SDL2 and /usr/local/lib.
+SDL is used for graphics layer. Download and install before building and running Chessbox. 
+
+Copy `cbgui-sample.json` and point to your own IP address, and where you have an engine installed. `cbgui.json`.
+I have stockfish installed, so my config looks like this:
+
+```
+{
+  "engine": "C:/Program Files/tarrasch-v3.12b-g/Engines/stockfish_8_x64.exe",
+  "fullscreen": false,
+  "controller": "127.0.0.1:9999",
+  "currentgame": "/t/game.pgn"
+}
+```
+
+### Windows
+Make file expects SDL to be installed to `\workspace\sdl\sdl2`:
+```
+include_directories(/workspace/sdl/SDL2/include)
+link_directories(/workspace/sdl/SDL2/lib/x86)
+```
+
+You will need to have the following in the `controller-gui` folder:
+
+```
+libfreetype-6.dll
+libjpeg-9.dll
+libpng16-16.dll
+libtiff-5.dll
+libwebp-7.dll
+SDL2.dll
+SDL2_image.dll
+SDL2_ttf.dll
+zlib1.dll
+```
+
+### Linux
+Installs to /usr/local/include/SDL2 and /usr/local/lib.
 
     sudo apt-get install libxext-dev
     wget https://libsdl.org/release/SDL2-2.0.12.zip
@@ -19,7 +56,7 @@ SDL is used for graphics layer. Download and install before building and running
     cd SDL2-2.0.12
     ./configure && make && sudo make install
 
-### Build
+#### Build
 You will need the tiny-process-library to compile the GUI. It provides the ability to launch and control processes, cross platform. This is required to launch and control chess engines. 
 
     $ cd chessbox
@@ -38,7 +75,7 @@ Once that is built, you can move onto building controller-gui.
     $ make
     $ cd ..
 
-### Run
+#### Run
 
 Copy **cbgui-sample.json** to **cbgui.json** and update the  controller, engine, and where the current game should be saved to. 
 
