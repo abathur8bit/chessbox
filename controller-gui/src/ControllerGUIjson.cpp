@@ -20,9 +20,9 @@ void ControllerGUI::processJson(const char* buffer) {
             m_board->highlightSquare(m_board->toIndex(square.c_str()),true);
 //            invalidate();
         } else if(!action.compare("piece_down")) {
-            string square=j["square"];
-            m_board->highlightSquare(m_board->toIndex(square.c_str()),false);
-//            invalidate();
+            int square=j["square"];
+            m_board->highlightSquare(square,false);
+            //            invalidate();
         } else if(!action.compare("move")) {
             ChessAction* a=new ChessAction(j);
             ChessMove m = a->move(0);
