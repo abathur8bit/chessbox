@@ -46,3 +46,5 @@ martin/
 /controller-gui/chessbox-sdl.vcxproj.user
 /controller-gui/chessbox-sdl.sln
 /controller-gui/x64/
+/controller-gui/
+/.idea/
