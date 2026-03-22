@@ -217,7 +217,7 @@ struct SetLedRequest : Request {
 struct QuerySquareRequest : public Request {
     QuerySquareRequest(std::string id, std::vector<std::string> squares)
     : Request(std::move(id), "query-squares"),
-    squares(std::move(squares)) {}
+      squares(std::move(squares)) {}
 
     QuerySquareRequest(const json& j)
             : Request(j) {
@@ -232,6 +232,26 @@ struct QuerySquareRequest : public Request {
     }
 
     vector<string> squares;
+};
+
+struct MoveRequest : public Request {
+    MoveRequest(std::string id, std::vector<std::string> moves)
+    : Request(std::move(id), "query-squares"),
+      moves(std::move(moves)) {}
+
+    MoveRequest(const json& j)
+            : Request(j) {
+        const auto& p = j.at("params");
+        p.at("moves").get_to(moves);
+    }
+
+    json params_to_json() const override {
+        return json{
+                {"moves", moves}
+        };
+    }
+
+    vector<string> moves;
 };
 struct LedState {
     string square;
@@ -594,7 +614,7 @@ public:
 //                    else if(action.compare("setup-pieces")==0) setupPieces(sock, src, result);
                     else if(action.compare("flash")==0) flash(sock, SetLedRequest(src), result);
                     else if(action.compare("set-led")==0) led(sock, SetLedRequest(src), result);
-//                    else if(action.compare("move")==0) move(sock, src, result);
+                    else if(action.compare("move")==0) move(sock, MoveRequest(src), result);
                     else if(action.compare("query-squares")==0) querySquares(sock, QuerySquareRequest(src), result);
                     println(sock, result.dump().c_str());
                 }
@@ -610,6 +630,7 @@ public:
             resp.addError({"INVALID_JSON", "INVALID_JSON", "Invalid request message"});
             println(sock,resp.to_json().dump().c_str());
         }
+        fflush(stdout);
     }
 
     void quit(SocketInstance sock,json& src,json& result) {
@@ -634,23 +655,26 @@ public:
         }
         result = Response(req.id,true).to_json();
     }
-    void move(SocketInstance sock,json& src,json& result) {
-        string lan=src["lan"];
-        int from=parseFrom(lan.c_str());
-        int to=parseTo(lan.c_str());
-        if(m_board.piece(from)==true && m_board.piece(to)==false) {
-            printf("move from=%d,to=%d\n", from, to);
-            m_gameMode=GAME_MODE_MOVE;
-            m_moveActions[0]=MOVE_UP;
-            m_moveActions[1]=MOVE_DOWN;
-            m_moveIndex=0;
-            m_movesNeeded=2;
-            m_moveLocations[0]=from;
-            m_moveLocations[1]=to;
-            m_board.setLed(from, true);
-            m_board.setLed(to, true);
-            result["success"]=true;
+    void move(SocketInstance sock,const MoveRequest& req,json& result) {
+        for(auto move : req.moves) {
+            int from=parseFrom(move.c_str());
+            int to=parseTo(move.c_str());
+            printf("from %s(%d) to %s(%d)\n",m_board.lan(from),from,m_board.lan(to),to);
         }
+        result = Response(req.id,true).to_json();
+//        if(m_board.piece(from)==true && m_board.piece(to)==false) {
+//            printf("move from=%d,to=%d\n", from, to);
+//            m_gameMode=GAME_MODE_MOVE;
+//            m_moveActions[0]=MOVE_UP;
+//            m_moveActions[1]=MOVE_DOWN;
+//            m_moveIndex=0;
+//            m_movesNeeded=2;
+//            m_moveLocations[0]=from;
+//            m_moveLocations[1]=to;
+//            m_board.setLed(from, true);
+//            m_board.setLed(to, true);
+//            result["success"]=true;
+//        }
     }
     void querySquares(SocketInstance sock,const QuerySquareRequest& req,json& result) {
         QuerySquareResponse resp = QuerySquareResponse(req.id);
