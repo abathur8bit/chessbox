@@ -1,0 +1,7 @@
+// GENERATED FILE - DO NOT EDIT
+#pragma once
+#define APP_VERSION "0.01.00+0020"
+#define APP_VERSIONNUMBER 0;
+#define APP_REVISION 1;
+#define APP_PATCH 0;
+#define APP_BUILD 20;

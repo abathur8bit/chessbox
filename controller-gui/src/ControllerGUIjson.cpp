@@ -14,7 +14,9 @@ using namespace std;
 void ControllerGUI::processJson(const char* buffer) {
     json j = json::parse(buffer);       //todo surrond with try/catch(json::exception& ex)
     if(j.contains("action")) {
+        string id = j["id"];
         string action = j["action"];
+        bool success = j["success"];
         if(!action.compare("piece_up")) {
             string square=j["lan"];
             m_board->highlightSquare(m_board->toIndex(square.c_str()),true);
