@@ -4,7 +4,7 @@
 
 Chessbox is the sum of three parts. The controller, the GUI, and the hardware.
 
-**The hardware** is the chess board with the LEDs, piece switches, MCPs and all the wires. You can read about building that on the [Chessbox blog](https://8bitcoder.com/chessbox).
+**The hardware** is the chess board with the LEDs, piece switches, MCPs and all the wires. You can read about building that on the [Chessbox blog](https://axorion.com/chessbox).
 
 **The controller** is the software interface to the hardware. It turns the LEDs on/off and uses the piece switches to sense when a piece is on a square. This runs on the PI. 
 
